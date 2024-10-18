@@ -32,7 +32,6 @@ const login = async () => {
       localStorage.setItem("userData", {
         id: decodedToken.id,
         username: decodedToken.username,
-        permissionLevel: decodedToken.permissionLevel,
       });
     }
 
