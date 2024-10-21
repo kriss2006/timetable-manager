@@ -7,7 +7,7 @@
 </template>
 
 <script setup>
-const classes = { 8: ["8a", "8b", "8v"], 9: ["9a", "9b"] };
+const classes = { 8: ['8a', '8b', '8v'], 9: ['9a', '9b'] }
 </script>
 
 <style scoped>

@@ -16,15 +16,27 @@
   "devDependencies": {
     "@eslint/js": "^9.12.0",
     "@types/eslint-config-prettier": "^6.11.3",
+    "@types/nodemon": "^1.19.6",
     "eslint": "^9.12.0",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-vue": "^9.29.0",
     "globals": "^15.11.0",
+    "nodemon": "^3.1.7",
     "prettier": "3.3.3",
     "typescript-eslint": "^8.9.0"
   },
   "dependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/jsonwebtoken": "^9.0.7",
     "axios": "^1.7.7",
-    "jwt-decode": "^4.0.0"
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "jsonwebtoken": "^9.0.2",
+    "jwt-decode": "^4.0.0",
+    "mysql2": "^3.11.3"
   }
 }
