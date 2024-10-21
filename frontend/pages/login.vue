@@ -35,7 +35,7 @@ const login = async () => {
       })
     }
 
-    navigateTo('/dashboard')
+    navigateTo('/admin/dashboard')
   } catch (err) {
     error.value = err.response.data.message || 'An error occurred'
   }
