@@ -5,17 +5,10 @@ import dotenv from 'dotenv'
 import jwt from 'jsonwebtoken'
 
 import User from './models/User.js'
+import db from '../config/db.js'
 
 dotenv.config()
 
-async function generateHashedPassword() {
-  const password = 'admin'
-  const salt = await bcrypt.genSalt(10)
-  const hashedPassword = await bcrypt.hash(password, salt)
-  console.log(hashedPassword)
-}
-
-generateHashedPassword()
 const app = express()
 
 app.use(json())
@@ -81,6 +74,11 @@ app.post('/api/login', async (req, res) => {
     console.error(err.message)
     res.status(500).json({ message: 'Server error' })
   }
+})
+
+app.get('/api/year-terms', async (req, res) => {
+  const [yearTerms] = await db.query('SELECT * FROM year_term')
+  res.json(yearTerms)
 })
 
 const PORT = process.env.PORT || 3001
