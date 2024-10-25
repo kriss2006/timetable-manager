@@ -11,6 +11,13 @@
       {{ yearTerm.year }} {{ yearTerm.term == 1 ? 'I-ви' : 'II-ри' }} срок
     </option>
   </select>
+  <div v-if="selectedYearTerm">
+    <button @click="navigateTo('classes')">Manage classses</button>
+    <button>Manage teachers</button>
+    <button>Manage subjects</button>
+    <button>Manage rooms</button>
+    <button>Manage timetables</button>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -19,9 +26,22 @@ definePageMeta({
 })
 
 const store = useAdminStore()
-const { selectedYearTerm, yearTerms } = storeToRefs(store)
+const { selectedYearTerm } = storeToRefs(store)
 
-onMounted(() => {
-  store.fetchYearTerms()
+const yearTerms = ref<YearTerm[]>([])
+const classes = ref<Class[]>([])
+
+onMounted(async () => {
+  const resultYearTerms = await store.fetchYearTerms()
+  if (resultYearTerms) {
+    yearTerms.value = resultYearTerms
+  }
+})
+
+watch(selectedYearTerm, async () => {
+  const resultClasses = await store.fetchClasses()
+  if (resultClasses) {
+    classes.value = resultClasses
+  }
 })
 </script>

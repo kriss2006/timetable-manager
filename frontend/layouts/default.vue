@@ -11,3 +11,9 @@
     </footer>
   </div>
 </template>
+
+<script setup lang="ts">
+const store = useAdminStore()
+
+store.getFromLocalStorage()
+</script>

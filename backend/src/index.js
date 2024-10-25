@@ -71,14 +71,25 @@ app.post('/api/login', async (req, res) => {
 
     res.json({ token })
   } catch (err) {
-    console.error(err.message)
-    res.status(500).json({ message: 'Server error' })
+    res.status(500).json({ message: err | 'Server error' })
   }
 })
 
-app.get('/api/year-terms', async (req, res) => {
+app.get('/api/year-terms', async (_req, res) => {
   const [yearTerms] = await db.query('SELECT * FROM year_term')
   res.json(yearTerms)
+})
+
+app.get('/api/classes/:yearTermId', async (req, res) => {
+  try {
+    const [classes] = await db.query(
+      'SELECT * FROM classes WHERE year_term_id = ?',
+      [req.params.yearTermId]
+    )
+    res.json(classes)
+  } catch (err) {
+    res.status(500).json({ error: err | 'Error fetching classes' })
+  }
 })
 
 const PORT = process.env.PORT || 3001
