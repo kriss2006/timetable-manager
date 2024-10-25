@@ -9,7 +9,6 @@ declare global {
 
   interface Class {
     id: number
-    number: number
-    letter: string
+    name: string
   }
 }

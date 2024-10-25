@@ -1,6 +1,6 @@
 <template>
   <h1>Manage classes</h1>
-  <p v-for="classs in classes">{{ classs.number }}{{ classs.letter }}</p>
+  <p v-for="classs in classes">{{ classs.name }}</p>
 </template>
 
 <script setup lang="ts">

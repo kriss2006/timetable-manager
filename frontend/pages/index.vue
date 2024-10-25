@@ -1,28 +1,30 @@
 <template>
   <div class="wrapper">
-    <div v-for="(row, key) in classes" :key="key" class="row">
-      <div v-for="item in row" :key="item" class="box">{{ item }}</div>
+    <div v-for="item in classes" :key="item.id" class="box">
+      {{ item.name }}
     </div>
   </div>
 </template>
 
-<script setup>
-const classes = { 8: ['8a', '8b', '8v'], 9: ['9a', '9b'] }
-</script>
+<script setup lang="ts">
+const store = useAdminStore()
 
+const classes = ref<Class[]>([])
+
+onMounted(async () => {
+  const resultClasses = await store.fetchClasses()
+  if (resultClasses) {
+    classes.value = resultClasses
+  }
+})
+</script>
 <style scoped>
 .wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   gap: 5vh;
-  margin: 5vh 0;
-}
-
-.row {
-  display: flex;
-  justify-content: center;
-  gap: 2.5vw;
+  margin: 5vh auto;
+  width: 50vw;
 }
 
 .box {
