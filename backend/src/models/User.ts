@@ -1,7 +1,7 @@
 import db from '../../config/db.js'
 
 class User {
-  static async findByUsername(username) {
+  static async findByUsername(username: string) {
     const [rows] = await db.query('SELECT * FROM users WHERE username = ?', [
       username,
     ])
