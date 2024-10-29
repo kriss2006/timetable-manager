@@ -13,7 +13,7 @@
   </select>
   <div v-if="selectedYearTerm">
     <button @click="navigateTo('classes')">Manage classses</button>
-    <button>Manage teachers</button>
+    <button @click="navigateTo('teachers')">Manage teachers</button>
     <button>Manage subjects</button>
     <button>Manage rooms</button>
     <button>Manage timetables</button>

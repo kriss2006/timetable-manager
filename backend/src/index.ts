@@ -98,5 +98,17 @@ app.get('/api/classes/:yearTermId', async (req, res) => {
   }
 })
 
+app.get('/api/teachers/:yearTermId', async (req, res) => {
+  try {
+    const [teachers] = await db.query(
+      'SELECT * FROM teachers WHERE year_term_id = ?',
+      [req.params.yearTermId]
+    )
+    res.json(teachers)
+  } catch (err) {
+    res.status(500).json({ error: err || 'Error fetching teachers' })
+  }
+})
+
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`))

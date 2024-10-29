@@ -11,4 +11,10 @@ declare global {
     id: number
     name: string
   }
+
+  interface Teacher {
+    id: number
+    name: string
+    initials: string
+  }
 }

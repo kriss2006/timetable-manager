@@ -13,9 +13,6 @@ const store = useAdminStore()
 const classes = ref<Class[]>([])
 
 onMounted(async () => {
-  const resultClasses = await store.fetchClasses()
-  if (resultClasses) {
-    classes.value = resultClasses
-  }
+  classes.value = await store.fetchClasses()
 })
 </script>
