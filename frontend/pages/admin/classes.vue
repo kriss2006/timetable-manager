@@ -4,11 +4,24 @@
 
     <UInput v-model="q" placeholder="Search" />
 
-    <UTable
-      :loading="!classes.length"
-      :rows="computedRows"
-      :columns="columns"
-    />
+    <UTable :loading="!classes.length" :rows="computedRows" :columns="columns">
+      <template #actions-data="{ row }">
+        <UButton
+          color="blue"
+          variant="soft"
+          @click="editClass(row.id)"
+          class="mx-1"
+          >Edit</UButton
+        >
+        <UButton
+          color="red"
+          variant="soft"
+          @click="removeClass(row.id)"
+          class="mx-1"
+          >Remove</UButton
+        >
+      </template></UTable
+    >
 
     <UPagination
       v-model="page"
@@ -27,6 +40,7 @@ const columns = [
   {
     key: 'name',
   },
+  { key: 'actions' },
 ]
 
 const q = ref('')
@@ -38,7 +52,7 @@ const computedRows = computed(() => {
   let rows = classes.value
 
   if (q.value) {
-    rows.filter((row) => {
+    rows = rows.filter((row) => {
       return String(row.name).toLowerCase().includes(q.value.toLowerCase())
     })
   }
@@ -56,4 +70,11 @@ const classes = ref<Class[]>([])
 onMounted(async () => {
   classes.value = await store.fetchClasses()
 })
+const editClass = (row: number) => {
+  console.log('Edit', row)
+}
+
+const removeClass = (row: number) => {
+  console.log('Remove', row)
+}
 </script>
