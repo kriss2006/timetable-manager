@@ -98,6 +98,26 @@ app.get('/api/classes/:yearTermId', async (req, res) => {
   }
 })
 
+app.patch('/api/classes/:id', async (req, res) => {
+  try {
+    const { name } = req.body
+
+    if (!name) {
+      res.status(400).json({ error: 'Name is required' })
+      return
+    }
+
+    await db.query('UPDATE classes SET name = ? WHERE id = ?', [
+      name,
+      req.params.id,
+    ])
+
+    res.json({ message: 'Class updated successfully' })
+  } catch (err) {
+    res.status(500).json({ error: err.message || 'Error patching classes' })
+  }
+})
+
 app.get('/api/teachers/:yearTermId', async (req, res) => {
   try {
     const [teachers] = await db.query(
