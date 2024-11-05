@@ -1,4 +1,75 @@
 <template>
+  <DataTable
+    title="Manage Classes"
+    :columns="columns"
+    :rows="classes"
+    :itemsPerPage="8"
+    :onEdit="openEditModal"
+    :onRemove="openRemoveModal"
+  />
+
+  <EditModal
+    title="Edit Class"
+    type="class"
+    :open="editModalOpen"
+    :initialData="formData"
+    @update:open="editModalOpen = $event"
+    @edit:row="editRow($event)"
+  />
+</template>
+
+<script setup lang="ts">
+definePageMeta({
+  middleware: ['admin'],
+})
+
+const store = useAdminStore()
+
+const classes = ref<Class[]>([])
+
+onMounted(async () => {
+  classes.value = await store.fetchClasses()
+})
+
+const columns = [{ key: 'name' }, { key: 'actions' }]
+
+const addModalOpen = ref(false)
+const editModalOpen = ref(false)
+const removeModalOpen = ref(false)
+
+const formData = ref<Class>({
+  id: -1,
+  name: '',
+})
+
+const openAddModal = () => {
+  formData.value = { id: -1, name: '' }
+  addModalOpen.value = true
+}
+
+const openEditModal = (row: Class) => {
+  formData.value = { id: row.id, name: row.name }
+  editModalOpen.value = true
+}
+
+const openRemoveModal = (row: Class) => {
+  formData.value = { id: row.id, name: row.name }
+  removeModalOpen.value = true
+}
+
+const addRow = (row: Class) => {
+  classes.value.push(row)
+}
+const editRow = (row: Class) => {
+  classes.value[row.id - 1] = row
+}
+
+const removeRow = (id: number) => {
+  classes.value.splice(id, 1)
+}
+</script>
+
+<!-- <template>
   <div class="flex flex-col items-center my-2 gap-4 max-w-1/2">
     <h1 class="text-2xl font-bold">Manage Classes</h1>
 
@@ -114,4 +185,4 @@ const saveEdit = async () => {
     }
   }
 }
-</script>
+</script> -->
