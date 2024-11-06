@@ -1,10 +1,9 @@
 export {}
 
 declare global {
-  interface YearTerm {
+  interface Year {
     id: number
-    year: string
-    term: number
+    name: string
   }
 
   interface Class {

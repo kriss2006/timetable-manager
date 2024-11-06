@@ -81,17 +81,16 @@ app.post('/api/login', async (req, res) => {
   }
 })
 
-app.get('/api/year-terms', async (_req, res) => {
-  const [yearTerms] = await db.query('SELECT * FROM year_term')
-  res.json(yearTerms)
+app.get('/api/years', async (_req, res) => {
+  const [years] = await db.query('SELECT * FROM year')
+  res.json(years)
 })
 
-app.get('/api/classes/:yearTermId', async (req, res) => {
+app.get('/api/classes/:yearId', async (req, res) => {
   try {
-    const [classes] = await db.query(
-      'SELECT * FROM classes WHERE year_term_id = ?',
-      [req.params.yearTermId]
-    )
+    const [classes] = await db.query('SELECT * FROM class WHERE year_id = ?', [
+      req.params.yearId,
+    ])
     res.json(classes)
   } catch (err) {
     res.status(500).json({ error: err || 'Error fetching classes' })
@@ -107,7 +106,7 @@ app.patch('/api/classes/:id', async (req, res) => {
       return
     }
 
-    await db.query('UPDATE classes SET name = ? WHERE id = ?', [
+    await db.query('UPDATE class SET name = ? WHERE id = ?', [
       name,
       req.params.id,
     ])
@@ -118,11 +117,11 @@ app.patch('/api/classes/:id', async (req, res) => {
   }
 })
 
-app.get('/api/teachers/:yearTermId', async (req, res) => {
+app.get('/api/teachers/:yearId', async (req, res) => {
   try {
     const [teachers] = await db.query(
-      'SELECT * FROM teachers WHERE year_term_id = ?',
-      [req.params.yearTermId]
+      'SELECT * FROM teacher WHERE year_id = ?',
+      [req.params.yearId]
     )
     res.json(teachers)
   } catch (err) {

@@ -1,17 +1,17 @@
 import axios from 'axios'
 
 export const useAdminStore = defineStore('admin', () => {
-  const selectedYearTerm = ref(0)
+  const selectedYear = ref(0)
 
   const getFromLocalStorage = () => {
-    selectedYearTerm.value = import.meta.client
-      ? Number(localStorage.getItem('selectedYearTerm') ?? 0)
+    selectedYear.value = import.meta.client
+      ? Number(localStorage.getItem('selectedYear') ?? 0)
       : 0
   }
 
-  const fetchYearTerms = async (): Promise<YearTerm[] | void> => {
+  const fetchYears = async (): Promise<Year[] | void> => {
     try {
-      const response = await axios.get('http://localhost:3001/api/year-terms')
+      const response = await axios.get('http://localhost:3001/api/years')
       return response.data
     } catch (err) {
       console.error(err)
@@ -19,11 +19,12 @@ export const useAdminStore = defineStore('admin', () => {
   }
 
   const fetchClasses = async (): Promise<Class[]> => {
-    if (selectedYearTerm.value > 0) {
+    if (selectedYear.value > 0) {
       try {
         const response = await axios.get(
-          `http://localhost:3001/api/classes/${selectedYearTerm.value}`
+          `http://localhost:3001/api/classes/${selectedYear.value}`
         )
+        console.info(response.data)
         return response.data
       } catch (err) {
         console.error(err)
@@ -35,10 +36,10 @@ export const useAdminStore = defineStore('admin', () => {
   }
 
   const fetchTeachers = async (): Promise<Teacher[]> => {
-    if (selectedYearTerm.value > 0) {
+    if (selectedYear.value > 0) {
       try {
         const response = await axios.get(
-          `http://localhost:3001/api/teachers/${selectedYearTerm.value}`
+          `http://localhost:3001/api/teachers/${selectedYear.value}`
         )
         return response.data
       } catch (err) {
@@ -50,16 +51,16 @@ export const useAdminStore = defineStore('admin', () => {
     }
   }
 
-  watch(selectedYearTerm, () => {
-    if (selectedYearTerm.value > 0 && import.meta.client) {
-      localStorage.setItem('selectedYearTerm', String(selectedYearTerm.value))
+  watch(selectedYear, () => {
+    if (selectedYear.value > 0 && import.meta.client) {
+      localStorage.setItem('selectedYear', String(selectedYear.value))
     }
   })
 
   return {
     getFromLocalStorage,
-    selectedYearTerm,
-    fetchYearTerms,
+    selectedYear,
+    fetchYears,
     fetchClasses,
     fetchTeachers,
   }

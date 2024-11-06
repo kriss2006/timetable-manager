@@ -51,8 +51,8 @@ watch(
 const handleEdit = async () => {
   console.info('Type: ', props.type, 'Row: ', formData.value)
   switch (props.type) {
-    case 'yearTerm':
-      console.log('Edit year term', formData.value)
+    case 'year':
+      console.log('Edit year', formData.value)
       break
 
     case 'class':

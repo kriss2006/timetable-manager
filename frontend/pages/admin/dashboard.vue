@@ -1,17 +1,13 @@
 <template>
   <h1>Dashboard temp</h1>
 
-  <select v-model="selectedYearTerm">
-    <option :value="0">Select term</option>
-    <option
-      v-for="yearTerm in yearTerms"
-      :key="yearTerm.id"
-      :value="yearTerm.id"
-    >
-      {{ yearTerm.year }} {{ yearTerm.term == 1 ? 'I-ви' : 'II-ри' }} срок
+  <select v-model="selectedYear">
+    <option :value="0">Select year</option>
+    <option v-for="year in years" :key="year.id" :value="year.id">
+      {{ year.name }}
     </option>
   </select>
-  <div v-if="selectedYearTerm">
+  <div v-if="selectedYear">
     <button @click="navigateTo('classes')">Manage classses</button>
     <button @click="navigateTo('teachers')">Manage teachers</button>
     <button>Manage subjects</button>
@@ -26,19 +22,19 @@ definePageMeta({
 })
 
 const store = useAdminStore()
-const { selectedYearTerm } = storeToRefs(store)
+const { selectedYear } = storeToRefs(store)
 
-const yearTerms = ref<YearTerm[]>([])
+const years = ref<Year[]>([])
 const classes = ref<Class[]>([])
 
 onMounted(async () => {
-  const resultYearTerms = await store.fetchYearTerms()
-  if (resultYearTerms) {
-    yearTerms.value = resultYearTerms
+  const resultYears = await store.fetchYears()
+  if (resultYears) {
+    years.value = resultYears
   }
 })
 
-watch(selectedYearTerm, async () => {
+watch(selectedYear, async () => {
   const resultClasses = await store.fetchClasses()
   if (resultClasses) {
     classes.value = resultClasses
