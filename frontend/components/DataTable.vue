@@ -3,7 +3,20 @@
     <h1 class="text-2xl font-bold">{{ title }}</h1>
 
     <UInput v-model="searchQuery" placeholder="Search" />
-
+    <div class="flex justify-end gap-2 mt-4">
+      <UButton
+        color="blue"
+        variant="soft"
+        @click="
+          () => {
+            onAdd()
+            currentPage = Math.ceil(rows.length / itemsPerPage)
+          }
+        "
+      >
+        Add
+      </UButton>
+    </div>
     <UTable :loading="!rows.length" :rows="computedRows" :columns="columns">
       <template #actions-data="{ row }">
         <UButton color="blue" variant="soft" @click="onEdit(row)" class="mx-1">
@@ -29,6 +42,7 @@ const props = defineProps<{
   columns: { key: string; label?: string }[]
   rows: Class[]
   itemsPerPage: number
+  onAdd: () => void
   onEdit: (row: Class) => void
   onRemove: (row: Class) => void
 }>()

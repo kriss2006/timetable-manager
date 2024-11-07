@@ -1,7 +1,7 @@
 <template>
   <UModal :modelValue="open" @update:modelValue="emit('update:open')">
     <div class="p-4 w-full max-w-md mx-auto flex flex-col gap-4">
-      <h2 class="text-xl font-semibold">Edit</h2>
+      <h2 class="text-xl font-semibold">Add</h2>
       <UInput v-model="formData.name" placeholder="Class Name" />
 
       <p v-if="errorMessage" class="text-red-500">{{ errorMessage }}</p>
@@ -22,7 +22,7 @@ const props = defineProps<{
   row: Class
 }>()
 
-const emit = defineEmits(['update:open', 'edit:row'])
+const emit = defineEmits(['update:open', 'add:row'])
 const formData = ref({ ...props.row })
 
 watch(
@@ -50,12 +50,12 @@ watch(
 const handleEdit = async () => {
   switch (props.type) {
     case 'year':
-      console.log('Edit year', formData.value)
+      console.log('Add year', formData.value)
       break
 
     case 'class':
       await axios
-        .patch(`http://localhost:3001/api/classes/${formData.value.id}`, {
+        .post(`http://localhost:3001/api/classes/${formData.value.id}`, {
           name: formData.value.name,
         })
         .catch((error) => {
@@ -74,7 +74,7 @@ const handleEdit = async () => {
       break
 
     case 'teacher':
-      console.log('Edit teacher', formData.value)
+      console.log('Add teacher', formData.value)
       break
 
     default:
@@ -86,7 +86,7 @@ const confirm = async () => {
   if (formData.value.id) {
     await handleEdit()
     if (!errorMessage.value) {
-      emit('edit:row', formData.value)
+      emit('add:row', formData.value)
       emit('update:open', false)
     }
   }

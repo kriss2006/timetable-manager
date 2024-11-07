@@ -4,10 +4,18 @@
     :columns="columns"
     :rows="classes"
     :itemsPerPage="8"
+    :onAdd="openAddModal"
     :onEdit="openEditModal"
     :onRemove="openRemoveModal"
   />
 
+  <AddModal
+    type="class"
+    :open="addModalOpen"
+    :row="formData"
+    @update:open="addModalOpen = $event"
+    @add:row="addRow($event)"
+  />
   <EditModal
     type="class"
     :open="editModalOpen"
@@ -31,6 +39,8 @@ definePageMeta({
 
 const store = useAdminStore()
 
+const { selectedYear } = storeToRefs(store)
+
 const classes = ref<Class[]>([])
 
 onMounted(async () => {
@@ -49,7 +59,7 @@ const formData = ref<Class>({
 })
 
 const openAddModal = () => {
-  formData.value = { id: -1, name: '' }
+  formData.value = { id: selectedYear.value, name: '' }
   addModalOpen.value = true
 }
 

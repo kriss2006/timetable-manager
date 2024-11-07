@@ -97,6 +97,26 @@ app.get('/api/classes/:yearId', async (req, res) => {
   }
 })
 
+app.post('/api/classes/:yearId', async (req, res) => {
+  try {
+    const { name } = req.body
+
+    if (!name) {
+      res.status(400).json({ error: 'Name is required' })
+      return
+    }
+
+    await db.query('INSERT INTO class (name, year_id) VALUES (?, 1)', [
+      name,
+      req.params.yearId,
+    ])
+
+    res.json({ message: 'Class added successfully' })
+  } catch (err) {
+    res.status(500).json({ error: err.message || 'Error adding class' })
+  }
+})
+
 app.patch('/api/classes/:id', async (req, res) => {
   try {
     const { name } = req.body
@@ -111,9 +131,9 @@ app.patch('/api/classes/:id', async (req, res) => {
       req.params.id,
     ])
 
-    res.json({ message: 'Class updated successfully' })
+    res.json({ message: 'Class edited successfully' })
   } catch (err) {
-    res.status(500).json({ error: err.message || 'Error patching classes' })
+    res.status(500).json({ error: err.message || 'Error editing class' })
   }
 })
 
@@ -121,9 +141,9 @@ app.delete('/api/classes/:id', async (req, res) => {
   try {
     await db.query('DELETE FROM class WHERE id = ?', [req.params.id])
 
-    res.json({ message: 'Class updated successfully' })
+    res.json({ message: 'Class deleted successfully' })
   } catch (err) {
-    res.status(500).json({ error: err.message || 'Error deleting classes' })
+    res.status(500).json({ error: err.message || 'Error deleting class' })
   }
 })
 
