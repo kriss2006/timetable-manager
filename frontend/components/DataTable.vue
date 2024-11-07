@@ -9,12 +9,7 @@
         <UButton color="blue" variant="soft" @click="onEdit(row)" class="mx-1">
           Edit
         </UButton>
-        <UButton
-          color="red"
-          variant="soft"
-          @click="onRemove(row.id)"
-          class="mx-1"
-        >
+        <UButton color="red" variant="soft" @click="onRemove(row)" class="mx-1">
           Remove
         </UButton>
       </template>

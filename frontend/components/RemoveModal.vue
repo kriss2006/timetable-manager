@@ -1,13 +1,15 @@
 <template>
   <UModal :modelValue="open" @update:modelValue="emit('update:open')">
     <div class="p-4 w-full max-w-md mx-auto flex flex-col gap-4">
-      <h2 class="text-xl font-semibold">Edit</h2>
-      <UInput v-model="formData.name" placeholder="Class Name" />
-
+      <h2 class="text-xl font-semibold">Remove</h2>
+      <p class="text-500">
+        Are you sure you would like to remove <b>{{ props.row.name }}</b
+        >?
+      </p>
       <p v-if="errorMessage" class="text-red-500">{{ errorMessage }}</p>
       <div class="flex justify-end gap-2 mt-4">
-        <UButton color="blue" variant="soft" @click="saveEdit">Save</UButton>
-        <UButton color="red" variant="soft" @click="cancelEdit">Cancel</UButton>
+        <UButton color="red" variant="soft" @click="confirm">Confirm</UButton>
+        <UButton color="black" variant="soft" @click="cancel">Cancel</UButton>
       </div>
     </div>
   </UModal>
@@ -22,42 +24,19 @@ const props = defineProps<{
   row: Class
 }>()
 
-const emit = defineEmits(['update:open', 'edit:row'])
-const formData = ref({ ...props.row })
-
-watch(
-  () => props.row,
-  (newData) => {
-    formData.value = { ...newData }
-  },
-  { immediate: true }
-)
-
-watch(
-  () => props.open,
-  (isOpen) => {
-    if (!isOpen) formData.value = { ...props.row }
-  }
-)
+const emit = defineEmits(['update:open', 'remove:row'])
 
 const errorMessage = ref('')
 
-watch(
-  () => formData.value.name,
-  () => (errorMessage.value = '')
-)
-
-const handleEdit = async () => {
+const handleRemove = async () => {
   switch (props.type) {
     case 'year':
-      console.log('Edit year', formData.value)
+      console.log('Remove year', props.row.name)
       break
 
     case 'class':
       await axios
-        .patch(`http://localhost:3001/api/classes/${formData.value.id}`, {
-          name: formData.value.name,
-        })
+        .delete(`http://localhost:3001/api/classes/${props.row.id}`)
         .catch((error) => {
           if (error.response) {
             errorMessage.value = error.response.data.error
@@ -74,7 +53,7 @@ const handleEdit = async () => {
       break
 
     case 'teacher':
-      console.log('Edit teacher', formData.value)
+      console.log('Remove teacher', props.row)
       break
 
     default:
@@ -82,17 +61,17 @@ const handleEdit = async () => {
   }
 }
 
-const saveEdit = async () => {
-  if (formData.value.id) {
-    await handleEdit()
+const confirm = async () => {
+  if (props.row.id) {
+    await handleRemove()
     if (!errorMessage.value) {
-      emit('edit:row', formData.value)
+      emit('remove:row', props.row.id)
       emit('update:open', false)
     }
   }
 }
 
-const cancelEdit = () => {
+const cancel = () => {
   errorMessage.value = ''
   emit('update:open', false)
 }

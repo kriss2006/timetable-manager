@@ -9,12 +9,18 @@
   />
 
   <EditModal
-    title="Edit Class"
     type="class"
     :open="editModalOpen"
-    :initialData="formData"
+    :row="formData"
     @update:open="editModalOpen = $event"
     @edit:row="editRow($event)"
+  />
+  <RemoveModal
+    type="class"
+    :open="removeModalOpen"
+    :row="formData"
+    @update:open="removeModalOpen = $event"
+    @remove:row="removeRow($event)"
   />
 </template>
 
@@ -65,7 +71,7 @@ const editRow = (row: Class) => {
 }
 
 const removeRow = (id: number) => {
-  classes.value.splice(id, 1)
+  classes.value.splice(id - 1, 1)
 }
 </script>
 

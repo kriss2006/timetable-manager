@@ -117,6 +117,16 @@ app.patch('/api/classes/:id', async (req, res) => {
   }
 })
 
+app.delete('/api/classes/:id', async (req, res) => {
+  try {
+    await db.query('DELETE FROM class WHERE id = ?', [req.params.id])
+
+    res.json({ message: 'Class updated successfully' })
+  } catch (err) {
+    res.status(500).json({ error: err.message || 'Error deleting classes' })
+  }
+})
+
 app.get('/api/teachers/:yearId', async (req, res) => {
   try {
     const [teachers] = await db.query(

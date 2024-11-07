@@ -24,7 +24,6 @@ export const useAdminStore = defineStore('admin', () => {
         const response = await axios.get(
           `http://localhost:3001/api/classes/${selectedYear.value}`
         )
-        console.info(response.data)
         return response.data
       } catch (err) {
         console.error(err)
