@@ -44,28 +44,31 @@
 const props = defineProps<{
   title: string
   columns: { key: string; label?: string }[]
-  rows: Class[]
+  rows: (Class | Year | Teacher)[]
   itemsPerPage: number
   onAdd: () => void
-  onEdit: (row: Class) => void
-  onRemove: (row: Class) => void
+  onEdit: (row: Class | Year | Teacher) => void
+  onRemove: (row: Class | Year | Teacher) => void
 }>()
 
 const searchQuery = ref('')
 const currentPage = ref(1)
 
-const filteredRowsCount = computed(
-  () =>
-    props.rows.filter((row) =>
-      row.name.toLowerCase().includes(searchQuery.value.toLowerCase())
-    ).length
-)
+const filteredRowsCount = computed(() => {
+  return props.rows.filter((row) => matchesQuery(row)).length
+})
+
+function matchesQuery(row: Class | Year | Teacher) {
+  const query = searchQuery.value.toLowerCase()
+  const searchableRow = row as { [key: string]: any }
+  return Object.keys(searchableRow).some(
+    (key) =>
+      key !== 'id' && String(searchableRow[key]).toLowerCase().includes(query)
+  )
+}
 
 const computedRows = computed(() => {
-  const filteredRows = props.rows.filter((row) =>
-    row.name.toLowerCase().includes(searchQuery.value.toLowerCase())
-  )
-
+  const filteredRows = props.rows.filter((row) => matchesQuery(row))
   const start = (currentPage.value - 1) * props.itemsPerPage
   return filteredRows.slice(start, start + props.itemsPerPage)
 })
