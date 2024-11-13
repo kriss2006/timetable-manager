@@ -40,32 +40,34 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup lang="ts" generic="T extends Record<string, number | string>">
 const props = defineProps<{
   title: string
   columns: { key: string; label?: string }[]
-  rows: (Class | Year | Teacher)[]
+  hiddenColumns: string[]
+  rows: T[]
   itemsPerPage: number
   onAdd: () => void
-  onEdit: (row: Class | Year | Teacher) => void
-  onRemove: (row: Class | Year | Teacher) => void
+  onEdit: (row: T) => void
+  onRemove: (row: T) => void
 }>()
 
 const searchQuery = ref('')
 const currentPage = ref(1)
 
-const filteredRowsCount = computed(() => {
-  return props.rows.filter((row) => matchesQuery(row)).length
-})
-
-function matchesQuery(row: Class | Year | Teacher) {
+function matchesQuery(row: T) {
   const query = searchQuery.value.toLowerCase()
   const searchableRow = row as { [key: string]: any }
   return Object.keys(searchableRow).some(
     (key) =>
-      key !== 'id' && String(searchableRow[key]).toLowerCase().includes(query)
+      !props.hiddenColumns.includes(key) &&
+      String(searchableRow[key]).toLowerCase().includes(query)
   )
 }
+
+const filteredRowsCount = computed(() => {
+  return props.rows.filter((row) => matchesQuery(row)).length
+})
 
 const computedRows = computed(() => {
   const filteredRows = props.rows.filter((row) => matchesQuery(row))

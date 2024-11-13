@@ -2,6 +2,7 @@
   <DataTable
     title="Manage Classes"
     :columns="columns"
+    :hiddenColumns="hiddenColumns"
     :rows="classes"
     :itemsPerPage="8"
     :onAdd="openAddModal"
@@ -10,29 +11,37 @@
   />
 
   <AddModal
-    type="class"
     :open="addModalOpen"
-    :row="formData"
+    :hidden-columns="hiddenColumns"
+    :row="addFormData"
+    :errorMessage="errorMessage"
     @update:open="addModalOpen = $event"
     @add:row="addRow($event)"
+    @reset:error-message="errorMessage = ''"
   />
   <EditModal
-    type="class"
     :open="editModalOpen"
-    :row="formData"
+    :hidden-columns="hiddenColumns"
+    :row="editFormData"
+    :errorMessage="errorMessage"
     @update:open="editModalOpen = $event"
     @edit:row="editRow($event)"
+    @reset:error-message="errorMessage = ''"
   />
   <RemoveModal
-    type="class"
     :open="removeModalOpen"
-    :row="formData"
+    :hidden-columns="hiddenColumns"
+    :row="removeFormData"
+    :errorMessage="errorMessage"
     @update:open="removeModalOpen = $event"
     @remove:row="removeRow($event)"
+    @reset:error-message="errorMessage = ''"
   />
 </template>
 
 <script setup lang="ts">
+import axios, { type AxiosResponse } from 'axios'
+
 definePageMeta({
   middleware: ['admin'],
 })
@@ -48,157 +57,121 @@ onMounted(async () => {
 })
 
 const columns = [{ key: 'name' }, { key: 'actions' }]
+const hiddenColumns = ['id', 'yearId', 'year_id']
+const errorMessage = ref('')
 
 const addModalOpen = ref(false)
-const editModalOpen = ref(false)
-const removeModalOpen = ref(false)
-
-const formData = ref<Class>({
-  id: -1,
+const addFormData = ref({
   name: '',
+  yearId: -1,
 })
 
 const openAddModal = () => {
-  formData.value = { id: selectedYear.value, name: '' }
+  addFormData.value = { name: '', yearId: selectedYear.value }
+  errorMessage.value = ''
   addModalOpen.value = true
 }
 
-const openEditModal = (row: Class) => {
-  formData.value = { id: row.id, name: row.name }
-  editModalOpen.value = true
-}
-
-const openRemoveModal = (row: Class) => {
-  formData.value = { id: row.id, name: row.name }
-  removeModalOpen.value = true
-}
-
 const addRow = (row: Class) => {
-  classes.value.push(row)
-}
-const editRow = (row: Class) => {
-  classes.value[row.id - 1] = row
-}
-
-const removeRow = (id: number) => {
-  classes.value.splice(id - 1, 1)
-}
-</script>
-
-<!-- <template>
-  <div class="flex flex-col items-center my-2 gap-4 max-w-1/2">
-    <h1 class="text-2xl font-bold">Manage Classes</h1>
-
-    <UInput v-model="q" placeholder="Search" />
-
-    <UTable :loading="!classes.length" :rows="computedRows" :columns="columns">
-      <template #actions-data="{ row }">
-        <UButton
-          color="blue"
-          variant="soft"
-          @click="openEditModal(row)"
-          class="mx-1"
-        >
-          Edit
-        </UButton>
-        <UButton color="red" variant="soft" @click="" class="mx-1">
-          Remove
-        </UButton>
-      </template>
-    </UTable>
-
-    <UPagination
-      v-model="page"
-      :page-count="itemsPerPage"
-      :total="filteredRowsCount"
-    />
-
-    <UModal v-model="modalOpen">
-      <div class="p-4 w-full max-w-md mx-auto flex flex-col gap-4">
-        <h2 class="text-xl font-semibold">Edit Class</h2>
-        <UInput v-model="editData.name" placeholder="Class Name" />
-
-        <p v-if="modalError" class="text-red-500">{{ modalError }}</p>
-        <div class="flex justify-end gap-2 mt-4">
-          <UButton color="blue" variant="soft" @click="saveEdit">Save</UButton>
-          <UButton color="red" variant="soft" @click="cancelEdit"
-            >Cancel</UButton
-          >
-        </div>
-      </div>
-    </UModal>
-  </div>
-</template>
-
-<script setup lang="ts">
-definePageMeta({
-  middleware: ['admin'],
-})
-
-const store = useAdminStore()
-
-const { modalError } = storeToRefs(store)
-
-const classes = ref<Class[]>([])
-
-onMounted(async () => {
-  classes.value = await store.fetchClasses()
-})
-
-const columns = [{ key: 'name' }, { key: 'actions' }]
-
-const q = ref('')
-const page = ref(1)
-const itemsPerPage = ref(8)
-
-const filteredRowsCount = ref(classes.value.length)
-const computedRows = computed(() => {
-  let rows = classes.value
-  if (q.value) {
-    rows = rows.filter((row) => {
-      return String(row.name).toLowerCase().includes(q.value.toLowerCase())
+  const response = axios
+    .post(`http://localhost:3001/api/classes/${selectedYear.value}`, {
+      name: row.name,
     })
+    .catch((error) => {
+      if (error.response) {
+        errorMessage.value = error.response.data.error
+        // console.error(error.response.data)
+        // console.error(error.response.status)
+        // console.error(error.response.headers)
+      } else if (error.request) {
+        // console.error(error.request)
+      } else {
+        // console.error('Error', error.message)
+      }
+      // console.error(error.config)
+    }) as unknown as AxiosResponse
+
+  if (!errorMessage.value) {
+    classes.value.push({ id: response.data, name: row.name })
+    addModalOpen.value = false
   }
-  filteredRowsCount.value = rows.length
-  const start = (page.value - 1) * itemsPerPage.value
-  const end = start + itemsPerPage.value
-  return rows.slice(start, end)
-})
+}
 
-const modalOpen = ref(false)
-
-const editData = ref<{ id: number; name: string }>({
+const editModalOpen = ref(false)
+const editFormData = ref({
   id: -1,
   name: '',
 })
 
 const openEditModal = (row: Class) => {
-  editData.value = { id: row.id, name: row.name }
-  modalOpen.value = true
+  editFormData.value = { id: row.id, name: row.name }
+  errorMessage.value = ''
+  editModalOpen.value = true
 }
 
-watch(
-  () => editData.value.name,
-  () => {
-    if (modalError.value) {
-      modalError.value = null
+const editRow = async (row: Class) => {
+  await axios
+    .patch(`http://localhost:3001/api/classes/${row.id}`, {
+      name: row.name,
+    })
+    .catch((error) => {
+      if (error.response) {
+        errorMessage.value = error.response.data.error
+        // console.error(error.response.data)
+        // console.error(error.response.status)
+        // console.error(error.response.headers)
+      } else if (error.request) {
+        // console.error(error.request)
+      } else {
+        // console.error('Error', error.message)
+      }
+      // console.error(error.config)
+    })
+
+  if (!errorMessage.value) {
+    const index = classes.value.findIndex((item) => item.id === row.id)
+    if (index !== -1) {
+      Object.assign(classes.value[index], row)
     }
+    editModalOpen.value = false
   }
-)
-
-const cancelEdit = () => {
-  modalOpen.value = false
-  editData.value = { id: -1, name: '' }
-  modalError.value = null
 }
 
-const saveEdit = async () => {
-  if (editData.value.id) {
-    await store.handleEdit('class', editData.value)
-    classes.value = await store.fetchClasses()
-    if (!modalError.value) {
-      cancelEdit()
+const removeModalOpen = ref(false)
+const removeFormData = ref({
+  id: -1,
+  name: '',
+})
+
+const openRemoveModal = (row: Class) => {
+  removeFormData.value = { id: row.id, name: row.name }
+  errorMessage.value = ''
+  removeModalOpen.value = true
+}
+
+const removeRow = async (id: number) => {
+  await axios
+    .delete(`http://localhost:3001/api/classes/${id}`)
+    .catch((error) => {
+      if (error.response) {
+        errorMessage.value = error.response.data.error
+        // console.error(error.response.data)
+        // console.error(error.response.status)
+        // console.error(error.response.headers)
+      } else if (error.request) {
+        // console.error(error.request)
+      } else {
+        // console.error('Error', error.message)
+      }
+      // console.error(error.config)
+    })
+
+  if (!errorMessage.value) {
+    const index = classes.value.findIndex((item) => item.id === id)
+    if (index !== -1) {
+      classes.value.splice(index, 1)
     }
+    removeModalOpen.value = false
   }
 }
-</script> -->
+</script>

@@ -2,8 +2,13 @@
   <UModal :modelValue="open" @update:modelValue="emit('update:open')">
     <div class="p-4 w-full max-w-md mx-auto flex flex-col gap-4">
       <h2 class="text-xl font-semibold">Edit</h2>
-      <UInput v-model="formData.name" placeholder="Class Name" />
-
+      <template v-for="(_value, key) in formData" :key="String(key)">
+        <UInput
+          v-if="!hiddenColumns.includes(String(key))"
+          v-model="formData[String(key)]"
+          :placeholder="`Enter ${String(key)}`"
+        />
+      </template>
       <p v-if="errorMessage" class="text-red-500">{{ errorMessage }}</p>
       <div class="flex justify-end gap-2 mt-4">
         <UButton color="blue" variant="soft" @click="confirm">Save</UButton>
@@ -13,24 +18,23 @@
   </UModal>
 </template>
 
-<script setup lang="ts">
-import axios from 'axios'
-
+<script setup lang="ts" generic="T extends Record<string, number | string>">
 const props = defineProps<{
-  type: string
   open: boolean
-  row: Class
+  hiddenColumns: string[]
+  row: T
+  errorMessage: string
 }>()
 
-const emit = defineEmits(['update:open', 'edit:row'])
+const emit = defineEmits(['update:open', 'edit:row', 'reset:error-message'])
 const formData = ref({ ...props.row })
 
 watch(
   () => props.row,
-  (newData) => {
-    formData.value = { ...newData }
+  (newRow) => {
+    Object.assign(formData.value, newRow)
   },
-  { immediate: true }
+  { immediate: true, deep: true }
 )
 
 watch(
@@ -40,60 +44,13 @@ watch(
   }
 )
 
-const errorMessage = ref('')
+watch(formData, () => emit('reset:error-message'), { deep: true })
 
-watch(
-  () => formData.value.name,
-  () => (errorMessage.value = '')
-)
-
-const handleEdit = async () => {
-  switch (props.type) {
-    case 'year':
-      console.log('Edit year', formData.value)
-      break
-
-    case 'class':
-      await axios
-        .patch(`http://localhost:3001/api/classes/${formData.value.id}`, {
-          name: formData.value.name,
-        })
-        .catch((error) => {
-          if (error.response) {
-            errorMessage.value = error.response.data.error
-            // console.error(error.response.data)
-            // console.error(error.response.status)
-            // console.error(error.response.headers)
-          } else if (error.request) {
-            // console.error(error.request)
-          } else {
-            // console.error('Error', error.message)
-          }
-          // console.error(error.config)
-        })
-      break
-
-    case 'teacher':
-      console.log('Edit teacher', formData.value)
-      break
-
-    default:
-      return
-  }
-}
-
-const confirm = async () => {
-  if (formData.value.id) {
-    await handleEdit()
-    if (!errorMessage.value) {
-      emit('edit:row', formData.value)
-      emit('update:open', false)
-    }
-  }
+const confirm = () => {
+  emit('edit:row', formData.value)
 }
 
 const cancel = () => {
-  errorMessage.value = ''
   emit('update:open', false)
 }
 </script>

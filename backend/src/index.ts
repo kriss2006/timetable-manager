@@ -6,6 +6,7 @@ import jwt from 'jsonwebtoken'
 
 import User from './models/User.js'
 import db from '../config/db.js'
+import { ResultSetHeader } from 'mysql2'
 
 dotenv.config()
 
@@ -86,6 +87,17 @@ app.get('/api/years', async (_req, res) => {
   res.json(years)
 })
 
+app.get('/api/rooms/:yearId', async (req, res) => {
+  try {
+    const [rooms] = await db.query('SELECT * FROM room WHERE year_id = ?', [
+      req.params.yearId,
+    ])
+    res.json(rooms)
+  } catch (err) {
+    res.status(500).json({ error: err || 'Error fetching rooms' })
+  }
+})
+
 app.get('/api/classes/:yearId', async (req, res) => {
   try {
     const [classes] = await db.query('SELECT * FROM class WHERE year_id = ?', [
@@ -106,12 +118,14 @@ app.post('/api/classes/:yearId', async (req, res) => {
       return
     }
 
-    await db.query('INSERT INTO class (name, year_id) VALUES (?, 1)', [
-      name,
-      req.params.yearId,
-    ])
+    const [result] = await db.query<ResultSetHeader>(
+      'INSERT INTO class (name, year_id) VALUES (?, ?)',
+      [name, req.params.yearId]
+    )
 
-    res.json({ message: 'Class added successfully' })
+    const newClassId = result.insertId
+
+    res.json({ message: 'Class added successfully', id: newClassId })
   } catch (err) {
     res.status(500).json({ error: err.message || 'Error adding class' })
   }
@@ -147,17 +161,26 @@ app.delete('/api/classes/:id', async (req, res) => {
   }
 })
 
-app.get('/api/teachers/:yearId', async (req, res) => {
+app.get('/api/teachers', async (_req, res) => {
   try {
-    const [teachers] = await db.query(
-      'SELECT * FROM teacher WHERE year_id = ?',
-      [req.params.yearId]
-    )
+    const [teachers] = await db.query('SELECT * FROM teacher')
     res.json(teachers)
   } catch (err) {
     res.status(500).json({ error: err || 'Error fetching teachers' })
   }
 })
+
+// app.get('/api/teachers/:yearId', async (req, res) => {
+//   try {
+//     const [teachers] = await db.query(
+//       'SELECT * FROM teacher WHERE year_id = ?',
+//       [req.params.yearId]
+//     )
+//     res.json(teachers)
+//   } catch (err) {
+//     res.status(500).json({ error: err || 'Error fetching teachers' })
+//   }
+// })
 
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`))

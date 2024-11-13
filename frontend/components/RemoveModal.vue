@@ -15,64 +15,21 @@
   </UModal>
 </template>
 
-<script setup lang="ts">
-import axios from 'axios'
-
+<script setup lang="ts" generic="T extends Record<string, number | string>">
 const props = defineProps<{
-  type: string
   open: boolean
-  row: Class
+  hiddenColumns: string[]
+  row: T
+  errorMessage: string
 }>()
 
-const emit = defineEmits(['update:open', 'remove:row'])
-
-const errorMessage = ref('')
-
-const handleRemove = async () => {
-  switch (props.type) {
-    case 'year':
-      console.log('Remove year', props.row.name)
-      break
-
-    case 'class':
-      await axios
-        .delete(`http://localhost:3001/api/classes/${props.row.id}`)
-        .catch((error) => {
-          if (error.response) {
-            errorMessage.value = error.response.data.error
-            // console.error(error.response.data)
-            // console.error(error.response.status)
-            // console.error(error.response.headers)
-          } else if (error.request) {
-            // console.error(error.request)
-          } else {
-            // console.error('Error', error.message)
-          }
-          // console.error(error.config)
-        })
-      break
-
-    case 'teacher':
-      console.log('Remove teacher', props.row)
-      break
-
-    default:
-      return
-  }
-}
+const emit = defineEmits(['update:open', 'remove:row', 'reset:error-message'])
 
 const confirm = async () => {
-  if (props.row.id) {
-    await handleRemove()
-    if (!errorMessage.value) {
-      emit('remove:row', props.row.id)
-      emit('update:open', false)
-    }
-  }
+  emit('remove:row', props.row.id)
 }
 
 const cancel = () => {
-  errorMessage.value = ''
   emit('update:open', false)
 }
 </script>
