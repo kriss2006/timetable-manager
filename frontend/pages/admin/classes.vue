@@ -1,6 +1,6 @@
 <template>
   <DataTable
-    title="Manage Classes"
+    title="Manage classes"
     :columns="columns"
     :hiddenColumns="hiddenColumns"
     :rows="classes"
@@ -73,9 +73,13 @@ const openAddModal = () => {
 }
 
 const addRow = (row: Class) => {
-  const response = axios
+  axios
     .post(`http://localhost:3001/api/classes/${selectedYear.value}`, {
       name: row.name,
+    })
+    .then((response) => {
+      classes.value.push({ id: response.data.id, name: row.name })
+      addModalOpen.value = false
     })
     .catch((error) => {
       if (error.response) {
@@ -90,11 +94,6 @@ const addRow = (row: Class) => {
       }
       // console.error(error.config)
     }) as unknown as AxiosResponse
-
-  if (!errorMessage.value) {
-    classes.value.push({ id: response.data, name: row.name })
-    addModalOpen.value = false
-  }
 }
 
 const editModalOpen = ref(false)
@@ -114,6 +113,13 @@ const editRow = async (row: Class) => {
     .patch(`http://localhost:3001/api/classes/${row.id}`, {
       name: row.name,
     })
+    .then(() => {
+      const index = classes.value.findIndex((item) => item.id === row.id)
+      if (index !== -1) {
+        Object.assign(classes.value[index], row)
+      }
+      editModalOpen.value = false
+    })
     .catch((error) => {
       if (error.response) {
         errorMessage.value = error.response.data.error
@@ -127,14 +133,6 @@ const editRow = async (row: Class) => {
       }
       // console.error(error.config)
     })
-
-  if (!errorMessage.value) {
-    const index = classes.value.findIndex((item) => item.id === row.id)
-    if (index !== -1) {
-      Object.assign(classes.value[index], row)
-    }
-    editModalOpen.value = false
-  }
 }
 
 const removeModalOpen = ref(false)
@@ -152,6 +150,13 @@ const openRemoveModal = (row: Class) => {
 const removeRow = async (id: number) => {
   await axios
     .delete(`http://localhost:3001/api/classes/${id}`)
+    .then(() => {
+      const index = classes.value.findIndex((item) => item.id === id)
+      if (index !== -1) {
+        classes.value.splice(index, 1)
+      }
+      removeModalOpen.value = false
+    })
     .catch((error) => {
       if (error.response) {
         errorMessage.value = error.response.data.error
@@ -165,13 +170,5 @@ const removeRow = async (id: number) => {
       }
       // console.error(error.config)
     })
-
-  if (!errorMessage.value) {
-    const index = classes.value.findIndex((item) => item.id === id)
-    if (index !== -1) {
-      classes.value.splice(index, 1)
-    }
-    removeModalOpen.value = false
-  }
 }
 </script>
