@@ -41,7 +41,7 @@
 </template>
 
 <script setup lang="ts">
-import axios, { type AxiosResponse } from 'axios'
+import axios from 'axios'
 
 definePageMeta({
   middleware: ['admin'],
@@ -102,7 +102,7 @@ const addRow = (row: Room) => {
         // console.error('Error', error.message)
       }
       // console.error(error.config)
-    }) as unknown as AxiosResponse
+    })
 }
 
 const editModalOpen = ref(false)
