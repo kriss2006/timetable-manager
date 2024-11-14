@@ -18,6 +18,22 @@ export const useAdminStore = defineStore('admin', () => {
     }
   }
 
+  const fetchRooms = async (): Promise<Room[]> => {
+    if (selectedYear.value > 0) {
+      try {
+        const response = await axios.get(
+          `http://localhost:3001/api/rooms/${selectedYear.value}`
+        )
+        return response.data
+      } catch (err) {
+        console.error(err)
+        return []
+      }
+    } else {
+      return []
+    }
+  }
+
   const fetchClasses = async (): Promise<Class[]> => {
     if (selectedYear.value > 0) {
       try {
@@ -60,6 +76,7 @@ export const useAdminStore = defineStore('admin', () => {
     getFromLocalStorage,
     selectedYear,
     fetchYears,
+    fetchRooms,
     fetchClasses,
     fetchTeachers,
   }

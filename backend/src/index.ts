@@ -98,6 +98,79 @@ app.get('/api/rooms/:yearId', async (req, res) => {
   }
 })
 
+app.post('/api/rooms/:yearId', async (req, res) => {
+  try {
+    const { name, type } = req.body
+
+    if (!name || !type) {
+      res.status(400).json({ error: 'Name and type are required' })
+      return
+    }
+
+    if (name.length > 255) {
+      res.status(400).json({ error: 'Name must be up to 255 characters' })
+      return
+    }
+
+    if (type.length > 255) {
+      res.status(400).json({ error: 'Type must be up to 255 characters' })
+      return
+    }
+
+    const [result] = await db.query<ResultSetHeader>(
+      'INSERT INTO room (name, type, year_id) VALUES (?, ?, ?)',
+      [name, type, req.params.yearId]
+    )
+
+    const newRoom = result.insertId
+
+    res.json({ message: 'Room added successfully', id: newRoom })
+  } catch (err) {
+    res.status(500).json({ error: err.message || 'Error adding room' })
+  }
+})
+
+app.patch('/api/rooms/:id', async (req, res) => {
+  try {
+    const { name, type } = req.body
+
+    if (!name || !type) {
+      res.status(400).json({ error: 'Name and type are required' })
+      return
+    }
+
+    if (name.length > 255) {
+      res.status(400).json({ error: 'Name must be up to 255 characters' })
+      return
+    }
+
+    if (type.length > 255) {
+      res.status(400).json({ error: 'Type must be up to 255 characters' })
+      return
+    }
+
+    await db.query('UPDATE room SET name = ?, type = ? WHERE id = ?', [
+      name,
+      type,
+      req.params.id,
+    ])
+
+    res.json({ message: 'Room edited successfully' })
+  } catch (err) {
+    res.status(500).json({ error: err.message || 'Error editing room' })
+  }
+})
+
+app.delete('/api/rooms/:id', async (req, res) => {
+  try {
+    await db.query('DELETE FROM room WHERE id = ?', [req.params.id])
+
+    res.json({ message: 'Room deleted successfully' })
+  } catch (err) {
+    res.status(500).json({ error: err.message || 'Error deleting room' })
+  }
+})
+
 app.get('/api/classes/:yearId', async (req, res) => {
   try {
     const [classes] = await db.query('SELECT * FROM class WHERE year_id = ?', [
@@ -115,6 +188,11 @@ app.post('/api/classes/:yearId', async (req, res) => {
 
     if (!name) {
       res.status(400).json({ error: 'Name is required' })
+      return
+    }
+
+    if (name.length > 5) {
+      res.status(400).json({ error: 'Name must be up to 5 characters' })
       return
     }
 
@@ -137,6 +215,11 @@ app.patch('/api/classes/:id', async (req, res) => {
 
     if (!name) {
       res.status(400).json({ error: 'Name is required' })
+      return
+    }
+
+    if (name.length > 5) {
+      res.status(400).json({ error: 'Name must be up to 5 characters' })
       return
     }
 

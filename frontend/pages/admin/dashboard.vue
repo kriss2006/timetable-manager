@@ -8,10 +8,10 @@
     </option>
   </select>
   <div v-if="selectedYear">
+    <button @click="navigateTo('rooms')">Manage rooms</button>
     <button @click="navigateTo('classes')">Manage classses</button>
     <button @click="navigateTo('teachers')">Manage teachers</button>
     <button>Manage subjects</button>
-    <button>Manage rooms</button>
     <button>Manage timetables</button>
   </div>
 </template>
