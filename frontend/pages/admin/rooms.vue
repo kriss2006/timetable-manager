@@ -1,6 +1,7 @@
 <template>
   <DataTable
     title="Manage rooms"
+    :isLoading="tableLoading"
     :columns="columns"
     :hiddenColumns="hiddenColumns"
     :rows="rooms"
@@ -52,8 +53,10 @@ const { selectedYear } = storeToRefs(store)
 
 const rooms = ref<Room[]>([])
 
+const tableLoading = ref(true)
 onMounted(async () => {
   rooms.value = await store.fetchRooms()
+  tableLoading.value = false
 })
 
 const columns = [

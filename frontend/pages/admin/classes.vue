@@ -1,6 +1,7 @@
 <template>
   <DataTable
     title="Manage classes"
+    :isLoading="tableLoading"
     :columns="columns"
     :hiddenColumns="hiddenColumns"
     :rows="classes"
@@ -52,8 +53,10 @@ const { selectedYear } = storeToRefs(store)
 
 const classes = ref<Class[]>([])
 
+const tableLoading = ref(true)
 onMounted(async () => {
   classes.value = await store.fetchClasses()
+  tableLoading.value = false
 })
 
 const columns = [{ key: 'name' }, { key: 'actions' }]

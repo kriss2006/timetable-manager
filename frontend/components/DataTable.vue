@@ -4,7 +4,7 @@
 
     <UInput v-model="searchQuery" placeholder="Search" />
 
-    <UTable :loading="!rows.length" :rows="computedRows" :columns="columns">
+    <UTable :loading="isLoading" :rows="computedRows" :columns="columns">
       <template #actions-header>
         <div class="flex justify-end">
           <UButton
@@ -43,6 +43,7 @@
 <script setup lang="ts" generic="T extends Record<string, number | string>">
 const props = defineProps<{
   title: string
+  isLoading: boolean
   columns: { key: string; label?: string }[]
   hiddenColumns: string[]
   rows: T[]
