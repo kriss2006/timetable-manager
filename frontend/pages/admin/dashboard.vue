@@ -12,7 +12,7 @@
     <button @click="navigateTo('classes')">Manage classses</button>
     <button @click="navigateTo('teachers')">Manage teachers</button>
     <button>Manage subjects</button>
-    <button>Manage timetables</button>
+    <button @click="navigateTo('timetable')">Manage timetables</button>
   </div>
 </template>
 
@@ -25,19 +25,11 @@ const store = useAdminStore()
 const { selectedYear } = storeToRefs(store)
 
 const years = ref<Year[]>([])
-const classes = ref<Class[]>([])
 
 onMounted(async () => {
   const resultYears = await store.fetchYears()
   if (resultYears) {
     years.value = resultYears
-  }
-})
-
-watch(selectedYear, async () => {
-  const resultClasses = await store.fetchClasses()
-  if (resultClasses) {
-    classes.value = resultClasses
   }
 })
 </script>
