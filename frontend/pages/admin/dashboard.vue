@@ -1,18 +1,26 @@
 <template>
-  <h1>Dashboard temp</h1>
+  <h1>Dashboard</h1>
+  <USelectMenu
+    :loading="yearsLoading"
+    searchable
+    v-model="selectedYearId"
+    :options="years"
+    placeholder="Select a year"
+    value-attribute="id"
+    option-attribute="name"
+    class="w-48"
+  />
 
-  <select v-model="selectedYear">
-    <option :value="0">Select year</option>
-    <option v-for="year in years" :key="year.id" :value="year.id">
-      {{ year.name }}
-    </option>
-  </select>
-  <div v-if="selectedYear">
-    <button @click="navigateTo('rooms')">Manage rooms</button>
-    <button @click="navigateTo('classes')">Manage classses</button>
-    <button @click="navigateTo('teachers')">Manage teachers</button>
-    <button>Manage subjects</button>
-    <button @click="navigateTo('timetable')">Manage timetables</button>
+  <div v-if="selectedYearId">
+    <UButton color="blue" variant="soft" @click="navigateTo('rooms')"
+      >Manage rooms
+    </UButton>
+    <UButton color="blue" variant="soft" @click="navigateTo('classes')"
+      >Manage classes
+    </UButton>
+    <UButton color="blue" variant="soft" @click="navigateTo('timetable')"
+      >Manage timetable
+    </UButton>
   </div>
 </template>
 
@@ -22,14 +30,12 @@ definePageMeta({
 })
 
 const store = useAdminStore()
-const { selectedYear } = storeToRefs(store)
+
+const { selectedYearId, yearsLoading } = storeToRefs(store)
 
 const years = ref<Year[]>([])
 
 onMounted(async () => {
-  const resultYears = await store.fetchYears()
-  if (resultYears) {
-    years.value = resultYears
-  }
+  years.value = await store.fetchYears()
 })
 </script>

@@ -14,7 +14,7 @@ const store = useAdminStore()
 
 const teachers = ref<Teacher[]>([])
 
-onMounted(async () => {
-  teachers.value = await store.fetchTeachers()
-})
+// onMounted(async () => {
+//   teachers.value = await store.fetchTeachers()
+// })
 </script>

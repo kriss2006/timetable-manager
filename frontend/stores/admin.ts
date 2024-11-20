@@ -1,15 +1,16 @@
 import axios from 'axios'
 
 export const useAdminStore = defineStore('admin', () => {
-  const selectedYear = ref(0)
+  const selectedYearId = ref(0)
 
   const getFromLocalStorage = () => {
-    selectedYear.value = import.meta.client
-      ? Number(localStorage.getItem('selectedYear') ?? 0)
+    selectedYearId.value = import.meta.client
+      ? Number(localStorage.getItem('selectedYearId') ?? 0)
       : 0
   }
 
-  const fetchYears = async (): Promise<Year[] | void> => {
+  const yearsLoading = ref(true)
+  const fetchYears = async (): Promise<Year[]> => {
     return axios
       .get(`http://localhost:3001/api/years`)
       .then((response) => response.data)
@@ -17,30 +18,41 @@ export const useAdminStore = defineStore('admin', () => {
         console.error(err)
         return []
       })
+      .finally(() => {
+        yearsLoading.value = false
+      })
   }
 
+  const roomsLoading = ref(true)
   const fetchRooms = async (): Promise<Room[]> => {
-    if (selectedYear.value > 0) {
+    if (selectedYearId.value > 0) {
       return axios
-        .get(`http://localhost:3001/api/rooms/${selectedYear.value}`)
+        .get(`http://localhost:3001/api/rooms/${selectedYearId.value}`)
         .then((response) => response.data)
         .catch((err) => {
           console.error(err)
           return []
+        })
+        .finally(() => {
+          roomsLoading.value = false
         })
     } else {
       return []
     }
   }
 
+  const classesLoading = ref(true)
   const fetchClasses = async (): Promise<Class[]> => {
-    if (selectedYear.value > 0) {
+    if (selectedYearId.value > 0) {
       return axios
-        .get(`http://localhost:3001/api/classes/${selectedYear.value}`)
+        .get(`http://localhost:3001/api/classes/${selectedYearId.value}`)
         .then((response) => response.data)
         .catch((err) => {
           console.error(err)
           return []
+        })
+        .finally(() => {
+          classesLoading.value = false
         })
     } else {
       return []
@@ -48,10 +60,10 @@ export const useAdminStore = defineStore('admin', () => {
   }
 
   // const fetchTeachers = async (): Promise<Teacher[]> => {
-  //   if (selectedYear.value > 0) {
+  //   if (selectedYearId.value > 0) {
   //     try {
   //       const response = await axios.get(
-  //         `http://localhost:3001/api/teachers/${selectedYear.value}`
+  //         `http://localhost:3001/api/teachers/${selectedYearId.value}`
   //       )
   //       return response.data
   //     } catch (err) {
@@ -63,18 +75,20 @@ export const useAdminStore = defineStore('admin', () => {
   //   }
   // }
 
-  watch(selectedYear, () => {
-    if (selectedYear.value > 0 && import.meta.client) {
-      localStorage.setItem('selectedYear', String(selectedYear.value))
+  watch(selectedYearId, () => {
+    if (selectedYearId.value > 0 && import.meta.client) {
+      localStorage.setItem('selectedYearId', String(selectedYearId.value))
     }
   })
 
   return {
     getFromLocalStorage,
-    selectedYear,
+    selectedYearId,
+    yearsLoading,
     fetchYears,
+    roomsLoading,
     fetchRooms,
+    classesLoading,
     fetchClasses,
-    // fetchTeachers,
   }
 })

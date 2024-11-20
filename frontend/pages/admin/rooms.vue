@@ -1,7 +1,7 @@
 <template>
   <DataTable
     title="Manage rooms"
-    :isLoading="tableLoading"
+    :isLoading="roomsLoading"
     :columns="columns"
     :hiddenColumns="hiddenColumns"
     :rows="rooms"
@@ -49,14 +49,12 @@ definePageMeta({
 
 const store = useAdminStore()
 
-const { selectedYear } = storeToRefs(store)
+const { selectedYearId, roomsLoading } = storeToRefs(store)
 
 const rooms = ref<Room[]>([])
 
-const tableLoading = ref(true)
 onMounted(async () => {
   rooms.value = await store.fetchRooms()
-  tableLoading.value = false
 })
 
 const columns = [
@@ -75,14 +73,14 @@ const addFormData = ref({
 })
 
 const openAddModal = () => {
-  addFormData.value = { name: '', type: '', yearId: selectedYear.value }
+  addFormData.value = { name: '', type: '', yearId: selectedYearId.value }
   errorMessage.value = ''
   addModalOpen.value = true
 }
 
 const addRow = (row: Room) => {
   axios
-    .post(`http://localhost:3001/api/rooms/${selectedYear.value}`, {
+    .post(`http://localhost:3001/api/rooms/${selectedYearId.value}`, {
       name: row.name,
       type: row.type,
     })

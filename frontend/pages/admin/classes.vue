@@ -1,7 +1,7 @@
 <template>
   <DataTable
     title="Manage classes"
-    :isLoading="tableLoading"
+    :isLoading="classesLoading"
     :columns="columns"
     :hiddenColumns="hiddenColumns"
     :rows="classes"
@@ -49,14 +49,12 @@ definePageMeta({
 
 const store = useAdminStore()
 
-const { selectedYear } = storeToRefs(store)
+const { selectedYearId, classesLoading } = storeToRefs(store)
 
 const classes = ref<Class[]>([])
 
-const tableLoading = ref(true)
 onMounted(async () => {
   classes.value = await store.fetchClasses()
-  tableLoading.value = false
 })
 
 const columns = [{ key: 'name' }, { key: 'actions' }]
@@ -70,14 +68,14 @@ const addFormData = ref({
 })
 
 const openAddModal = () => {
-  addFormData.value = { name: '', yearId: selectedYear.value }
+  addFormData.value = { name: '', yearId: selectedYearId.value }
   errorMessage.value = ''
   addModalOpen.value = true
 }
 
 const addRow = (row: Class) => {
   axios
-    .post(`http://localhost:3001/api/classes/${selectedYear.value}`, {
+    .post(`http://localhost:3001/api/classes/${selectedYearId.value}`, {
       name: row.name,
     })
     .then((response) => {
