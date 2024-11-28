@@ -9,7 +9,6 @@ declare global {
   interface Room {
     id: number
     name: string
-    type: string
   }
 
   interface Class {

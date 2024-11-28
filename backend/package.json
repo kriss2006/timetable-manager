@@ -5,10 +5,18 @@
   "main": "index.js",
   "scripts": {
     "start": "node src/index.ts",
-    "dev": "npx tsx src/index.ts"
+    "dev": "npx tsx src/index.ts",
+    "postinstall": "npx prisma generate"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "@prisma/client": "5.22.0",
+    "prisma": "^5.22.0"
+  },
+  "prisma": {
+    "seed": "npx tsx prisma/seed.ts"
+  }
 }

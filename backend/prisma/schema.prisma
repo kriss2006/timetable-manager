@@ -1,0 +1,135 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  name         String   @db.VarChar(255)
+  username     String   @unique @db.VarChar(32)
+  passwordHash String   @map("password_hash") @db.VarChar(255)
+  type         UserType
+}
+
+model Year {
+  id   Int    @id @default(autoincrement())
+  name String @unique @db.Char(9)
+
+  rooms             Room[]
+  studentClasses    StudentClass[]
+  subjects          Subject[]
+  subjectTeachers   SubjectTeacher[]
+  timetableElements TimetableElement[]
+}
+
+model Room {
+  id   Int    @id @default(autoincrement())
+  name String @db.VarChar(32)
+
+  yearId Int  @map("year_id")
+  year   Year @relation(fields: [yearId], references: [id], onDelete: Cascade)
+
+  timetableElements         TimetableElement[] @relation("TimetableElements")
+  timetableElementsEvenWeek TimetableElement[] @relation("TimetableElementsEvenWeek")
+  timetableElementsGroup2   TimetableElement[] @relation("TimetableElementsGroup2")
+}
+
+model StudentClass {
+  id   Int    @id @default(autoincrement())
+  name String @db.VarChar(5)
+
+  yearId Int  @map("year_id")
+  year   Year @relation(fields: [yearId], references: [id], onDelete: Cascade)
+
+  timetableElements TimetableElement[]
+}
+
+model Subject {
+  id           Int     @id @default(autoincrement())
+  name         String  @db.VarChar(255)
+  abbreviation String? @db.VarChar(32)
+
+  yearId Int  @map("year_id")
+  year   Year @relation(fields: [yearId], references: [id], onDelete: Cascade)
+
+  subjectTeachers SubjectTeacher[]
+}
+
+model Teacher {
+  id       Int    @id @default(autoincrement())
+  name     String @db.VarChar(255)
+  initials String @db.VarChar(4)
+
+  subjectTeachers SubjectTeacher[]
+}
+
+model SubjectTeacher {
+  id Int @id @default(autoincrement())
+
+  subjectId Int     @map("subject_id")
+  subject   Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  teacherId Int     @map("teacher_id")
+  teacher   Teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  yearId Int  @map("year_id")
+  year   Year @relation(fields: [yearId], references: [id], onDelete: Cascade)
+
+  timetableElements         TimetableElement[] @relation("TimetableElements")
+  timetableElementsEvenWeek TimetableElement[] @relation("TimetableElementsEvenWeek")
+  timetableElementsGroup2   TimetableElement[] @relation("TimetableElementsGroup2")
+}
+
+model TimetableElement {
+  id          Int      @id @default(autoincrement())
+  term        Int      @db.TinyInt
+  period      Int      @db.TinyInt
+  day         Day
+  startTime   DateTime @map("start_time") @db.Time
+  endTime     DateTime @map("end_time") @db.Time
+  alternating Boolean
+  split       Boolean
+
+  yearId Int  @map("year_id")
+  year   Year @relation(fields: [yearId], references: [id], onDelete: Cascade)
+
+  studentClassId Int          @map("student_class_id")
+  studentClass   StudentClass @relation(fields: [studentClassId], references: [id], onDelete: Cascade)
+
+  subjectTeacherId Int            @map("subject_teacher_id")
+  subjectTeacher   SubjectTeacher @relation("TimetableElements", fields: [subjectTeacherId], references: [id], onDelete: Cascade)
+
+  roomId Int  @map("room_id")
+  room   Room @relation("TimetableElements", fields: [roomId], references: [id], onDelete: Cascade)
+
+  evenWeekSubjectTeacherId Int?            @map("even_week_subject_teacher_id")
+  evenWeekSubjectTeacher   SubjectTeacher? @relation("TimetableElementsEvenWeek", fields: [evenWeekSubjectTeacherId], references: [id], onDelete: Cascade)
+
+  evenWeekRoomId Int?  @map("even_week_room_id")
+  evenWeekRoom   Room? @relation("TimetableElementsEvenWeek", fields: [evenWeekRoomId], references: [id], onDelete: Cascade)
+
+  group2SubjectTeacherId Int?            @map("group_2_subject_teacher_id")
+  group2SubjectTeacher   SubjectTeacher? @relation("TimetableElementsGroup2", fields: [group2SubjectTeacherId], references: [id], onDelete: Cascade)
+
+  group2RoomId Int?  @map("group_2_room_id")
+  group2Room   Room? @relation("TimetableElementsGroup2", fields: [group2RoomId], references: [id], onDelete: Cascade)
+}
+
+enum UserType {
+  student
+  teacher
+  admin
+  super_admin
+}
+
+enum Day {
+  Monday
+  Tuesday
+  Wednesday
+  Thursday
+  Friday
+}

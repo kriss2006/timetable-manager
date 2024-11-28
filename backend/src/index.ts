@@ -4,9 +4,9 @@ import cors from 'cors'
 import dotenv from 'dotenv'
 import jwt from 'jsonwebtoken'
 
-import User from './models/User.js'
-import db from '../config/db.js'
-import { ResultSetHeader } from 'mysql2'
+import { PrismaClient } from '@prisma/client'
+
+const prisma = new PrismaClient()
 
 dotenv.config()
 
@@ -16,254 +16,272 @@ app.use(json())
 app.use(cors())
 
 const jwtSecret = process.env.JWT_SECRET as jwt.Secret
-// app.post('/api/signup', async (req, res) => {
-//   const { username, password } = req.body
 
-//   try {
-//     let user = await User.findByUsername(username)
-//     if (user) return res.status(400).json({ message: 'User already exists' })
+app.post('/api/signup', async (req, res) => {
+  const { name, username, password } = req.body
 
-//     if (!username || !password) {
-//       return res
-//         .status(400)
-//         .json({ message: 'Username and password are required' })
-//     }
+  if (!name) {
+    res.status(400).json({ error: 'Name is required' })
+    return
+  }
 
-//     const salt = await bcrypt.genSalt(10)
-//     const hashedPassword = await bcrypt.hash(password, salt)
+  if (name.length > 255) {
+    res.status(400).json({ error: 'Name must be up to 255 characters' })
+    return
+  }
 
-//     const userId = await User.create(username, hashedPassword)
+  if (!username) {
+    res.status(400).json({ error: 'Username is required' })
+    return
+  }
 
-//     const payload = {
-//       user: { id: userId, username: username },
-//     }
+  if (username.length > 32) {
+    res.status(400).json({ error: 'Username must be up to 32 characters' })
+    return
+  }
 
-//     const token = jwt.sign(payload, process.env.JWT_SECRET, {
-//       expiresIn: '1h',
-//     })
+  if (!password) {
+    res.status(400).json({ error: 'Password is required' })
+    return
+  }
 
-//     res.json({ token })
-//   } catch (err) {
-//     console.error(err.message)
-//     res.status(500).json({ message: 'Server error' })
-//   }
-// })
+  if (password.length > 255) {
+    res.status(400).json({ error: 'Password must be up to 255 characters' })
+    return
+  }
+
+  const salt = await bcrypt.genSalt(10)
+  const passwordHash = await bcrypt.hash(password, salt)
+
+  prisma.user
+    .create({
+      data: {
+        name,
+        username,
+        passwordHash,
+        type: 'student',
+      },
+    })
+    .then((newUser) => {
+      const payload = {
+        user: {
+          id: newUser.id,
+          username: newUser.username,
+          type: newUser.type,
+        },
+      }
+
+      const token = jwt.sign(payload, jwtSecret, {
+        expiresIn: '1h',
+      })
+
+      res.status(201).json({
+        message: 'User created successfully',
+        id: newUser.id,
+        token: token,
+      })
+    })
+    .catch((err) =>
+      res.status(500).json({ error: err.message || 'Error adding room' })
+    )
+})
 
 app.post('/api/login', async (req, res) => {
   const { username, password } = req.body
 
-  try {
-    const user = await User.findByUsername(username)
+  prisma.user.findUnique({ where: { username } }).then((user) => {
     if (!user) {
-      res.status(400).json({ message: 'Invalid credentials' })
-      return
+      return res.status(400).json({ message: 'Invalid credentials' })
     }
 
-    const isMatch = await bcrypt.compare(password, user.password)
+    bcrypt
+      .compare(password, user.passwordHash)
+      .then((isMatch) => {
+        if (!isMatch) {
+          return res.status(400).json({ message: 'Invalid credentials' })
+        }
 
-    if (!isMatch) {
-      res.status(400).json({ message: 'Invalid credentials' })
-      return
-    }
-    const payload = {
-      user: {
-        id: user.id,
-        username: user.username,
-      },
-    }
+        const payload = {
+          user: { id: user.id, username: user.username },
+        }
 
-    const token = jwt.sign(payload, jwtSecret, {
-      expiresIn: '1h',
-    })
-
-    res.json({ token })
-  } catch (err) {
-    res.status(500).json({ message: err || 'Server error' })
-  }
+        const token = jwt.sign(payload, jwtSecret, { expiresIn: '1h' })
+        res.json({ token })
+      })
+      .catch((err) =>
+        res.status(500).json({ message: err.message || 'Server error' })
+      )
+  })
 })
 
-app.get('/api/years', async (_req, res) => {
-  const [years] = await db.query('SELECT * FROM year')
-  res.json(years)
-})
-
-app.get('/api/rooms/:yearId', async (req, res) => {
-  try {
-    const [rooms] = await db.query('SELECT * FROM room WHERE year_id = ?', [
-      req.params.yearId,
-    ])
-    res.json(rooms)
-  } catch (err) {
-    res.status(500).json({ error: err || 'Error fetching rooms' })
-  }
-})
-
-app.post('/api/rooms/:yearId', async (req, res) => {
-  try {
-    const { name, type } = req.body
-
-    if (!name || !type) {
-      res.status(400).json({ error: 'Name and type are required' })
-      return
-    }
-
-    if (name.length > 255) {
-      res.status(400).json({ error: 'Name must be up to 255 characters' })
-      return
-    }
-
-    if (type.length > 255) {
-      res.status(400).json({ error: 'Type must be up to 255 characters' })
-      return
-    }
-
-    const [result] = await db.query<ResultSetHeader>(
-      'INSERT INTO room (name, type, year_id) VALUES (?, ?, ?)',
-      [name, type, req.params.yearId]
+app.get('/api/years', (_req, res) => {
+  prisma.year
+    .findMany()
+    .then((years) => res.json(years))
+    .catch((err) =>
+      res.status(500).json({ error: err.message || 'Error fetching years' })
     )
-
-    const newRoom = result.insertId
-
-    res.json({ message: 'Room added successfully', id: newRoom })
-  } catch (err) {
-    res.status(500).json({ error: err.message || 'Error adding room' })
-  }
 })
 
-app.patch('/api/rooms/:id', async (req, res) => {
-  try {
-    const { name, type } = req.body
-
-    if (!name || !type) {
-      res.status(400).json({ error: 'Name and type are required' })
-      return
-    }
-
-    if (name.length > 255) {
-      res.status(400).json({ error: 'Name must be up to 255 characters' })
-      return
-    }
-
-    if (type.length > 255) {
-      res.status(400).json({ error: 'Type must be up to 255 characters' })
-      return
-    }
-
-    await db.query('UPDATE room SET name = ?, type = ? WHERE id = ?', [
-      name,
-      type,
-      req.params.id,
-    ])
-
-    res.json({ message: 'Room edited successfully' })
-  } catch (err) {
-    res.status(500).json({ error: err.message || 'Error editing room' })
-  }
+app.get('/api/rooms/:yearId', (req, res) => {
+  prisma.room
+    .findMany({ where: { yearId: Number(req.params.yearId) } })
+    .then((rooms) => res.json(rooms))
+    .catch((err) =>
+      res.status(500).json({ error: err.message || 'Error fetching rooms' })
+    )
 })
 
-app.delete('/api/rooms/:id', async (req, res) => {
-  try {
-    await db.query('DELETE FROM room WHERE id = ?', [req.params.id])
+app.post('/api/rooms/:yearId', (req, res) => {
+  const { name } = req.body
 
-    res.json({ message: 'Room deleted successfully' })
-  } catch (err) {
-    res.status(500).json({ error: err.message || 'Error deleting room' })
+  if (!name) {
+    res.status(400).json({ error: 'Name is required' })
+    return
   }
+
+  if (name.length > 255) {
+    res.status(400).json({ error: 'Name must be up to 255 characters' })
+    return
+  }
+
+  prisma.room
+    .create({
+      data: {
+        name,
+        yearId: Number(req.params.yearId),
+      },
+    })
+    .then((newRoom) =>
+      res.json({ message: 'Room added successfully', id: newRoom.id })
+    )
+    .catch((err) =>
+      res.status(500).json({ error: err.message || 'Error adding room' })
+    )
 })
 
-app.get('/api/classes/:yearId', async (req, res) => {
-  try {
-    const [classes] = await db.query('SELECT * FROM class WHERE year_id = ?', [
-      req.params.yearId,
-    ])
-    res.json(classes)
-  } catch (err) {
-    res.status(500).json({ error: err || 'Error fetching classes' })
+app.patch('/api/rooms/:id', (req, res) => {
+  const { name } = req.body
+
+  if (!name) {
+    res.status(400).json({ error: 'Name is required' })
+    return
   }
+
+  if (name.length > 255) {
+    res.status(400).json({ error: 'Name must be up to 255 characters' })
+    return
+  }
+
+  prisma.room
+    .update({
+      where: { id: Number(req.params.id) },
+      data: { name },
+    })
+    .then(() => res.json({ message: 'Room edited successfully' }))
+    .catch((err) =>
+      res.status(500).json({ error: err.message || 'Error editing room' })
+    )
+})
+
+app.delete('/api/rooms/:id', (req, res) => {
+  prisma.room
+    .delete({ where: { id: Number(req.params.id) } })
+    .then(() => res.json({ message: 'Room deleted successfully' }))
+    .catch((err) =>
+      res.status(500).json({ error: err.message || 'Error deleting room' })
+    )
+})
+
+app.get('/api/classes/:yearId', (req, res) => {
+  prisma.studentClass
+    .findMany({ where: { yearId: Number(req.params.yearId) } })
+    .then((studentClasses) => res.json(studentClasses))
+    .catch((err) =>
+      res
+        .status(500)
+        .json({ error: err.message || 'Error fetching student classes' })
+    )
 })
 
 app.post('/api/classes/:yearId', async (req, res) => {
-  try {
-    const { name } = req.body
+  const { name } = req.body
 
-    if (!name) {
-      res.status(400).json({ error: 'Name is required' })
-      return
-    }
+  if (!name) {
+    res.status(400).json({ error: 'Name is required' })
+    return
+  }
 
-    if (name.length > 5) {
-      res.status(400).json({ error: 'Name must be up to 5 characters' })
-      return
-    }
+  if (name.length > 5) {
+    res.status(400).json({ error: 'Name must be up to 5 characters' })
+    return
+  }
 
-    const [result] = await db.query<ResultSetHeader>(
-      'INSERT INTO class (name, year_id) VALUES (?, ?)',
-      [name, req.params.yearId]
+  prisma.studentClass
+    .create({
+      data: {
+        name,
+        yearId: Number(req.params.yearId),
+      },
+    })
+    .then((newStudentClass) =>
+      res.json({
+        message: 'Student class added successfully',
+        id: newStudentClass.id,
+      })
     )
-
-    const newClassId = result.insertId
-
-    res.json({ message: 'Class added successfully', id: newClassId })
-  } catch (err) {
-    res.status(500).json({ error: err.message || 'Error adding class' })
-  }
+    .catch((err) =>
+      res
+        .status(500)
+        .json({ error: err.message || 'Error adding student class' })
+    )
 })
 
-app.patch('/api/classes/:id', async (req, res) => {
-  try {
-    const { name } = req.body
+app.patch('/api/classes/:id', (req, res) => {
+  const { name } = req.body
 
-    if (!name) {
-      res.status(400).json({ error: 'Name is required' })
-      return
-    }
-
-    if (name.length > 5) {
-      res.status(400).json({ error: 'Name must be up to 5 characters' })
-      return
-    }
-
-    await db.query('UPDATE class SET name = ? WHERE id = ?', [
-      name,
-      req.params.id,
-    ])
-
-    res.json({ message: 'Class edited successfully' })
-  } catch (err) {
-    res.status(500).json({ error: err.message || 'Error editing class' })
+  if (!name) {
+    res.status(400).json({ error: 'Name is required' })
+    return
   }
+
+  if (name.length > 5) {
+    res.status(400).json({ error: 'Name must be up to 5 characters' })
+    return
+  }
+
+  prisma.studentClass
+    .update({
+      where: { id: Number(req.params.id) },
+      data: { name },
+    })
+    .then(() => res.json({ message: 'Student class edited successfully' }))
+    .catch((err) =>
+      res
+        .status(500)
+        .json({ error: err.message || 'Error editing student class' })
+    )
 })
 
-app.delete('/api/classes/:id', async (req, res) => {
-  try {
-    await db.query('DELETE FROM class WHERE id = ?', [req.params.id])
-
-    res.json({ message: 'Class deleted successfully' })
-  } catch (err) {
-    res.status(500).json({ error: err.message || 'Error deleting class' })
-  }
+app.delete('/api/classes/:id', (req, res) => {
+  prisma.studentClass
+    .delete({ where: { id: Number(req.params.id) } })
+    .then(() => res.json({ message: 'Student class deleted successfully' }))
+    .catch((err) =>
+      res
+        .status(500)
+        .json({ error: err.message || 'Error deleting student class' })
+    )
 })
 
-app.get('/api/teachers', async (_req, res) => {
-  try {
-    const [teachers] = await db.query('SELECT * FROM teacher')
-    res.json(teachers)
-  } catch (err) {
-    res.status(500).json({ error: err || 'Error fetching teachers' })
-  }
+app.get('/api/teachers/:yearId', (_req, res) => {
+  prisma.teacher
+    .findMany()
+    .then((teachers) => res.json(teachers))
+    .catch((err) =>
+      res.status(500).json({ error: err.message || 'Error fetching teachers' })
+    )
 })
-
-// app.get('/api/teachers/:yearId', async (req, res) => {
-//   try {
-//     const [teachers] = await db.query(
-//       'SELECT * FROM teacher WHERE year_id = ?',
-//       [req.params.yearId]
-//     )
-//     res.json(teachers)
-//   } catch (err) {
-//     res.status(500).json({ error: err || 'Error fetching teachers' })
-//   }
-// })
 
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`))

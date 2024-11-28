@@ -57,23 +57,18 @@ onMounted(async () => {
   rooms.value = await store.fetchRooms()
 })
 
-const columns = [
-  { key: 'name', label: 'Name' },
-  { key: 'type', label: 'Type' },
-  { key: 'actions' },
-]
+const columns = [{ key: 'name', label: 'Name' }, { key: 'actions' }]
 const hiddenColumns = ['id', 'yearId', 'year_id']
 const errorMessage = ref('')
 
 const addModalOpen = ref(false)
 const addFormData = ref({
   name: '',
-  type: '',
   yearId: -1,
 })
 
 const openAddModal = () => {
-  addFormData.value = { name: '', type: '', yearId: selectedYearId.value }
+  addFormData.value = { name: '', yearId: selectedYearId.value }
   errorMessage.value = ''
   addModalOpen.value = true
 }
@@ -82,10 +77,9 @@ const addRow = (row: Room) => {
   axios
     .post(`http://localhost:3001/api/rooms/${selectedYearId.value}`, {
       name: row.name,
-      type: row.type,
     })
     .then((response) => {
-      rooms.value.push({ id: response.data.id, name: row.name, type: row.type })
+      rooms.value.push({ id: response.data.id, name: row.name })
       addModalOpen.value = false
     })
     .catch((error) => {
@@ -107,11 +101,10 @@ const editModalOpen = ref(false)
 const editFormData = ref({
   id: -1,
   name: '',
-  type: '',
 })
 
 const openEditModal = (row: Room) => {
-  editFormData.value = { id: row.id, name: row.name, type: row.type }
+  editFormData.value = { id: row.id, name: row.name }
   errorMessage.value = ''
   editModalOpen.value = true
 }
@@ -120,7 +113,6 @@ const editRow = async (row: Room) => {
   await axios
     .patch(`http://localhost:3001/api/rooms/${row.id}`, {
       name: row.name,
-      type: row.type,
     })
     .then(() => {
       const index = rooms.value.findIndex((item) => item.id === row.id)
@@ -148,11 +140,10 @@ const removeModalOpen = ref(false)
 const removeFormData = ref({
   id: -1,
   name: '',
-  type: '',
 })
 
 const openRemoveModal = (row: Room) => {
-  removeFormData.value = { id: row.id, name: row.name, type: row.type }
+  removeFormData.value = { id: row.id, name: row.name }
   errorMessage.value = ''
   removeModalOpen.value = true
 }
