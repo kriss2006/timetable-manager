@@ -9,7 +9,7 @@
 <script setup lang="ts">
 const store = useAdminStore()
 
-const classes = ref<Class[]>([])
+const classes = ref<StudentClass[]>([])
 
 onMounted(async () => {
   const resultClasses = await store.fetchClasses()

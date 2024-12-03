@@ -1,10 +1,10 @@
 <template>
   <DataTable
     title="Manage classes"
-    :isLoading="classesLoading"
+    :isLoading="studentClassesLoading"
     :columns="columns"
     :hiddenColumns="hiddenColumns"
-    :rows="classes"
+    :rows="studentClasses"
     :itemsPerPage="8"
     :onAdd="openAddModal"
     :onEdit="openEditModal"
@@ -49,12 +49,12 @@ definePageMeta({
 
 const store = useAdminStore()
 
-const { selectedYearId, classesLoading } = storeToRefs(store)
+const { selectedYearId, studentClassesLoading } = storeToRefs(store)
 
-const classes = ref<Class[]>([])
+const studentClasses = ref<StudentClass[]>([])
 
 onMounted(async () => {
-  classes.value = await store.fetchClasses()
+  studentClasses.value = await store.fetchStudentClasses()
 })
 
 const columns = [{ key: 'name' }, { key: 'actions' }]
@@ -73,13 +73,13 @@ const openAddModal = () => {
   addModalOpen.value = true
 }
 
-const addRow = (row: Class) => {
+const addRow = (row: StudentClass) => {
   axios
-    .post(`http://localhost:3001/api/classes/${selectedYearId.value}`, {
+    .post(`http://localhost:3001/api/student-classes/${selectedYearId.value}`, {
       name: row.name,
     })
     .then((response) => {
-      classes.value.push({ id: response.data.id, name: row.name })
+      studentClasses.value.push({ id: response.data.id, name: row.name })
       addModalOpen.value = false
     })
     .catch((error) => {
@@ -103,21 +103,21 @@ const editFormData = ref({
   name: '',
 })
 
-const openEditModal = (row: Class) => {
+const openEditModal = (row: StudentClass) => {
   editFormData.value = { id: row.id, name: row.name }
   errorMessage.value = ''
   editModalOpen.value = true
 }
 
-const editRow = async (row: Class) => {
+const editRow = async (row: StudentClass) => {
   await axios
-    .patch(`http://localhost:3001/api/classes/${row.id}`, {
+    .patch(`http://localhost:3001/api/student-classes/${row.id}`, {
       name: row.name,
     })
     .then(() => {
-      const index = classes.value.findIndex((item) => item.id === row.id)
+      const index = studentClasses.value.findIndex((item) => item.id === row.id)
       if (index !== -1) {
-        Object.assign(classes.value[index], row)
+        Object.assign(studentClasses.value[index], row)
       }
       editModalOpen.value = false
     })
@@ -142,7 +142,7 @@ const removeFormData = ref({
   name: '',
 })
 
-const openRemoveModal = (row: Class) => {
+const openRemoveModal = (row: StudentClass) => {
   removeFormData.value = { id: row.id, name: row.name }
   errorMessage.value = ''
   removeModalOpen.value = true
@@ -150,11 +150,11 @@ const openRemoveModal = (row: Class) => {
 
 const removeRow = async (id: number) => {
   await axios
-    .delete(`http://localhost:3001/api/classes/${id}`)
+    .delete(`http://localhost:3001/api/student-classes/${id}`)
     .then(() => {
-      const index = classes.value.findIndex((item) => item.id === id)
+      const index = studentClasses.value.findIndex((item) => item.id === id)
       if (index !== -1) {
-        classes.value.splice(index, 1)
+        studentClasses.value.splice(index, 1)
       }
       removeModalOpen.value = false
     })

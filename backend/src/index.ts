@@ -193,7 +193,7 @@ app.delete('/api/rooms/:id', (req, res) => {
     )
 })
 
-app.get('/api/classes/:yearId', (req, res) => {
+app.get('/api/student-classes/:yearId', (req, res) => {
   prisma.studentClass
     .findMany({ where: { yearId: Number(req.params.yearId) } })
     .then((studentClasses) => res.json(studentClasses))
@@ -204,7 +204,7 @@ app.get('/api/classes/:yearId', (req, res) => {
     )
 })
 
-app.post('/api/classes/:yearId', async (req, res) => {
+app.post('/api/student-classes/:yearId', async (req, res) => {
   const { name } = req.body
 
   if (!name) {
@@ -237,7 +237,7 @@ app.post('/api/classes/:yearId', async (req, res) => {
     )
 })
 
-app.patch('/api/classes/:id', (req, res) => {
+app.patch('/api/student-classes/:id', (req, res) => {
   const { name } = req.body
 
   if (!name) {
@@ -263,7 +263,7 @@ app.patch('/api/classes/:id', (req, res) => {
     )
 })
 
-app.delete('/api/classes/:id', (req, res) => {
+app.delete('/api/student-classes/:id', (req, res) => {
   prisma.studentClass
     .delete({ where: { id: Number(req.params.id) } })
     .then(() => res.json({ message: 'Student class deleted successfully' }))
@@ -280,6 +280,50 @@ app.get('/api/teachers/:yearId', (_req, res) => {
     .then((teachers) => res.json(teachers))
     .catch((err) =>
       res.status(500).json({ error: err.message || 'Error fetching teachers' })
+    )
+})
+
+app.post('/api/temp/:yearId', async (req, res) => {
+  const {
+    term,
+    period,
+    day,
+    startTime,
+    endTime,
+    alternating,
+    split,
+    studentClassId,
+    subjectTeacherId,
+    roomId,
+  } = req.body
+
+  prisma.timetableElement
+    .create({
+      data: {
+        term,
+        period,
+        day,
+        startTime,
+        endTime,
+        alternating,
+        split,
+        yearId: Number(req.params.yearId),
+        studentClassId,
+        subjectTeacherId,
+        roomId,
+      },
+    })
+    .then((newTimetableElement) =>
+      res.json({
+        message: 'Timetable element added successfully',
+        id: newTimetableElement.id,
+        whole: newTimetableElement,
+      })
+    )
+    .catch((err) =>
+      res
+        .status(500)
+        .json({ error: err.message || 'Error adding timetable element' })
     )
 })
 

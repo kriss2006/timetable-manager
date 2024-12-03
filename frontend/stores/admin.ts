@@ -41,18 +41,20 @@ export const useAdminStore = defineStore('admin', () => {
     }
   }
 
-  const classesLoading = ref(true)
-  const fetchClasses = async (): Promise<Class[]> => {
+  const studentClassesLoading = ref(true)
+  const fetchStudentClasses = async (): Promise<StudentClass[]> => {
     if (selectedYearId.value > 0) {
       return axios
-        .get(`http://localhost:3001/api/classes/${selectedYearId.value}`)
+        .get(
+          `http://localhost:3001/api/student-classes/${selectedYearId.value}`
+        )
         .then((response) => response.data)
         .catch((err) => {
           console.error(err)
           return []
         })
         .finally(() => {
-          classesLoading.value = false
+          studentClassesLoading.value = false
         })
     } else {
       return []
@@ -88,7 +90,7 @@ export const useAdminStore = defineStore('admin', () => {
     fetchYears,
     roomsLoading,
     fetchRooms,
-    classesLoading,
-    fetchClasses,
+    studentClassesLoading,
+    fetchStudentClasses,
   }
 })
