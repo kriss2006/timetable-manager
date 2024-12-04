@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col items-center my-2 gap-4 max-w-1/2">
+  <div class="flex flex-col items-center my-2 gap-4">
     <USelectMenu
       v-model="selectedTerm"
       :options="[
@@ -7,40 +7,112 @@
         { value: 2, label: '2' },
       ]"
       placeholder="Select a term"
-      class="w-36"
+      :ui="{ base: 'w-36' }"
     />
 
     <USelectMenu
-      :loading="classesLoading"
+      :loading="studentClassesLoading"
       searchable
-      v-model="selectedClassId"
-      :options="classes"
+      v-model="selectedStudentClassId"
+      :options="studentClasses"
       placeholder="Select a class"
       value-attribute="id"
       option-attribute="name"
-      class="w-36"
+      :ui="{ base: 'w-36' }"
     />
 
-    <UTable :columns="columns"> </UTable>
+    <UTable
+      :columns="columns"
+      :rows="rows"
+      :ui="{
+        wrapper: 'w-3/4',
+        th: { base: 'text-center w-1/5' },
+        tr: { base: 'flex flex-row' },
+        td: { base: 'flex flex-col w-1/5' },
+      }"
+    >
+      <template #monday-data="{ column, row }">
+        <div v-for="period in row[column.key]" :key="period.id">
+          <TimetableElement
+            :period="period.number"
+            :start="period.start"
+            :end="period.end"
+            :name="period.subject"
+            :teacher="period.teacher"
+            :room="period.room"
+          />
+        </div>
+      </template>
+      <template #tuesday-data="{ column, row }">
+        <div v-for="period in row[column.key]" :key="period.id">
+          <TimetableElement
+            :period="period.number"
+            :start="period.start"
+            :end="period.end"
+            :name="period.subject"
+            :teacher="period.teacher"
+            :room="period.room"
+          />
+        </div>
+      </template>
+      <template #wednesday-data="{ column, row }">
+        <div v-for="period in row[column.key]" :key="period.id">
+          <TimetableElement
+            :period="period.number"
+            :start="period.start"
+            :end="period.end"
+            :name="period.subject"
+            :teacher="period.teacher"
+            :room="period.room"
+          />
+        </div>
+      </template>
+      <template #thursday-data="{ column, row }">
+        <div v-for="period in row[column.key]" :key="period.id">
+          <TimetableElement
+            :period="period.number"
+            :start="period.start"
+            :end="period.end"
+            :name="period.subject"
+            :teacher="period.teacher"
+            :room="period.room"
+          />
+        </div>
+      </template>
+      <template #friday-data="{ column, row }">
+        <div v-for="period in row[column.key]" :key="period.id">
+          <TimetableElement
+            :period="period.number"
+            :start="period.start"
+            :end="period.end"
+            :name="period.subject"
+            :teacher="period.teacher"
+            :room="period.room"
+          />
+        </div>
+      </template>
+    </UTable>
   </div>
 </template>
+
 <script setup lang="ts">
+import TimetableElement from '@/components/TimetableElement.vue'
+
 definePageMeta({
   middleware: ['admin'],
 })
 
 const selectedTerm = ref<1 | 2>()
 const store = useAdminStore()
+const { studentClassesLoading } = storeToRefs(store)
 
-const { classesLoading } = storeToRefs(store)
-
-const classes = ref<Class[]>([])
+const studentClasses = ref<StudentClass[]>([])
 
 onMounted(async () => {
-  classes.value = await store.fetchClasses()
+  studentClasses.value = await store.fetchStudentClasses()
 })
 
-const selectedClassId = ref<number>()
+const selectedStudentClassId = ref<number>()
 
 const columns = [
   {
@@ -64,4 +136,14 @@ const columns = [
     label: 'Friday',
   },
 ]
+
+const rows = ref([
+  {
+    monday: [],
+    tuesday: [],
+    wednesday: [],
+    thursday: [],
+    friday: [],
+  },
+])
 </script>
