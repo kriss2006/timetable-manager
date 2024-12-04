@@ -1,13 +1,19 @@
 <template>
-  <div class="timetable-element">
-    <div class="period-number">{{ timetableElement.period }}</div>
-    <div class="time">
+  <div class="border-2 p-2 rounded-lg text-center">
+    <h1 class="text-lg">{{ timetableElement.period }}.</h1>
+    <p>
       {{ timetableElement.startTime.toTimeString().slice(0, 5) }} -
       {{ timetableElement.endTime.toTimeString().slice(0, 5) }}
-    </div>
-    <div class="subject">{{ timetableElement.subject.name }}</div>
-    <div class="teacher">{{ timetableElement.teacher.name }}</div>
-    <div class="room">{{ timetableElement.room.name }}</div>
+    </p>
+    <p>
+      {{
+        timetableElement.subject.abbreviation ?? timetableElement.subject.name
+      }}
+    </p>
+    <p>
+      {{ timetableElement.teacher.initials ?? timetableElement.teacher.name }}
+    </p>
+    <p>{{ timetableElement.room.name }}</p>
   </div>
 </template>
 
@@ -16,25 +22,3 @@ defineProps<{
   timetableElement: TimetableElement
 }>()
 </script>
-
-<style scoped>
-.timetable-element {
-  border: 2px solid green;
-  padding: 8px;
-  margin: 4px;
-  border-radius: 8px;
-  text-align: center;
-  background-color: #000;
-  color: #0f0;
-}
-.period-number {
-  font-weight: bold;
-  font-size: 1.2rem;
-}
-.time,
-.subject,
-.teacher,
-.room {
-  font-size: 0.9rem;
-}
-</style>

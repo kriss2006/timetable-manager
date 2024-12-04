@@ -61,6 +61,20 @@ export const useAdminStore = defineStore('admin', () => {
     }
   }
 
+  const timetableElementsLoading = ref(true)
+  const fetchTimetableElements = async (
+    term: number | undefined,
+    studentClassId: number | undefined,
+    day: string
+  ): Promise<TimetableElement[]> => {
+    if (selectedYearId.value > 0 && term && studentClassId) {
+      timetableElementsLoading.value = false
+      return []
+    } else {
+      return []
+    }
+  }
+
   // const fetchTeachers = async (): Promise<Teacher[]> => {
   //   if (selectedYearId.value > 0) {
   //     try {
@@ -92,5 +106,7 @@ export const useAdminStore = defineStore('admin', () => {
     fetchRooms,
     studentClassesLoading,
     fetchStudentClasses,
+    timetableElementsLoading,
+    fetchTimetableElements,
   }
 })

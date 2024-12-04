@@ -22,6 +22,7 @@
     />
 
     <UTable
+      :loading="timetableElementsLoading"
       :columns="columns"
       :rows="rows"
       :ui="{
@@ -32,57 +33,44 @@
       }"
     >
       <template #monday-data="{ column, row }">
-        <div v-for="period in row[column.key]" :key="period.id">
-          <TimetableElement :timetable-element="period" />
-        </div>
+        <span v-if="row[column.key].length">
+          <span v-for="period in row[column.key]" :key="period.id">
+            <TimetableElement :timetable-element="period" />
+          </span>
+        </span>
+        <span v-else />
       </template>
       <template #tuesday-data="{ column, row }">
-        <div v-for="period in row[column.key]" :key="period.id">
-          <!-- <TimetableElement
-            :period="period.number"
-            :start="period.start"
-            :end="period.end"
-            :name="period.subject"
-            :teacher="period.teacher"
-            :room="period.room"
-          /> -->
-        </div>
+        <span v-if="row[column.key].length">
+          <span v-for="period in row[column.key]" :key="period.id">
+            <TimetableElement :timetable-element="period" />
+          </span>
+        </span>
+        <span v-else />
       </template>
       <template #wednesday-data="{ column, row }">
-        <div v-for="period in row[column.key]" :key="period.id">
-          <!-- <TimetableElement
-            :period="period.number"
-            :start="period.start"
-            :end="period.end"
-            :name="period.subject"
-            :teacher="period.teacher"
-            :room="period.room"
-          /> -->
-        </div>
+        <span v-if="row[column.key].length">
+          <span v-for="period in row[column.key]" :key="period.id">
+            <TimetableElement :timetable-element="period" />
+          </span>
+        </span>
+        <span v-else />
       </template>
       <template #thursday-data="{ column, row }">
-        <div v-for="period in row[column.key]" :key="period.id">
-          <!-- <TimetableElement
-            :period="period.number"
-            :start="period.start"
-            :end="period.end"
-            :name="period.subject"
-            :teacher="period.teacher"
-            :room="period.room"
-          /> -->
-        </div>
+        <span v-if="row[column.key].length">
+          <span v-for="period in row[column.key]" :key="period.id">
+            <TimetableElement :timetable-element="period" />
+          </span>
+        </span>
+        <span v-else />
       </template>
       <template #friday-data="{ column, row }">
-        <div v-for="period in row[column.key]" :key="period.id">
-          <!-- <TimetableElement
-            :period="period.number"
-            :start="period.start"
-            :end="period.end"
-            :name="period.subject"
-            :teacher="period.teacher"
-            :room="period.room"
-          /> -->
-        </div>
+        <span v-if="row[column.key].length">
+          <span v-for="period in row[column.key]" :key="period.id">
+            <TimetableElement :timetable-element="period" />
+          </span>
+        </span>
+        <span v-else />
       </template>
     </UTable>
   </div>
@@ -116,13 +104,35 @@ const timetableElements = ref<{
 }>({ monday: [], tuesday: [], wednesday: [], thursday: [], friday: [] })
 
 watchEffect(async () => {
-  console.log('zele')
   timetableElements.value.monday = await store.fetchTimetableElements(
     selectedTerm.value,
     selectedStudentClassId.value,
     'Monday'
   )
-  rows.value[0].monday = timetableElements.value.monday
+
+  timetableElements.value.tuesday = await store.fetchTimetableElements(
+    selectedTerm.value,
+    selectedStudentClassId.value,
+    'Tuesday'
+  )
+
+  timetableElements.value.wednesday = await store.fetchTimetableElements(
+    selectedTerm.value,
+    selectedStudentClassId.value,
+    'Wednesday'
+  )
+
+  timetableElements.value.thursday = await store.fetchTimetableElements(
+    selectedTerm.value,
+    selectedStudentClassId.value,
+    'Thursday'
+  )
+
+  timetableElements.value.friday = await store.fetchTimetableElements(
+    selectedTerm.value,
+    selectedStudentClassId.value,
+    'Friday'
+  )
 })
 const columns = [
   {
@@ -147,80 +157,5 @@ const columns = [
   },
 ]
 
-const rows = ref([
-  {
-    monday: timetableElements.value.monday,
-    tuesday: [
-      {
-        id: 1,
-        number: 1,
-        start: '08:00',
-        end: '08:40',
-        subject: 'Chemistry',
-        teacher: 'Alice Brown',
-        room: '103',
-      },
-      {
-        id: 2,
-        number: 2,
-        start: '08:50',
-        end: '09:30',
-        subject: 'Biology',
-        teacher: 'Mark Lee',
-        room: '104',
-      },
-      {
-        id: 2,
-        number: 2,
-        start: '08:50',
-        end: '09:30',
-        subject: 'Biology',
-        teacher: 'Mark Lee',
-        room: '104',
-      },
-      {
-        id: 2,
-        number: 2,
-        start: '08:50',
-        end: '09:30',
-        subject: 'Biology',
-        teacher: 'Mark Lee',
-        room: '104',
-      },
-    ],
-    wednesday: [
-      {
-        id: 3,
-        period: 1,
-        start: '05:10',
-        end: '05:20',
-        subject: 'something',
-        teacher: 'da',
-        room: 'ne',
-      },
-    ],
-    thursday: [
-      {
-        id: 3,
-        period: 1,
-        start: '05:10',
-        end: '05:20',
-        subject: 'something',
-        teacher: 'da',
-        room: 'ne',
-      },
-    ],
-    friday: [
-      {
-        id: 3,
-        period: 1,
-        start: '05:10',
-        end: '05:20',
-        subject: 'something',
-        teacher: 'da',
-        room: 'ne',
-      },
-    ],
-  },
-])
+const rows = ref([timetableElements.value])
 </script>
