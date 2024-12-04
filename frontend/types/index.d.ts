@@ -21,8 +21,8 @@ declare global {
   // For a year
   interface Subject {
     id: number
-    name: number
-    abbreviation: string
+    name: string
+    abbreviation?: string
     teachers: Teacher[]
   }
 

@@ -33,62 +33,55 @@
     >
       <template #monday-data="{ column, row }">
         <div v-for="period in row[column.key]" :key="period.id">
-          <TimetableElement
-            :period="period.number"
-            :start="period.start"
-            :end="period.end"
-            :name="period.subject"
-            :teacher="period.teacher"
-            :room="period.room"
-          />
+          <TimetableElement :timetable-element="period" />
         </div>
       </template>
       <template #tuesday-data="{ column, row }">
         <div v-for="period in row[column.key]" :key="period.id">
-          <TimetableElement
+          <!-- <TimetableElement
             :period="period.number"
             :start="period.start"
             :end="period.end"
             :name="period.subject"
             :teacher="period.teacher"
             :room="period.room"
-          />
+          /> -->
         </div>
       </template>
       <template #wednesday-data="{ column, row }">
         <div v-for="period in row[column.key]" :key="period.id">
-          <TimetableElement
+          <!-- <TimetableElement
             :period="period.number"
             :start="period.start"
             :end="period.end"
             :name="period.subject"
             :teacher="period.teacher"
             :room="period.room"
-          />
+          /> -->
         </div>
       </template>
       <template #thursday-data="{ column, row }">
         <div v-for="period in row[column.key]" :key="period.id">
-          <TimetableElement
+          <!-- <TimetableElement
             :period="period.number"
             :start="period.start"
             :end="period.end"
             :name="period.subject"
             :teacher="period.teacher"
             :room="period.room"
-          />
+          /> -->
         </div>
       </template>
       <template #friday-data="{ column, row }">
         <div v-for="period in row[column.key]" :key="period.id">
-          <TimetableElement
+          <!-- <TimetableElement
             :period="period.number"
             :start="period.start"
             :end="period.end"
             :name="period.subject"
             :teacher="period.teacher"
             :room="period.room"
-          />
+          /> -->
         </div>
       </template>
     </UTable>
@@ -104,7 +97,7 @@ definePageMeta({
 
 const selectedTerm = ref<1 | 2>()
 const store = useAdminStore()
-const { studentClassesLoading } = storeToRefs(store)
+const { studentClassesLoading, timetableElementsLoading } = storeToRefs(store)
 
 const studentClasses = ref<StudentClass[]>([])
 
@@ -114,6 +107,23 @@ onMounted(async () => {
 
 const selectedStudentClassId = ref<number>()
 
+const timetableElements = ref<{
+  monday: TimetableElement[]
+  tuesday: TimetableElement[]
+  wednesday: TimetableElement[]
+  thursday: TimetableElement[]
+  friday: TimetableElement[]
+}>({ monday: [], tuesday: [], wednesday: [], thursday: [], friday: [] })
+
+watchEffect(async () => {
+  console.log('zele')
+  timetableElements.value.monday = await store.fetchTimetableElements(
+    selectedTerm.value,
+    selectedStudentClassId.value,
+    'Monday'
+  )
+  rows.value[0].monday = timetableElements.value.monday
+})
 const columns = [
   {
     key: 'monday',
@@ -139,11 +149,78 @@ const columns = [
 
 const rows = ref([
   {
-    monday: [],
-    tuesday: [],
-    wednesday: [],
-    thursday: [],
-    friday: [],
+    monday: timetableElements.value.monday,
+    tuesday: [
+      {
+        id: 1,
+        number: 1,
+        start: '08:00',
+        end: '08:40',
+        subject: 'Chemistry',
+        teacher: 'Alice Brown',
+        room: '103',
+      },
+      {
+        id: 2,
+        number: 2,
+        start: '08:50',
+        end: '09:30',
+        subject: 'Biology',
+        teacher: 'Mark Lee',
+        room: '104',
+      },
+      {
+        id: 2,
+        number: 2,
+        start: '08:50',
+        end: '09:30',
+        subject: 'Biology',
+        teacher: 'Mark Lee',
+        room: '104',
+      },
+      {
+        id: 2,
+        number: 2,
+        start: '08:50',
+        end: '09:30',
+        subject: 'Biology',
+        teacher: 'Mark Lee',
+        room: '104',
+      },
+    ],
+    wednesday: [
+      {
+        id: 3,
+        period: 1,
+        start: '05:10',
+        end: '05:20',
+        subject: 'something',
+        teacher: 'da',
+        room: 'ne',
+      },
+    ],
+    thursday: [
+      {
+        id: 3,
+        period: 1,
+        start: '05:10',
+        end: '05:20',
+        subject: 'something',
+        teacher: 'da',
+        room: 'ne',
+      },
+    ],
+    friday: [
+      {
+        id: 3,
+        period: 1,
+        start: '05:10',
+        end: '05:20',
+        subject: 'something',
+        teacher: 'da',
+        room: 'ne',
+      },
+    ],
   },
 ])
 </script>
