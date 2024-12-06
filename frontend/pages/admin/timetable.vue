@@ -77,13 +77,11 @@
 </template>
 
 <script setup lang="ts">
-import TimetableElement from '@/components/TimetableElement.vue'
-
 definePageMeta({
   middleware: ['admin'],
 })
 
-const selectedTerm = ref<1 | 2>()
+const selectedTerm = ref<{ value: 1; label: '1' } | { value: 2; label: '2' }>()
 const store = useAdminStore()
 const { studentClassesLoading, timetableElementsLoading } = storeToRefs(store)
 
@@ -104,35 +102,38 @@ const timetableElements = ref<{
 }>({ monday: [], tuesday: [], wednesday: [], thursday: [], friday: [] })
 
 watchEffect(async () => {
-  timetableElements.value.monday = await store.fetchTimetableElements(
-    selectedTerm.value,
-    selectedStudentClassId.value,
-    'Monday'
-  )
+  if (selectedTerm.value && selectedStudentClassId.value) {
+    timetableElements.value.monday = await store.fetchTimetableElements(
+      selectedTerm.value.value,
+      selectedStudentClassId.value,
+      'Monday'
+    )
 
-  timetableElements.value.tuesday = await store.fetchTimetableElements(
-    selectedTerm.value,
-    selectedStudentClassId.value,
-    'Tuesday'
-  )
+    timetableElements.value.tuesday = await store.fetchTimetableElements(
+      selectedTerm.value.value,
+      selectedStudentClassId.value,
+      'Tuesday'
+    )
 
-  timetableElements.value.wednesday = await store.fetchTimetableElements(
-    selectedTerm.value,
-    selectedStudentClassId.value,
-    'Wednesday'
-  )
+    timetableElements.value.wednesday = await store.fetchTimetableElements(
+      selectedTerm.value.value,
+      selectedStudentClassId.value,
+      'Wednesday'
+    )
 
-  timetableElements.value.thursday = await store.fetchTimetableElements(
-    selectedTerm.value,
-    selectedStudentClassId.value,
-    'Thursday'
-  )
+    timetableElements.value.thursday = await store.fetchTimetableElements(
+      selectedTerm.value.value,
+      selectedStudentClassId.value,
+      'Thursday'
+    )
 
-  timetableElements.value.friday = await store.fetchTimetableElements(
-    selectedTerm.value,
-    selectedStudentClassId.value,
-    'Friday'
-  )
+    timetableElements.value.friday = await store.fetchTimetableElements(
+      selectedTerm.value.value,
+      selectedStudentClassId.value,
+      'Friday'
+    )
+    console.info(typeof timetableElements.value.monday[0].startTime)
+  }
 })
 const columns = [
   {

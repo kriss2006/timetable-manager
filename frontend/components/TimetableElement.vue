@@ -1,17 +1,21 @@
 <template>
-  <div class="border-2 p-2 rounded-lg text-center">
+  <div class="border-2 p-2 my-1 rounded-lg text-center">
     <h1 class="text-lg">{{ timetableElement.period }}.</h1>
     <p>
-      {{ timetableElement.startTime.toTimeString().slice(0, 5) }} -
-      {{ timetableElement.endTime.toTimeString().slice(0, 5) }}
+      {{ timetableElement.startTime.toISOString().slice(11, 16) }} -
+      {{ timetableElement.endTime.toISOString().slice(11, 16) }}
     </p>
     <p>
       {{
-        timetableElement.subject.abbreviation ?? timetableElement.subject.name
+        timetableElement.subjectTeacher.subject.abbreviation ??
+        timetableElement.subjectTeacher.subject.name
       }}
     </p>
     <p>
-      {{ timetableElement.teacher.initials ?? timetableElement.teacher.name }}
+      {{
+        timetableElement.subjectTeacher.teacher.initials ??
+        timetableElement.subjectTeacher.teacher.name
+      }}
     </p>
     <p>{{ timetableElement.room.name }}</p>
   </div>

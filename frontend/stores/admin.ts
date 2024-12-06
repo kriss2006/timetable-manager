@@ -68,8 +68,24 @@ export const useAdminStore = defineStore('admin', () => {
     day: string
   ): Promise<TimetableElement[]> => {
     if (selectedYearId.value > 0 && term && studentClassId) {
-      timetableElementsLoading.value = false
-      return []
+      return axios
+        .get<TimetableElement[]>(
+          `http://localhost:3001/api/timetable-elements/${selectedYearId.value}/${term}/${studentClassId}/${day}`
+        )
+        .then((response) =>
+          response.data.map(({ startTime, endTime, ...rest }) => ({
+            ...rest,
+            startTime: new Date(startTime),
+            endTime: new Date(endTime),
+          }))
+        )
+        .catch((err) => {
+          console.error(err)
+          return []
+        })
+        .finally(() => {
+          timetableElementsLoading.value = false
+        })
     } else {
       return []
     }

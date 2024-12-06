@@ -4,7 +4,7 @@ import cors from 'cors'
 import dotenv from 'dotenv'
 import jwt from 'jsonwebtoken'
 
-import { PrismaClient } from '@prisma/client'
+import { UserType, Day, PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
@@ -283,49 +283,100 @@ app.get('/api/teachers/:yearId', (_req, res) => {
     )
 })
 
-app.post('/api/temp/:yearId', async (req, res) => {
-  const {
-    term,
-    period,
-    day,
-    startTime,
-    endTime,
-    alternating,
-    split,
-    studentClassId,
-    subjectTeacherId,
-    roomId,
-  } = req.body
-
-  prisma.timetableElement
-    .create({
-      data: {
-        term,
-        period,
-        day,
-        startTime,
-        endTime,
-        alternating,
-        split,
-        yearId: Number(req.params.yearId),
-        studentClassId,
-        subjectTeacherId,
-        roomId,
-      },
-    })
-    .then((newTimetableElement) =>
-      res.json({
-        message: 'Timetable element added successfully',
-        id: newTimetableElement.id,
-        whole: newTimetableElement,
+app.get(
+  '/api/timetable-elements/:yearId/:term/:studentClassId/:day',
+  (req, res) => {
+    prisma.timetableElement
+      .findMany({
+        where: {
+          yearId: Number(req.params.yearId),
+          term: Number(req.params.term),
+          studentClassId: Number(req.params.studentClassId),
+          day: req.params.day as Day,
+        },
+        include: {
+          subjectTeacher: {
+            include: {
+              subject: true,
+              teacher: true,
+            },
+          },
+          room: true,
+          evenWeekSubjectTeacher: {
+            include: {
+              subject: true,
+              teacher: true,
+            },
+          },
+          evenWeekRoom: true,
+          group2SubjectTeacher: {
+            include: {
+              subject: true,
+              teacher: true,
+            },
+          },
+          group2Room: true,
+        },
       })
-    )
-    .catch((err) =>
-      res
-        .status(500)
-        .json({ error: err.message || 'Error adding timetable element' })
-    )
-})
+      .then((timetableElements) => res.json(timetableElements))
+      .catch((err) =>
+        res
+          .status(500)
+          .json({ error: err.message || 'Error fetching timetable elements' })
+      )
+  }
+)
+
+app.post(
+  '/api/timetable-elements/:yearId/:term/:studentClassId/:day',
+  async (req, res) => {
+    const {
+      period,
+      startTime,
+      endTime,
+      alternating,
+      split,
+      subjectTeacherId,
+      roomId,
+      evenWeekSubjectTeacherId,
+      evenWeekRoomId,
+      group2SubjectTeacherId,
+      group2RoomId,
+    } = req.body
+
+    prisma.timetableElement
+      .create({
+        data: {
+          term: Number(req.params.term),
+          period,
+          day: req.params.day as Day,
+          startTime,
+          endTime,
+          alternating,
+          split,
+          yearId: Number(req.params.yearId),
+          studentClassId: Number(req.params.studentClassId),
+          subjectTeacherId,
+          roomId,
+          evenWeekSubjectTeacherId,
+          evenWeekRoomId,
+          group2SubjectTeacherId,
+          group2RoomId,
+        },
+      })
+      .then((newTimetableElement) =>
+        res.json({
+          message: 'Timetable element added successfully',
+          id: newTimetableElement.id,
+        })
+      )
+      .catch((err) =>
+        res
+          .status(500)
+          .json({ error: err.message || 'Error adding timetable element' })
+      )
+  }
+)
 
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`))

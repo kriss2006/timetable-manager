@@ -12,7 +12,7 @@ declare global {
     name: string
   }
 
-  // For an year
+  // For a year
   interface StudentClass {
     id: number
     name: string
@@ -41,14 +41,20 @@ declare global {
     endTime: Date
     alternating: boolean
     split: boolean
-    subject: Subject
-    teacher: Teacher
+    subjectTeacher: {
+      subject: Subject
+      teacher: Teacher
+    }
     room: Room
-    evenWeekSubject?: Subject
-    evenWeekTeacher?: Teacher
+    evenWeekSubjectTeacher?: {
+      subject: Subject
+      teacher: Teacher
+    }
     evenWeekRoom?: Room
-    week2Subject?: Subject
-    week2Teacher?: Teacher
-    week2Room?: Room
+    group2SubjectTeacher?: {
+      subject: Subject
+      teacher: Teacher
+    }
+    group2Room?: Room
   }
 }
