@@ -12,7 +12,7 @@ const store = useAdminStore()
 const classes = ref<StudentClass[]>([])
 
 onMounted(async () => {
-  const resultClasses = await store.fetchClasses()
+  const resultClasses = await store.fetchStudentClasses()
   if (resultClasses) {
     classes.value = resultClasses
   }

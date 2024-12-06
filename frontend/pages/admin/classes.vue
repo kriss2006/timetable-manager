@@ -44,6 +44,7 @@
 import axios from 'axios'
 
 definePageMeta({
+  layout: 'admin',
   middleware: ['admin'],
 })
 
@@ -85,15 +86,7 @@ const addRow = (row: StudentClass) => {
     .catch((error) => {
       if (error.response) {
         errorMessage.value = error.response.data.error
-        // console.error(error.response.data)
-        // console.error(error.response.status)
-        // console.error(error.response.headers)
-      } else if (error.request) {
-        // console.error(error.request)
-      } else {
-        // console.error('Error', error.message)
       }
-      // console.error(error.config)
     })
 }
 
@@ -124,15 +117,7 @@ const editRow = async (row: StudentClass) => {
     .catch((error) => {
       if (error.response) {
         errorMessage.value = error.response.data.error
-        // console.error(error.response.data)
-        // console.error(error.response.status)
-        // console.error(error.response.headers)
-      } else if (error.request) {
-        // console.error(error.request)
-      } else {
-        // console.error('Error', error.message)
       }
-      // console.error(error.config)
     })
 }
 
@@ -161,15 +146,7 @@ const removeRow = async (id: number) => {
     .catch((error) => {
       if (error.response) {
         errorMessage.value = error.response.data.error
-        // console.error(error.response.data)
-        // console.error(error.response.status)
-        // console.error(error.response.headers)
-      } else if (error.request) {
-        // console.error(error.request)
-      } else {
-        // console.error('Error', error.message)
       }
-      // console.error(error.config)
     })
 }
 </script>
