@@ -23,14 +23,12 @@ declare global {
     id: number
     name: string
     abbreviation?: string
-    teachers: Teacher[]
   }
 
   interface Teacher {
     id: number
     name: string
     initials: string
-    subjects: Subject[]
   }
 
   // For a year, term, student class and day
@@ -41,17 +39,17 @@ declare global {
     endTime: Date
     alternating: boolean
     split: boolean
-    subjectTeacher: {
+    studentClassSubjectTeacher: {
       subject: Subject
       teacher: Teacher
     }
     room: Room
-    evenWeekSubjectTeacher?: {
+    evenWeekStudentClassSubjectTeacher?: {
       subject: Subject
       teacher: Teacher
     }
     evenWeekRoom?: Room
-    group2SubjectTeacher?: {
+    group2StudentClassSubjectTeacher?: {
       subject: Subject
       teacher: Teacher
     }
