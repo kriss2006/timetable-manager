@@ -378,5 +378,28 @@ app.post(
   }
 )
 
+app.get(
+  '/api/available-timetable-elements/:yearId/:studentClassId',
+  (req, res) => {
+    prisma.studentClassSubjectTeacher
+      .findMany({
+        where: {
+          yearId: Number(req.params.yearId),
+          studentClassId: Number(req.params.studentClassId),
+        },
+        include: {
+          subject: true,
+          teacher: true,
+        },
+      })
+      .then((timetableElements) => res.json(timetableElements))
+      .catch((err) =>
+        res.status(500).json({
+          error: err.message || 'Error fetching available timetable elements',
+        })
+      )
+  }
+)
+
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`))

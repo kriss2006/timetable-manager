@@ -6,7 +6,7 @@ declare global {
     name: string
   }
 
-  // For an year
+  // For a year
   interface Room {
     id: number
     name: string
@@ -31,7 +31,7 @@ declare global {
     initials: string
   }
 
-  // For a year, term, student class and day
+  // For a year, a term, a student class and a day
   interface TimetableElement {
     id: number
     period: number
@@ -54,5 +54,13 @@ declare global {
       teacher: Teacher
     }
     group2Room?: Room
+  }
+
+  // For a year and a class
+  interface AvailableTimetableElement {
+    id: number
+    classesPerWeek: number
+    subject: Subject
+    teacher: Teacher
   }
 }

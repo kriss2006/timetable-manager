@@ -7,14 +7,14 @@
     </p>
     <p>
       {{
-        timetableElement.subjectTeacher.subject.abbreviation ??
-        timetableElement.subjectTeacher.subject.name
+        timetableElement.studentClassSubjectTeacher.subject.abbreviation ??
+        timetableElement.studentClassSubjectTeacher.subject.name
       }}
     </p>
     <p>
       {{
-        timetableElement.subjectTeacher.teacher.initials ??
-        timetableElement.subjectTeacher.teacher.name
+        timetableElement.studentClassSubjectTeacher.teacher.initials ??
+        timetableElement.studentClassSubjectTeacher.teacher.name
       }}
     </p>
     <p>{{ timetableElement.room.name }}</p>
