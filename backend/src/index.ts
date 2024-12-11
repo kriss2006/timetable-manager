@@ -295,21 +295,21 @@ app.get(
           day: req.params.day as Day,
         },
         include: {
-          subjectTeacher: {
+          studentClassSubjectTeacher: {
             include: {
               subject: true,
               teacher: true,
             },
           },
           room: true,
-          evenWeekSubjectTeacher: {
+          evenWeekStudentClassSubjectTeacher: {
             include: {
               subject: true,
               teacher: true,
             },
           },
           evenWeekRoom: true,
-          group2SubjectTeacher: {
+          group2StudentClassSubjectTeacher: {
             include: {
               subject: true,
               teacher: true,
@@ -336,11 +336,11 @@ app.post(
       endTime,
       alternating,
       split,
-      subjectTeacherId,
+      studentClassSubjectTeacherId,
       roomId,
-      evenWeekSubjectTeacherId,
+      evenWeekStudentClassSubjectTeacherId,
       evenWeekRoomId,
-      group2SubjectTeacherId,
+      group2StudentClassSubjectTeacherId,
       group2RoomId,
     } = req.body
 
@@ -348,19 +348,19 @@ app.post(
       .create({
         data: {
           term: Number(req.params.term),
-          period,
           day: req.params.day as Day,
+          period,
           startTime,
           endTime,
           alternating,
           split,
           yearId: Number(req.params.yearId),
           studentClassId: Number(req.params.studentClassId),
-          subjectTeacherId,
+          studentClassSubjectTeacherId,
           roomId,
-          evenWeekSubjectTeacherId,
+          evenWeekStudentClassSubjectTeacherId,
           evenWeekRoomId,
-          group2SubjectTeacherId,
+          group2StudentClassSubjectTeacherId,
           group2RoomId,
         },
       })
