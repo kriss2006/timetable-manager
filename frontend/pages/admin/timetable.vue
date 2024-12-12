@@ -34,45 +34,55 @@
       >
         <template #monday-data="{ column, row }">
           <span v-if="row[column.key].length">
-            <span v-for="period in row[column.key]" :key="period.id">
-              <TimetableElement :timetable-element="period" />
-            </span>
+            <TimetableElement
+              v-for="element in row[column.key]"
+              :key="element.id"
+              :timetable-element="element"
+            />
             <!-- <AddElement @on:click="addElement('Monday')" /> -->
           </span>
           <span v-else />
         </template>
         <template #tuesday-data="{ column, row }">
           <span v-if="row[column.key].length">
-            <span v-for="period in row[column.key]" :key="period.id">
-              <TimetableElement :timetable-element="period" />
-            </span>
+            <TimetableElement
+              v-for="element in row[column.key]"
+              :key="element.id"
+              :timetable-element="element"
+            />
             <!-- <AddElement @on:click="addElement('Tuesday')" /> -->
           </span>
           <span v-else />
         </template>
         <template #wednesday-data="{ column, row }">
           <span v-if="row[column.key].length">
-            <span v-for="period in row[column.key]" :key="period.id">
-              <TimetableElement :timetable-element="period" />
-            </span>
+            <TimetableElement
+              v-for="element in row[column.key]"
+              :key="element.id"
+              :timetable-element="element"
+            />
             <!-- <AddElement @on:click="addElement('Wednesday')" /> -->
           </span>
           <span v-else />
         </template>
         <template #thursday-data="{ column, row }">
           <span v-if="row[column.key].length">
-            <span v-for="period in row[column.key]" :key="period.id">
-              <TimetableElement :timetable-element="period" />
-            </span>
+            <TimetableElement
+              v-for="element in row[column.key]"
+              :key="element.id"
+              :timetable-element="element"
+            />
             <!-- <AddElement @on:click="addElement('Thursday')" /> -->
           </span>
           <span v-else />
         </template>
         <template #friday-data="{ column, row }">
           <span v-if="row[column.key].length">
-            <span v-for="period in row[column.key]" :key="period.id">
-              <TimetableElement :timetable-element="period" />
-            </span>
+            <TimetableElement
+              v-for="element in row[column.key]"
+              :key="element.id"
+              :timetable-element="element"
+            />
             <!-- <AddElement @on:click="addElement('Friday')" /> -->
           </span>
           <span v-else />
@@ -91,7 +101,7 @@
 </template>
 
 <script setup lang="ts">
-import axios from 'axios'
+// import axios from 'axios'
 
 definePageMeta({
   layout: 'admin',
