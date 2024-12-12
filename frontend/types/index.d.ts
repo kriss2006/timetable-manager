@@ -63,4 +63,19 @@ declare global {
     subject: Subject
     teacher: Teacher
   }
+
+  // enum UserType {
+  //   student = 'student',
+  //   teacher = 'teacher',
+  //   admin = 'admin',
+  //   super_admin = 'superAdmin',
+  // }
+
+  // enum Day {
+  //   Monday = 'Monday',
+  //   Tuesday = 'Tuesday',
+  //   Wednesday = 'Wednesday',
+  //   Thursday = 'Thursday',
+  //   Friday = 'Friday',
+  // }
 }

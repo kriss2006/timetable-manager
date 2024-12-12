@@ -91,6 +91,27 @@ export const useAdminStore = defineStore('admin', () => {
     }
   }
 
+  const availableTimetableElementsLoading = ref(true)
+  const fetchAvailableTimetableElements = async (
+    studentClassId: number | undefined
+  ): Promise<AvailableTimetableElement[]> => {
+    if (selectedYearId.value > 0 && studentClassId) {
+      return axios
+        .get<AvailableTimetableElement[]>(
+          `http://localhost:3001/api/available-timetable-elements/${selectedYearId.value}/${studentClassId}`
+        )
+        .then((response) => response.data)
+        .catch((err) => {
+          console.error(err)
+          return []
+        })
+        .finally(() => {
+          availableTimetableElementsLoading.value = false
+        })
+    } else {
+      return []
+    }
+  }
   // const fetchTeachers = async (): Promise<Teacher[]> => {
   //   if (selectedYearId.value > 0) {
   //     try {
@@ -124,5 +145,7 @@ export const useAdminStore = defineStore('admin', () => {
     fetchStudentClasses,
     timetableElementsLoading,
     fetchTimetableElements,
+    availableTimetableElementsLoading,
+    fetchAvailableTimetableElements,
   }
 })

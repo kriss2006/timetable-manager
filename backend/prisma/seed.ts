@@ -296,7 +296,7 @@ async function main() {
   await prisma.timetableElement.create({
     data: {
       term: 1,
-      period: 3,
+      period: 4,
       day: 'Monday',
       startTime: '1970-01-01T10:10:00.000Z',
       endTime: '1970-01-01T10:50:00.000Z',
