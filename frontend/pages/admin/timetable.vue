@@ -37,7 +37,7 @@
             <span v-for="period in row[column.key]" :key="period.id">
               <TimetableElement :timetable-element="period" />
             </span>
-            <AddElement @on:click="addElement('Monday')" />
+            <!-- <AddElement @on:click="addElement('Monday')" /> -->
           </span>
           <span v-else />
         </template>
@@ -46,7 +46,7 @@
             <span v-for="period in row[column.key]" :key="period.id">
               <TimetableElement :timetable-element="period" />
             </span>
-            <AddElement @on:click="addElement('Tuesday')" />
+            <!-- <AddElement @on:click="addElement('Tuesday')" /> -->
           </span>
           <span v-else />
         </template>
@@ -55,7 +55,7 @@
             <span v-for="period in row[column.key]" :key="period.id">
               <TimetableElement :timetable-element="period" />
             </span>
-            <AddElement @on:click="addElement('Wednesday')" />
+            <!-- <AddElement @on:click="addElement('Wednesday')" /> -->
           </span>
           <span v-else />
         </template>
@@ -64,7 +64,7 @@
             <span v-for="period in row[column.key]" :key="period.id">
               <TimetableElement :timetable-element="period" />
             </span>
-            <AddElement @on:click="addElement('Thursday')" />
+            <!-- <AddElement @on:click="addElement('Thursday')" /> -->
           </span>
           <span v-else />
         </template>
@@ -73,7 +73,7 @@
             <span v-for="period in row[column.key]" :key="period.id">
               <TimetableElement :timetable-element="period" />
             </span>
-            <AddElement @on:click="addElement('Friday')" />
+            <!-- <AddElement @on:click="addElement('Friday')" /> -->
           </span>
           <span v-else />
         </template>
