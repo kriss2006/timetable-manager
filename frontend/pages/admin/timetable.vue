@@ -33,14 +33,20 @@
         }"
       >
         <template #monday-data="{ column, row }">
-          <span v-if="row[column.key].length">
-            <TimetableElement
-              v-for="element in row[column.key]"
-              :key="element.id"
-              :timetable-element="element"
-            />
+          <draggable
+            v-if="row[column.key].length"
+            :list="row[column.key]"
+            item-key="id"
+            group="timetable"
+          >
+            <template #item="{ element }">
+              <TimetableElement
+                :timetable-element="element"
+                :key="element.id"
+              />
+            </template>
             <!-- <AddElement @on:click="addElement('Monday')" /> -->
-          </span>
+          </draggable>
           <span v-else />
         </template>
         <template #tuesday-data="{ column, row }">
@@ -102,7 +108,8 @@
 
 <script setup lang="ts">
 // import axios from 'axios'
-
+import draggable from 'vuedraggable'
+const list = ref(['neshto', 'oshte neshto', 'treto neshto'])
 definePageMeta({
   layout: 'admin',
   middleware: ['admin'],
