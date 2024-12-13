@@ -33,12 +33,7 @@
         }"
       >
         <template #monday-data="{ column, row }">
-          <draggable
-            v-if="row[column.key].length"
-            :list="row[column.key]"
-            item-key="id"
-            group="timetable"
-          >
+          <draggable :list="row[column.key]" item-key="id" group="timetable">
             <template #item="{ element }">
               <TimetableElement
                 :timetable-element="element"
@@ -47,51 +42,50 @@
             </template>
             <!-- <AddElement @on:click="addElement('Monday')" /> -->
           </draggable>
-          <span v-else />
         </template>
         <template #tuesday-data="{ column, row }">
-          <span v-if="row[column.key].length">
-            <TimetableElement
-              v-for="element in row[column.key]"
-              :key="element.id"
-              :timetable-element="element"
-            />
+          <draggable :list="row[column.key]" item-key="id" group="timetable">
+            <template #item="{ element }">
+              <TimetableElement
+                :timetable-element="element"
+                :key="element.id"
+              />
+            </template>
             <!-- <AddElement @on:click="addElement('Tuesday')" /> -->
-          </span>
-          <span v-else />
+          </draggable>
         </template>
         <template #wednesday-data="{ column, row }">
-          <span v-if="row[column.key].length">
-            <TimetableElement
-              v-for="element in row[column.key]"
-              :key="element.id"
-              :timetable-element="element"
-            />
+          <draggable :list="row[column.key]" item-key="id" group="timetable">
+            <template #item="{ element }">
+              <TimetableElement
+                :timetable-element="element"
+                :key="element.id"
+              />
+            </template>
             <!-- <AddElement @on:click="addElement('Wednesday')" /> -->
-          </span>
-          <span v-else />
+          </draggable>
         </template>
         <template #thursday-data="{ column, row }">
-          <span v-if="row[column.key].length">
-            <TimetableElement
-              v-for="element in row[column.key]"
-              :key="element.id"
-              :timetable-element="element"
-            />
+          <draggable :list="row[column.key]" item-key="id" group="timetable">
+            <template #item="{ element }">
+              <TimetableElement
+                :timetable-element="element"
+                :key="element.id"
+              />
+            </template>
             <!-- <AddElement @on:click="addElement('Thursday')" /> -->
-          </span>
-          <span v-else />
+          </draggable>
         </template>
         <template #friday-data="{ column, row }">
-          <span v-if="row[column.key].length">
-            <TimetableElement
-              v-for="element in row[column.key]"
-              :key="element.id"
-              :timetable-element="element"
-            />
+          <draggable :list="row[column.key]" item-key="id" group="timetable">
+            <template #item="{ element }">
+              <TimetableElement
+                :timetable-element="element"
+                :key="element.id"
+              />
+            </template>
             <!-- <AddElement @on:click="addElement('Friday')" /> -->
-          </span>
-          <span v-else />
+          </draggable>
         </template>
       </UTable>
 
