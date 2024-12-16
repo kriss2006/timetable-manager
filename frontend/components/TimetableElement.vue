@@ -1,5 +1,8 @@
 <template>
-  <div class="border-2 p-2 my-1 rounded-lg text-center cursor-move">
+  <div
+    class="border-2 p-2 my-1 rounded-lg text-center cursor-move"
+    :class="{ 'border-red-500': isNaN(timetableElement.id) }"
+  >
     <h1 class="text-lg">{{ timetableElement.period }}.</h1>
     <p>
       {{ timetableElement.startTime.toISOString().slice(11, 16) }} -

@@ -22,22 +22,16 @@
     />
     <div class="flex w-full justify-center gap-10">
       <aside class="w-1/4">
-        <!-- <AvailableTimetableElement
-          v-for="element in timetableElements.available"
-          :key="element.id"
-          :element="element"
-        /> -->
         <draggable
           :list="timetableElements.available"
           item-key="id"
-          :group="{ name: 'available', pull: 'clone', put: false }"
+          :group="{ name: 'timetable', pull: 'clone', put: false }"
           :clone="cloneAvailableElement"
           @change="log"
         >
           <template #item="{ element }">
             <AvailableTimetableElement :key="element.id" :element="element" />
           </template>
-          <!-- <AddElement @on:click="addElement('Tuesday')" /> -->
         </draggable>
       </aside>
       <UTable
@@ -64,22 +58,21 @@
                 :timetable-element="element"
               />
             </template>
-            <!-- <AddElement @on:click="addElement('Monday')" /> -->
           </draggable>
         </template>
         <template #tuesday-data="{ column, row }">
           <draggable
             :list="row[column.key]"
             item-key="id"
-            group="{ name: 'timetable', pull: true, put: ['timetable', 'available'] }"
+            group="timetable"
+            @change="log"
           >
             <template #item="{ element }">
               <TimetableElement
-                :timetable-element="element"
                 :key="element.id"
+                :timetable-element="element"
               />
             </template>
-            <!-- <AddElement @on:click="addElement('Tuesday')" /> -->
           </draggable>
         </template>
         <template #wednesday-data="{ column, row }">
@@ -93,7 +86,7 @@
             <!-- <AddElement @on:click="addElement('Wednesday')" /> -->
           </draggable>
         </template>
-        <template #thursday-data="{ column, row }">
+        <!-- <template #thursday-data="{ column, row }">
           <draggable :list="row[column.key]" item-key="id" group="timetable">
             <template #item="{ element }">
               <TimetableElement
@@ -101,18 +94,35 @@
                 :key="element.id"
               />
             </template>
-            <!-- <AddElement @on:click="addElement('Thursday')" /> -->
+          </draggable>
+        </template> -->
+        <!-- <template #friday-data="{ column, row }">
+          <draggable :list="row[column.key]" item-key="id" group="timetable">
+            <template #item="{ element }">
+              <TimetableElement
+                :timetable-element="element"
+                :key="element.id"
+              />
+            </template>
+          </draggable>
+        </template> -->
+        <template #thursday-data>
+          <draggable
+            :list="list1"
+            :group="{ name: 'timetable2', pull: 'clone', put: false }"
+            :clone="clone"
+            @change="log"
+          >
+            <template #item="{ element }">
+              <div class="border p-2">{{ element.name }}</div>
+            </template>
           </draggable>
         </template>
-        <template #friday-data="{ column, row }">
-          <draggable :list="row[column.key]" item-key="id" group="timetable">
+        <template #friday-data>
+          <draggable :list="list2" group="timetable2" @change="log">
             <template #item="{ element }">
-              <TimetableElement
-                :timetable-element="element"
-                :key="element.id"
-              />
+              <div class="border p-2">{{ element.name }}</div>
             </template>
-            <!-- <AddElement @on:click="addElement('Friday')" /> -->
           </draggable>
         </template>
       </UTable>
@@ -123,7 +133,21 @@
 <script setup lang="ts">
 // import axios from 'axios'
 import draggable from 'vuedraggable'
-const list = ref(['neshto', 'oshte neshto', 'treto neshto'])
+const list1 = ref([
+  { id: 1, name: 'neshto' },
+  { id: 2, name: 'oshte neshto' },
+  { id: 3, name: 'treto neshto' },
+])
+
+const list2 = ref([
+  { id: 1, name: 'b a' },
+  { id: 2, name: 'b b' },
+  { id: 3, name: 'b v' },
+])
+
+const clone = (list: any) => {
+  return { id: list.id, name: `ZZZ ${list.name} ZZZ` }
+}
 definePageMeta({
   layout: 'admin',
   middleware: ['admin'],
