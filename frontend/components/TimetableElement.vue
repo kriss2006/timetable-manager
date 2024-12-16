@@ -1,5 +1,5 @@
 <template>
-  <div class="border-2 p-2 my-1 rounded-lg text-center">
+  <div class="border-2 p-2 my-1 rounded-lg text-center cursor-move">
     <h1 class="text-lg">{{ timetableElement.period }}.</h1>
     <p>
       {{ timetableElement.startTime.toISOString().slice(11, 16) }} -

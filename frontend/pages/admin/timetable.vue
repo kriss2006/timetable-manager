@@ -21,6 +21,25 @@
       :ui="{ base: 'w-36' }"
     />
     <div class="flex w-full justify-center gap-10">
+      <aside class="w-1/4">
+        <!-- <AvailableTimetableElement
+          v-for="element in timetableElements.available"
+          :key="element.id"
+          :element="element"
+        /> -->
+        <draggable
+          :list="timetableElements.available"
+          item-key="id"
+          :group="{ name: 'available', pull: 'clone', put: false }"
+          :clone="cloneAvailableElement"
+          @change="log"
+        >
+          <template #item="{ element }">
+            <AvailableTimetableElement :key="element.id" :element="element" />
+          </template>
+          <!-- <AddElement @on:click="addElement('Tuesday')" /> -->
+        </draggable>
+      </aside>
       <UTable
         :loading="timetableElementsLoading"
         :columns="columns"
@@ -33,18 +52,27 @@
         }"
       >
         <template #monday-data="{ column, row }">
-          <draggable :list="row[column.key]" item-key="id" group="timetable">
+          <draggable
+            :list="row[column.key]"
+            item-key="id"
+            group="timetable"
+            @change="log"
+          >
             <template #item="{ element }">
               <TimetableElement
-                :timetable-element="element"
                 :key="element.id"
+                :timetable-element="element"
               />
             </template>
             <!-- <AddElement @on:click="addElement('Monday')" /> -->
           </draggable>
         </template>
         <template #tuesday-data="{ column, row }">
-          <draggable :list="row[column.key]" item-key="id" group="timetable">
+          <draggable
+            :list="row[column.key]"
+            item-key="id"
+            group="{ name: 'timetable', pull: true, put: ['timetable', 'available'] }"
+          >
             <template #item="{ element }">
               <TimetableElement
                 :timetable-element="element"
@@ -88,14 +116,6 @@
           </draggable>
         </template>
       </UTable>
-
-      <aside class="w-1/4">
-        <AvailableTimetableElement
-          v-for="element in timetableElements.available"
-          :key="element.id"
-          :element="element"
-        />
-      </aside>
     </div>
   </div>
 </template>
@@ -199,6 +219,27 @@ const columns = [
 
 const rows = ref([timetableElements.value])
 
+function cloneAvailableElement(
+  element: AvailableTimetableElement
+): TimetableElement {
+  return {
+    id: NaN,
+    period: NaN,
+    startTime: new Date('1970-01-01T00:00:00.000Z'),
+    endTime: new Date('1970-01-01T00:00:00.000Z'),
+    alternating: false,
+    split: false,
+    studentClassSubjectTeacher: {
+      subject: element.subject,
+      teacher: element.teacher,
+    },
+    room: { id: NaN, name: 'Placeholder Room' },
+  }
+}
+
+function log() {
+  console.log('zele')
+}
 // const addElement = (day: string) => {
 //   axios
 //     .post(
