@@ -27,7 +27,6 @@
           item-key="id"
           :group="{ name: 'timetable', pull: 'clone', put: false }"
           :clone="cloneAvailableElement"
-          @change="log"
         >
           <template #item="{ element }">
             <AvailableTimetableElement :key="element.id" :element="element" />
@@ -48,9 +47,8 @@
         <template #monday-data="{ column, row }">
           <draggable
             :list="row[column.key]"
-            item-key="id"
             group="timetable"
-            @change="log"
+            @change="onColumnUpdate"
           >
             <template #item="{ element }">
               <TimetableElement
@@ -63,9 +61,8 @@
         <template #tuesday-data="{ column, row }">
           <draggable
             :list="row[column.key]"
-            item-key="id"
             group="timetable"
-            @change="log"
+            @change="onColumnUpdate"
           >
             <template #item="{ element }">
               <TimetableElement
@@ -76,14 +73,17 @@
           </draggable>
         </template>
         <template #wednesday-data="{ column, row }">
-          <draggable :list="row[column.key]" item-key="id" group="timetable">
+          <draggable
+            :list="row[column.key]"
+            group="timetable"
+            @change="onColumnUpdate"
+          >
             <template #item="{ element }">
               <TimetableElement
-                :timetable-element="element"
                 :key="element.id"
+                :timetable-element="element"
               />
             </template>
-            <!-- <AddElement @on:click="addElement('Wednesday')" /> -->
           </draggable>
         </template>
         <!-- <template #thursday-data="{ column, row }">
@@ -111,7 +111,7 @@
             :list="list1"
             :group="{ name: 'timetable2', pull: 'clone', put: false }"
             :clone="clone"
-            @change="log"
+            @change="onColumnUpdate"
           >
             <template #item="{ element }">
               <div class="border p-2">{{ element.name }}</div>
@@ -119,7 +119,7 @@
           </draggable>
         </template>
         <template #friday-data>
-          <draggable :list="list2" group="timetable2" @change="log">
+          <draggable :list="list2" group="timetable2" @change="onColumnUpdate">
             <template #item="{ element }">
               <div class="border p-2">{{ element.name }}</div>
             </template>
@@ -261,8 +261,14 @@ function cloneAvailableElement(
   }
 }
 
-function log() {
-  console.log('zele')
+function onColumnUpdate() {
+  const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'] as const
+
+  days.forEach((day) => {
+    timetableElements.value[day].forEach((element, index) => {
+      element.period = index + 1
+    })
+  })
 }
 // const addElement = (day: string) => {
 //   axios
