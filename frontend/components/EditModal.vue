@@ -4,7 +4,7 @@
       <h2 class="text-xl font-semibold">Edit</h2>
       <template v-for="(_value, key) in formData" :key="String(key)">
         <UInput
-          v-if="!hiddenColumns.includes(String(key))"
+          v-if="!hiddenColumns || !hiddenColumns.includes(String(key))"
           v-model="formData[String(key)]"
           :placeholder="`Enter ${String(key)}`"
         />
@@ -18,10 +18,14 @@
   </UModal>
 </template>
 
-<script setup lang="ts" generic="T extends Record<string, number | string>">
+<script
+  setup
+  lang="ts"
+  generic="T extends Record<string, number | string | Date | Object>"
+>
 const props = defineProps<{
   open: boolean
-  hiddenColumns: string[]
+  hiddenColumns?: string[]
   row: T
   errorMessage: string
 }>()

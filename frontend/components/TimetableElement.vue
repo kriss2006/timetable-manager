@@ -1,31 +1,39 @@
 <template>
   <div
     class="border-2 p-2 my-1 rounded-lg text-center cursor-move"
-    :class="{ 'border-red-500': isNaN(timetableElement.id) }"
+    :class="{ 'border-red-500': isNaN(element.id) }"
   >
-    <h1 class="text-lg">{{ timetableElement.period }}.</h1>
+    <h1 class="text-lg">{{ element.period }}.</h1>
     <p>
-      {{ timetableElement.startTime.toISOString().slice(11, 16) }} -
-      {{ timetableElement.endTime.toISOString().slice(11, 16) }}
+      {{ element.startTime.toISOString().slice(11, 16) }} -
+      {{ element.endTime.toISOString().slice(11, 16) }}
     </p>
     <p>
       {{
-        timetableElement.studentClassSubjectTeacher.subject.abbreviation ??
-        timetableElement.studentClassSubjectTeacher.subject.name
+        element.studentClassSubjectTeacher.subject.abbreviation ??
+        element.studentClassSubjectTeacher.subject.name
       }}
     </p>
     <p>
       {{
-        timetableElement.studentClassSubjectTeacher.teacher.initials ??
-        timetableElement.studentClassSubjectTeacher.teacher.name
+        element.studentClassSubjectTeacher.teacher.initials ??
+        element.studentClassSubjectTeacher.teacher.name
       }}
     </p>
-    <p>{{ timetableElement.room.name }}</p>
+    <p>{{ element.room.name }}</p>
+    <UButton color="blue" variant="soft" @click="onEdit(element)" class="m-1">
+      Edit
+    </UButton>
+    <UButton color="red" variant="soft" @click="onRemove(element)" class="m-1">
+      Remove
+    </UButton>
   </div>
 </template>
 
 <script setup lang="ts">
 defineProps<{
-  timetableElement: TimetableElement
+  element: TimetableElement
+  onEdit: (element: TimetableElement) => void
+  onRemove: (element: TimetableElement) => void
 }>()
 </script>

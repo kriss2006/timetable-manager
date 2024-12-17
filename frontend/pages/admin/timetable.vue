@@ -53,7 +53,9 @@
             <template #item="{ element }">
               <TimetableElement
                 :key="element.id"
-                :timetable-element="element"
+                :element="element"
+                :onEdit="openEditModal"
+                :onRemove="openRemoveModal"
               />
             </template>
           </draggable>
@@ -67,7 +69,9 @@
             <template #item="{ element }">
               <TimetableElement
                 :key="element.id"
-                :timetable-element="element"
+                :element="element"
+                :onEdit="openEditModal"
+                :onRemove="openRemoveModal"
               />
             </template>
           </draggable>
@@ -81,7 +85,9 @@
             <template #item="{ element }">
               <TimetableElement
                 :key="element.id"
-                :timetable-element="element"
+                :element="element"
+                :onEdit="openEditModal"
+                :onRemove="openRemoveModal"
               />
             </template>
           </draggable>
@@ -128,6 +134,23 @@
       </UTable>
     </div>
   </div>
+  <EditModal
+    :open="editModalOpen"
+    :row="editFormData"
+    :errorMessage="errorMessage"
+    @update:open="editModalOpen = $event"
+    @edit:row="editElement($event)"
+    @reset:error-message="errorMessage = ''"
+  />
+  <!-- <RemoveModal
+    :open="removeModalOpen"
+    :hidden-columns="hiddenColumns"
+    :row="removeFormData"
+    :errorMessage="errorMessage"
+    @update:open="removeModalOpen = $event"
+    @remove:row="removeRow($event)"
+    @reset:error-message="errorMessage = ''"
+  /> -->
 </template>
 
 <script setup lang="ts">
@@ -300,6 +323,84 @@ function onColumnUpdate() {
 //         },
 //         room: { id: 1, name: 'temp3' },
 //       })
+//     })
+// }
+
+const errorMessage = ref('')
+
+const editModalOpen = ref(false)
+const editFormData = ref({
+  startTime: new Date('1970-01-01T00:00:00.000Z'),
+  endTime: new Date('1970-01-01T00:00:00.000Z'),
+  room: { id: NaN, name: 'Select room' },
+})
+
+const openEditModal = (element: TimetableElement) => {
+  editFormData.value = {
+    startTime: element.startTime,
+    endTime: element.endTime,
+    room: element.room,
+  }
+  errorMessage.value = ''
+  editModalOpen.value = true
+}
+
+const editElement = async (element: TimetableElement) => {
+  try {
+    const days = [
+      'monday',
+      'tuesday',
+      'wednesday',
+      'thursday',
+      'friday',
+    ] as const
+
+    for (const day of days) {
+      const elementToEdit = timetableElements.value[day].find(
+        (e) => e.id === element.id
+      )
+
+      if (elementToEdit) {
+        elementToEdit.startTime = editFormData.value.startTime
+        elementToEdit.endTime = editFormData.value.endTime
+        elementToEdit.room = editFormData.value.room
+        break
+      }
+    }
+
+    editModalOpen.value = false
+  } catch (error) {
+    console.error('Error updating element:', error)
+    errorMessage.value = 'Failed to update the timetable element.'
+  }
+}
+
+// const removeModalOpen = ref(false)
+// const removeFormData = ref({
+//   id: -1,
+//   name: '',
+// })
+
+const openRemoveModal = (element: TimetableElement) => {
+  //     removeFormData.value = { id: row.id, name: row.name }
+  //   errorMessage.value = ''
+  //      removeModalOpen.value = true
+}
+
+// const removeRow = async (id: number) => {
+//   await axios
+//     .delete(`http://localhost:3001/api/student-classes/${id}`)
+//     .then(() => {
+//       const index = studentClasses.value.findIndex((item) => item.id === id)
+//       if (index !== -1) {
+//         studentClasses.value.splice(index, 1)
+//       }
+//       removeModalOpen.value = false
+//     })
+//     .catch((error) => {
+//       if (error.response) {
+//         errorMessage.value = error.response.data.error
+//       }
 //     })
 // }
 </script>
