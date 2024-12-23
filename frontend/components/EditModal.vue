@@ -6,6 +6,7 @@
         <UInput
           v-if="!hiddenColumns || !hiddenColumns.includes(String(key))"
           v-model="formData[String(key)]"
+          :type="isDateField(String(key)) ? 'time' : 'text'"
           :placeholder="`Enter ${String(key)}`"
         />
       </template>
@@ -21,7 +22,7 @@
 <script
   setup
   lang="ts"
-  generic="T extends Record<string, number | string | Date | Object>"
+  generic="T extends Record<string, number | string | Date>"
 >
 const props = defineProps<{
   open: boolean
@@ -31,12 +32,24 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits(['update:open', 'edit:row', 'reset:error-message'])
-const formData = ref({ ...props.row })
+
+const isDateField = (key: string) => props.row[key] instanceof Date
+
+const parsedRow = computed(() => {
+  const copy: Record<string, number | string> = {}
+  for (const key in props.row) {
+    const value = props.row[key]
+    copy[key] = value instanceof Date ? dateToTimeString(value) : value
+  }
+  return copy
+})
+
+const formData = ref({ ...parsedRow.value })
 
 watch(
   () => props.row,
-  (newRow) => {
-    Object.assign(formData.value, newRow)
+  () => {
+    formData.value = { ...parsedRow.value }
   },
   { immediate: true, deep: true }
 )
@@ -44,14 +57,21 @@ watch(
 watch(
   () => props.open,
   (isOpen) => {
-    if (!isOpen) formData.value = { ...props.row }
+    if (!isOpen) formData.value = { ...parsedRow.value }
   }
 )
 
 watch(formData, () => emit('reset:error-message'), { deep: true })
 
 const confirm = () => {
-  emit('edit:row', formData.value)
+  const reparsedRow: Record<string, number | string | Date> = {}
+  for (const key in formData.value) {
+    const value = formData.value[key]
+    reparsedRow[key] = isDateField(key)
+      ? timeStringToDate(value as string)
+      : value
+  }
+  emit('edit:row', reparsedRow)
 }
 
 const cancel = () => {

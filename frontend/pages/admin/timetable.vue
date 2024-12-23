@@ -47,6 +47,7 @@
         <template #monday-data="{ column, row }">
           <draggable
             :list="row[column.key]"
+            item-key="id"
             group="timetable"
             @change="onColumnUpdate"
           >
@@ -63,6 +64,7 @@
         <template #tuesday-data="{ column, row }">
           <draggable
             :list="row[column.key]"
+            item-key="id"
             group="timetable"
             @change="onColumnUpdate"
           >
@@ -79,6 +81,7 @@
         <template #wednesday-data="{ column, row }">
           <draggable
             :list="row[column.key]"
+            item-key="id"
             group="timetable"
             @change="onColumnUpdate"
           >
@@ -92,42 +95,37 @@
             </template>
           </draggable>
         </template>
-        <!-- <template #thursday-data="{ column, row }">
-          <draggable :list="row[column.key]" item-key="id" group="timetable">
-            <template #item="{ element }">
-              <TimetableElement
-                :timetable-element="element"
-                :key="element.id"
-              />
-            </template>
-          </draggable>
-        </template> -->
-        <!-- <template #friday-data="{ column, row }">
-          <draggable :list="row[column.key]" item-key="id" group="timetable">
-            <template #item="{ element }">
-              <TimetableElement
-                :timetable-element="element"
-                :key="element.id"
-              />
-            </template>
-          </draggable>
-        </template> -->
-        <template #thursday-data>
+        <template #thursday-data="{ column, row }">
           <draggable
-            :list="list1"
-            :group="{ name: 'timetable2', pull: 'clone', put: false }"
-            :clone="clone"
+            :list="row[column.key]"
+            item-key="id"
+            group="timetable"
             @change="onColumnUpdate"
           >
             <template #item="{ element }">
-              <div class="border p-2">{{ element.name }}</div>
+              <TimetableElement
+                :key="element.id"
+                :element="element"
+                :onEdit="openEditModal"
+                :onRemove="openRemoveModal"
+              />
             </template>
           </draggable>
         </template>
-        <template #friday-data>
-          <draggable :list="list2" group="timetable2" @change="onColumnUpdate">
+        <template #friday-data="{ column, row }">
+          <draggable
+            :list="row[column.key]"
+            item-key="id"
+            group="timetable"
+            @change="onColumnUpdate"
+          >
             <template #item="{ element }">
-              <div class="border p-2">{{ element.name }}</div>
+              <TimetableElement
+                :key="element.id"
+                :element="element"
+                :onEdit="openEditModal"
+                :onRemove="openRemoveModal"
+              />
             </template>
           </draggable>
         </template>
@@ -136,6 +134,7 @@
   </div>
   <EditModal
     :open="editModalOpen"
+    :hidden-columns="hiddenColumns"
     :row="editFormData"
     :errorMessage="errorMessage"
     @update:open="editModalOpen = $event"
@@ -156,21 +155,7 @@
 <script setup lang="ts">
 // import axios from 'axios'
 import draggable from 'vuedraggable'
-const list1 = ref([
-  { id: 1, name: 'neshto' },
-  { id: 2, name: 'oshte neshto' },
-  { id: 3, name: 'treto neshto' },
-])
 
-const list2 = ref([
-  { id: 1, name: 'b a' },
-  { id: 2, name: 'b b' },
-  { id: 3, name: 'b v' },
-])
-
-const clone = (list: any) => {
-  return { id: list.id, name: `ZZZ ${list.name} ZZZ` }
-}
 definePageMeta({
   layout: 'admin',
   middleware: ['admin'],
@@ -272,8 +257,8 @@ function cloneAvailableElement(
   return {
     id: NaN,
     period: NaN,
-    startTime: new Date('1970-01-01T00:00:00.000Z'),
-    endTime: new Date('1970-01-01T00:00:00.000Z'),
+    startTime: timeStringToDate('00:00'),
+    endTime: timeStringToDate('00:00'),
     alternating: false,
     split: false,
     studentClassSubjectTeacher: {
@@ -328,19 +313,36 @@ function onColumnUpdate() {
 
 const errorMessage = ref('')
 
+const hiddenColumns = [
+  'id',
+  'period',
+  'alternating',
+  'split',
+  'studentClassSubjectTeacher',
+  'room',
+  'evenWeekStudentClassSubjectTeacher',
+  'evenWeekRoom',
+  'group2StudentClassSubjectTeacher',
+  'group2Room',
+]
+
 const editModalOpen = ref(false)
-const editFormData = ref({
-  startTime: new Date('1970-01-01T00:00:00.000Z'),
-  endTime: new Date('1970-01-01T00:00:00.000Z'),
-  room: { id: NaN, name: 'Select room' },
+const editFormData = ref<TimetableElement>({
+  id: NaN,
+  period: NaN,
+  startTime: timeStringToDate('00:00'),
+  endTime: timeStringToDate('00:00'),
+  alternating: false,
+  split: false,
+  studentClassSubjectTeacher: {
+    subject: { id: NaN, name: '', abbreviation: '' },
+    teacher: { id: NaN, name: '', initials: '' },
+  },
+  room: { id: NaN, name: '' },
 })
 
 const openEditModal = (element: TimetableElement) => {
-  editFormData.value = {
-    startTime: element.startTime,
-    endTime: element.endTime,
-    room: element.room,
-  }
+  editFormData.value = { ...element }
   errorMessage.value = ''
   editModalOpen.value = true
 }
@@ -361,16 +363,15 @@ const editElement = async (element: TimetableElement) => {
       )
 
       if (elementToEdit) {
-        elementToEdit.startTime = editFormData.value.startTime
-        elementToEdit.endTime = editFormData.value.endTime
-        elementToEdit.room = editFormData.value.room
+        elementToEdit.startTime = element.startTime
+        elementToEdit.endTime = element.endTime
+        // elementToEdit.room = editFormData.value.room
         break
       }
     }
 
     editModalOpen.value = false
   } catch (error) {
-    console.error('Error updating element:', error)
     errorMessage.value = 'Failed to update the timetable element.'
   }
 }

@@ -294,28 +294,34 @@ app.get(
           studentClassId: Number(req.params.studentClassId),
           day: req.params.day as Day,
         },
-        include: {
+        select: {
+          id: true,
+          period: true,
+          startTime: true,
+          endTime: true,
+          alternating: true,
+          split: true,
           studentClassSubjectTeacher: {
-            include: {
-              subject: true,
-              teacher: true,
+            select: {
+              subject: { select: { id: true, name: true, abbreviation: true } },
+              teacher: { select: { id: true, name: true, initials: true } },
             },
           },
-          room: true,
+          room: { select: { id: true, name: true } },
           evenWeekStudentClassSubjectTeacher: {
-            include: {
-              subject: true,
-              teacher: true,
+            select: {
+              subject: { select: { id: true, name: true, abbreviation: true } },
+              teacher: { select: { id: true, name: true, initials: true } },
             },
           },
-          evenWeekRoom: true,
+          evenWeekRoom: { select: { id: true, name: true } },
           group2StudentClassSubjectTeacher: {
-            include: {
-              subject: true,
-              teacher: true,
+            select: {
+              subject: { select: { id: true, name: true, abbreviation: true } },
+              teacher: { select: { id: true, name: true, initials: true } },
             },
           },
-          group2Room: true,
+          group2Room: { select: { id: true, name: true } },
         },
       })
       .then((timetableElements) => res.json(timetableElements))
