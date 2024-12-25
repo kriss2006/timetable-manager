@@ -369,11 +369,15 @@ const editElement = async (data: ModalData) => {
       const elementToEdit = timetableElements.value[day].find(
         (e) => e.id === data.id
       )
-
       if (elementToEdit) {
-        elementToEdit.startTime = data.input.startTime
-        elementToEdit.endTime = data.input.endTime
-        elementToEdit.room = data.select.room
+        if (data.input.startTime instanceof Date) {
+          elementToEdit.startTime = data.input.startTime
+        }
+
+        if (data.input.endTime instanceof Date) {
+          elementToEdit.endTime = data.input.endTime
+        }
+
         break
       }
     }
