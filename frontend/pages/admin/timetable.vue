@@ -251,8 +251,19 @@ const rows = ref([timetableElements.value])
 function cloneAvailableElement(
   element: AvailableTimetableElement
 ): TimetableElement {
+  const allIds = [
+    0,
+    ...timetableElements.value.monday.map((e) => e.id),
+    ...timetableElements.value.tuesday.map((e) => e.id),
+    ...timetableElements.value.wednesday.map((e) => e.id),
+    ...timetableElements.value.thursday.map((e) => e.id),
+    ...timetableElements.value.friday.map((e) => e.id),
+  ]
+
+  const maxId = Math.max(...allIds)
+
   return {
-    id: NaN,
+    id: maxId + 1,
     period: NaN,
     startTime: timeStringToDate('00:00'),
     endTime: timeStringToDate('00:00'),

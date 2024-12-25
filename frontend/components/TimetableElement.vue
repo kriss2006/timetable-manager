@@ -1,12 +1,12 @@
 <template>
   <div
     class="border-2 p-2 my-1 rounded-lg text-center cursor-move"
-    :class="{ 'border-red-500': isNaN(element.id) }"
+    :class="{ 'border-yellow-500': isWarning() }"
   >
     <h1 class="text-lg">{{ element.period }}.</h1>
     <p>
-      {{ element.startTime.toISOString().slice(11, 16) }} -
-      {{ element.endTime.toISOString().slice(11, 16) }}
+      {{ dateToTimeString(element.startTime) }} -
+      {{ dateToTimeString(element.endTime) }}
     </p>
     <p>
       {{
@@ -31,9 +31,16 @@
 </template>
 
 <script setup lang="ts">
-defineProps<{
+const props = defineProps<{
   element: TimetableElement
   onEdit: (element: TimetableElement) => void
   onRemove: (element: TimetableElement) => void
 }>()
+
+const isWarning = () => {
+  return (
+    props.element.startTime === props.element.endTime ||
+    isNaN(props.element.room.id)
+  )
+}
 </script>
