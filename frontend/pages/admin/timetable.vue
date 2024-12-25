@@ -250,7 +250,21 @@ const rows = ref([timetableElements.value])
 
 function cloneAvailableElement(
   element: AvailableTimetableElement
-): TimetableElement {
+): TimetableElement | void {
+  if (element.classesPerWeek <= 0) {
+    return
+  }
+
+  const targetElement = timetableElements.value.available.find(
+    (e) => e.id === element.id
+  )
+
+  if (!targetElement) {
+    return
+  }
+
+  targetElement.classesPerWeek--
+
   const allIds = [
     0,
     ...timetableElements.value.monday.map((e) => e.id),
@@ -270,10 +284,11 @@ function cloneAvailableElement(
     alternating: false,
     split: false,
     studentClassSubjectTeacher: {
+      id: element.id,
       subject: element.subject,
       teacher: element.teacher,
     },
-    room: { id: NaN, name: 'Placeholder Room' },
+    room: { id: NaN, name: 'No room selected' },
   }
 }
 
@@ -318,21 +333,6 @@ function onColumnUpdate() {
 //       })
 //     })
 // }
-
-const errorMessage = ref('')
-
-const hiddenColumns = [
-  'id',
-  'period',
-  'alternating',
-  'split',
-  'studentClassSubjectTeacher',
-  'room',
-  'evenWeekStudentClassSubjectTeacher',
-  'evenWeekRoom',
-  'group2StudentClassSubjectTeacher',
-  'group2Room',
-]
 
 const editModal = ref<ModalData>({
   open: false,

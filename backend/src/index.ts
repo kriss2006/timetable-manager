@@ -303,6 +303,7 @@ app.get(
           split: true,
           studentClassSubjectTeacher: {
             select: {
+              id: true,
               subject: { select: { id: true, name: true, abbreviation: true } },
               teacher: { select: { id: true, name: true, initials: true } },
             },
@@ -310,6 +311,7 @@ app.get(
           room: { select: { id: true, name: true } },
           evenWeekStudentClassSubjectTeacher: {
             select: {
+              id: true,
               subject: { select: { id: true, name: true, abbreviation: true } },
               teacher: { select: { id: true, name: true, initials: true } },
             },
@@ -317,6 +319,7 @@ app.get(
           evenWeekRoom: { select: { id: true, name: true } },
           group2StudentClassSubjectTeacher: {
             select: {
+              id: true,
               subject: { select: { id: true, name: true, abbreviation: true } },
               teacher: { select: { id: true, name: true, initials: true } },
             },

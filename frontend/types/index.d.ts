@@ -40,16 +40,19 @@ declare global {
     alternating: boolean
     split: boolean
     studentClassSubjectTeacher: {
+      id: number
       subject: Subject
       teacher: Teacher
     }
     room: Room
     evenWeekStudentClassSubjectTeacher?: {
+      id: number
       subject: Subject
       teacher: Teacher
     }
     evenWeekRoom?: Room
     group2StudentClassSubjectTeacher?: {
+      id: number
       subject: Subject
       teacher: Teacher
     }
