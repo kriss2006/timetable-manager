@@ -64,6 +64,13 @@ declare global {
     teacher: Teacher
   }
 
+  interface ModalData {
+    open: boolean
+    errorMessage: string
+    id: number
+    input: Record<string, number | string | boolean | Date>
+    select: Record<'room', Room>
+  }
   // enum UserType {
   //   student = 'student',
   //   teacher = 'teacher',

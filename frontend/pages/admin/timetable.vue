@@ -133,13 +133,10 @@
     </div>
   </div>
   <EditModal
-    :open="editModalOpen"
-    :hidden-columns="hiddenColumns"
-    :row="editFormData"
-    :errorMessage="errorMessage"
-    @update:open="editModalOpen = $event"
-    @edit:row="editElement($event)"
-    @reset:error-message="errorMessage = ''"
+    :data="editModal"
+    @close="editModal.open = false"
+    @reset:error-message="editModal.errorMessage = ''"
+    @edit="editElement($event)"
   />
   <!-- <RemoveModal
     :open="removeModalOpen"
@@ -326,28 +323,28 @@ const hiddenColumns = [
   'group2Room',
 ]
 
-const editModalOpen = ref(false)
-const editFormData = ref<TimetableElement>({
+const editModal = ref<ModalData>({
+  open: false,
+  errorMessage: '',
   id: NaN,
-  period: NaN,
-  startTime: timeStringToDate('00:00'),
-  endTime: timeStringToDate('00:00'),
-  alternating: false,
-  split: false,
-  studentClassSubjectTeacher: {
-    subject: { id: NaN, name: '', abbreviation: '' },
-    teacher: { id: NaN, name: '', initials: '' },
+  input: {
+    startTime: timeStringToDate('00:00'),
+    endTime: timeStringToDate('00:00'),
   },
-  room: { id: NaN, name: '' },
+  select: { room: { id: NaN, name: 'No room selected' } },
 })
 
 const openEditModal = (element: TimetableElement) => {
-  editFormData.value = { ...element }
-  errorMessage.value = ''
-  editModalOpen.value = true
+  editModal.value = {
+    open: true,
+    errorMessage: '',
+    id: element.id,
+    input: { startTime: element.startTime, endTime: element.endTime },
+    select: { room: element.room },
+  }
 }
 
-const editElement = async (element: TimetableElement) => {
+const editElement = async (data: ModalData) => {
   try {
     const days = [
       'monday',
@@ -359,20 +356,20 @@ const editElement = async (element: TimetableElement) => {
 
     for (const day of days) {
       const elementToEdit = timetableElements.value[day].find(
-        (e) => e.id === element.id
+        (e) => e.id === data.id
       )
 
       if (elementToEdit) {
-        elementToEdit.startTime = element.startTime
-        elementToEdit.endTime = element.endTime
-        // elementToEdit.room = editFormData.value.room
+        elementToEdit.startTime = data.input.startTime
+        elementToEdit.endTime = data.input.endTime
+        elementToEdit.room = data.select.room
         break
       }
     }
 
-    editModalOpen.value = false
+    editModal.value.open = false
   } catch (error) {
-    errorMessage.value = 'Failed to update the timetable element.'
+    editModal.value.errorMessage = 'Failed to update the timetable element.'
   }
 }
 

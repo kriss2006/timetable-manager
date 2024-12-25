@@ -1,80 +1,89 @@
 <template>
-  <UModal :modelValue="open" @update:modelValue="emit('update:open')">
+  <UModal :modelValue="data.open" @update:modelValue="emit('close')">
     <div class="p-4 w-full max-w-md mx-auto flex flex-col gap-4">
       <h2 class="text-xl font-semibold">Edit</h2>
-      <template v-for="(_value, key) in formData" :key="String(key)">
+      <template v-for="(_value, key) in parsedInput" :key="String(key)">
         <UInput
-          v-if="!hiddenColumns || !hiddenColumns.includes(String(key))"
-          v-model="formData[String(key)]"
+          v-model="parsedInput[String(key)]"
           :type="isDateField(String(key)) ? 'time' : 'text'"
           :placeholder="`Enter ${String(key)}`"
         />
       </template>
-      <p v-if="errorMessage" class="text-red-500">{{ errorMessage }}</p>
+      <div v-if="formData.select.room">
+        <USelectMenu
+          :loading="roomsLoading"
+          searchable
+          v-model="formData.select.room"
+          :options="rooms"
+          placeholder="Select a room"
+          option-attribute="name"
+        />
+      </div>
+      <p v-if="data.errorMessage" class="text-red-500">
+        {{ data.errorMessage }}
+      </p>
       <div class="flex justify-end gap-2 mt-4">
-        <UButton color="blue" variant="soft" @click="confirm">Save</UButton>
+        <UButton color="blue" variant="soft" @click="save">Save</UButton>
         <UButton color="red" variant="soft" @click="cancel">Cancel</UButton>
       </div>
     </div>
   </UModal>
 </template>
 
-<script
-  setup
-  lang="ts"
-  generic="T extends Record<string, number | string | Date>"
->
+<script setup lang="ts">
 const props = defineProps<{
-  open: boolean
-  hiddenColumns?: string[]
-  row: T
-  errorMessage: string
+  data: ModalData
 }>()
 
-const emit = defineEmits(['update:open', 'edit:row', 'reset:error-message'])
+const emit = defineEmits(['close', 'reset:error-message', 'edit'])
 
-const isDateField = (key: string) => props.row[key] instanceof Date
+const store = useAdminStore()
+const { roomsLoading } = storeToRefs(store)
 
-const parsedRow = computed(() => {
-  const copy: Record<string, number | string> = {}
-  for (const key in props.row) {
-    const value = props.row[key]
+const rooms = ref<Room[]>([])
+
+onMounted(async () => {
+  if ('room' in props.data.select) {
+    rooms.value = await store.fetchRooms()
+  }
+})
+
+const isDateField = (key: string) => props.data.input[key] instanceof Date
+
+const parsedInput = computed(() => {
+  const copy: Record<string, number | string | boolean> = {}
+  for (const key in props.data.input) {
+    const value = props.data.input[key]
     copy[key] = value instanceof Date ? dateToTimeString(value) : value
   }
   return copy
 })
 
-const formData = ref({ ...parsedRow.value })
+const formData = ref({ ...props.data })
+formData.value.input = { ...parsedInput.value }
 
 watch(
-  () => props.row,
-  () => {
-    formData.value = { ...parsedRow.value }
+  () => props.data,
+  (newData) => {
+    formData.value = { ...newData }
+    formData.value.input = { ...parsedInput.value }
   },
   { immediate: true, deep: true }
 )
 
-watch(
-  () => props.open,
-  (isOpen) => {
-    if (!isOpen) formData.value = { ...parsedRow.value }
-  }
-)
-
 watch(formData, () => emit('reset:error-message'), { deep: true })
 
-const confirm = () => {
-  const reparsedRow: Record<string, number | string | Date> = {}
-  for (const key in formData.value) {
-    const value = formData.value[key]
-    reparsedRow[key] = isDateField(key)
-      ? timeStringToDate(value as string)
-      : value
+const save = () => {
+  const updatedData = { ...formData.value }
+  for (const key in parsedInput.value) {
+    updatedData.input[key] = isDateField(key)
+      ? timeStringToDate(parsedInput.value[key] as string)
+      : parsedInput.value[key]
   }
-  emit('edit:row', reparsedRow)
+  emit('edit', updatedData)
 }
 
 const cancel = () => {
-  emit('update:open', false)
+  emit('close', false)
 }
 </script>
