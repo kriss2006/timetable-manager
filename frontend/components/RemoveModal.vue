@@ -1,12 +1,14 @@
 <template>
-  <UModal :modelValue="open" @update:modelValue="emit('update:open')">
+  <UModal :modelValue="data.open" @update:modelValue="emit('close')">
     <div class="p-4 w-full max-w-md mx-auto flex flex-col gap-4">
       <h2 class="text-xl font-semibold">Remove</h2>
       <p class="text-500">
-        Are you sure you would like to remove <b>{{ props.row.name }}</b
+        Are you sure you would like to remove <b>{{ props.data.name }}</b
         >?
       </p>
-      <p v-if="errorMessage" class="text-red-500">{{ errorMessage }}</p>
+      <p v-if="data.errorMessage" class="text-red-500">
+        {{ data.errorMessage }}
+      </p>
       <div class="flex justify-end gap-2 mt-4">
         <UButton color="red" variant="soft" @click="confirm">Confirm</UButton>
         <UButton color="black" variant="soft" @click="cancel">Cancel</UButton>
@@ -15,21 +17,18 @@
   </UModal>
 </template>
 
-<script setup lang="ts" generic="T extends Record<string, number | string>">
+<script setup lang="ts">
 const props = defineProps<{
-  open: boolean
-  hiddenColumns: string[]
-  row: T
-  errorMessage: string
+  data: RemoveModalData
 }>()
 
-const emit = defineEmits(['update:open', 'remove:row', 'reset:error-message'])
+const emit = defineEmits(['close', 'reset:error-message', 'remove'])
 
 const confirm = async () => {
-  emit('remove:row', props.row.id)
+  emit('remove', props.data)
 }
 
 const cancel = () => {
-  emit('update:open', false)
+  emit('close')
 }
 </script>

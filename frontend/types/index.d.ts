@@ -74,6 +74,13 @@ declare global {
     input: Record<string, number | string | boolean | Date>
     select: Record<'room', Room>
   }
+
+  interface RemoveModalData {
+    open: boolean
+    errorMessage: string
+    id: number
+    name: string
+  }
   // enum UserType {
   //   student = 'student',
   //   teacher = 'teacher',

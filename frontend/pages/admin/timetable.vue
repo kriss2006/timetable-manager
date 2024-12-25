@@ -133,20 +133,17 @@
     </div>
   </div>
   <EditModal
-    :data="editModal"
-    @close="editModal.open = false"
-    @reset:error-message="editModal.errorMessage = ''"
+    :data="editModalData"
+    @close="editModalData.open = false"
+    @reset:error-message="editModalData.errorMessage = ''"
     @edit="editElement($event)"
   />
-  <!-- <RemoveModal
-    :open="removeModalOpen"
-    :hidden-columns="hiddenColumns"
-    :row="removeFormData"
-    :errorMessage="errorMessage"
-    @update:open="removeModalOpen = $event"
-    @remove:row="removeRow($event)"
-    @reset:error-message="errorMessage = ''"
-  /> -->
+  <RemoveModal
+    :data="removeModalData"
+    @close="removeModalData.open = false"
+    @reset:error-message="removeModalData.errorMessage = ''"
+    @remove="removeElement($event)"
+  />
 </template>
 
 <script setup lang="ts">
@@ -301,40 +298,8 @@ function onColumnUpdate() {
     })
   })
 }
-// const addElement = (day: string) => {
-//   axios
-//     .post(
-//       `http://localhost:3001/api/timetable-elements/${selectedYearId.value}/${selectedTerm.value?.value}/${selectedStudentClassId.value}/${day}`,
-//       {
-//         period: 1,
-//         startTime: '1970-01-01T00:00:00.000Z',
-//         endTime: '1970-01-01T00:01:00.000Z',
-//         alternating: false,
-//         split: false,
-//         yearId: 1,
-//         subjectTeacherId: 1,
-//         roomId: 1,
-//       }
-//     )
-//     .then((response) => {
-//       // timetableElements.value[day.toLowerCase()].push({
-//       timetableElements.value.monday.push({
-//         id: response.data.id,
-//         period: 1,
-//         startTime: new Date('1970-01-01T00:00:00.000Z'),
-//         endTime: new Date('1970-01-01T00:01:00.000Z'),
-//         alternating: false,
-//         split: false,
-//         studentClassSubjectTeacher: {
-//           subject: { id: 1, name: 'temp1' },
-//           teacher: { id: 1, name: 'temp2', initials: 't2' },
-//         },
-//         room: { id: 1, name: 'temp3' },
-//       })
-//     })
-// }
 
-const editModal = ref<ModalData>({
+const editModalData = ref<ModalData>({
   open: false,
   errorMessage: '',
   id: NaN,
@@ -346,7 +311,7 @@ const editModal = ref<ModalData>({
 })
 
 const openEditModal = (element: TimetableElement) => {
-  editModal.value = {
+  editModalData.value = {
     open: true,
     errorMessage: '',
     id: element.id,
@@ -382,38 +347,94 @@ const editElement = async (data: ModalData) => {
       }
     }
 
-    editModal.value.open = false
+    editModalData.value.open = false
   } catch (error) {
-    editModal.value.errorMessage = 'Failed to update the timetable element.'
+    editModalData.value.errorMessage = 'Failed to update the timetable element.'
   }
 }
 
-// const removeModalOpen = ref(false)
-// const removeFormData = ref({
-//   id: -1,
-//   name: '',
-// })
+const removeModalData = ref<RemoveModalData>({
+  open: false,
+  errorMessage: '',
+  id: NaN,
+  name: '',
+})
 
 const openRemoveModal = (element: TimetableElement) => {
-  //     removeFormData.value = { id: row.id, name: row.name }
-  //   errorMessage.value = ''
-  //      removeModalOpen.value = true
+  removeModalData.value = {
+    open: true,
+    errorMessage: '',
+    id: element.id,
+    name: element.studentClassSubjectTeacher.subject.name,
+  }
 }
 
-// const removeRow = async (id: number) => {
-//   await axios
-//     .delete(`http://localhost:3001/api/student-classes/${id}`)
-//     .then(() => {
-//       const index = studentClasses.value.findIndex((item) => item.id === id)
-//       if (index !== -1) {
-//         studentClasses.value.splice(index, 1)
+const removeElement = async (data: RemoveModalData) => {
+  try {
+    const days = [
+      'monday',
+      'tuesday',
+      'wednesday',
+      'thursday',
+      'friday',
+    ] as const
+
+    for (const day of days) {
+      const index = timetableElements.value[day].findIndex(
+        (e) => e.id === data.id
+      )
+      if (index !== -1) {
+        const availableElementId =
+          timetableElements.value[day][index].studentClassSubjectTeacher.id
+        const availableElement = timetableElements.value.available.find(
+          (e) => e.id === availableElementId
+        )
+        if (availableElement) {
+          availableElement.classesPerWeek++
+        }
+
+        timetableElements.value[day].splice(index, 1)
+        break
+      }
+    }
+
+    removeModalData.value.open = false
+  } catch (error) {
+    removeModalData.value.errorMessage =
+      'Failed to remove the timetable element.'
+  }
+}
+
+// const addElement = (day: string) => {
+//   axios
+//     .post(
+//       `http://localhost:3001/api/timetable-elements/${selectedYearId.value}/${selectedTerm.value?.value}/${selectedStudentClassId.value}/${day}`,
+//       {
+//         period: 1,
+//         startTime: '1970-01-01T00:00:00.000Z',
+//         endTime: '1970-01-01T00:01:00.000Z',
+//         alternating: false,
+//         split: false,
+//         yearId: 1,
+//         subjectTeacherId: 1,
+//         roomId: 1,
 //       }
-//       removeModalOpen.value = false
-//     })
-//     .catch((error) => {
-//       if (error.response) {
-//         errorMessage.value = error.response.data.error
-//       }
+//     )
+//     .then((response) => {
+//       // timetableElements.value[day.toLowerCase()].push({
+//       timetableElements.value.monday.push({
+//         id: response.data.id,
+//         period: 1,
+//         startTime: new Date('1970-01-01T00:00:00.000Z'),
+//         endTime: new Date('1970-01-01T00:01:00.000Z'),
+//         alternating: false,
+//         split: false,
+//         studentClassSubjectTeacher: {
+//           subject: { id: 1, name: 'temp1' },
+//           teacher: { id: 1, name: 'temp2', initials: 't2' },
+//         },
+//         room: { id: 1, name: 'temp3' },
+//       })
 //     })
 // }
 </script>
