@@ -20,6 +20,14 @@
       option-attribute="name"
       :ui="{ base: 'w-36' }"
     />
+    <div class="flex gap-2 my-4">
+      <UButton size="lg" color="blue" variant="soft" @click="save"
+        >Save changes</UButton
+      >
+      <UButton size="lg" color="red" variant="soft" @click="fetchTimetable"
+        >Revert changes</UButton
+      >
+    </div>
     <div class="flex w-full justify-center gap-10">
       <aside class="w-1/4">
         <draggable
@@ -147,7 +155,7 @@
 </template>
 
 <script setup lang="ts">
-// import axios from 'axios'
+import axios from 'axios'
 import draggable from 'vuedraggable'
 
 definePageMeta({
@@ -184,7 +192,7 @@ const timetableElements = ref<{
   available: [],
 })
 
-watchEffect(async () => {
+const fetchTimetable = async () => {
   if (selectedTerm.value && selectedStudentClassId.value) {
     timetableElements.value.monday = await store.fetchTimetableElements(
       selectedTerm.value.value,
@@ -219,7 +227,12 @@ watchEffect(async () => {
     timetableElements.value.available =
       await store.fetchAvailableTimetableElements(selectedStudentClassId.value)
   }
+}
+
+watchEffect(() => {
+  fetchTimetable()
 })
+
 const columns = [
   {
     key: 'monday',
@@ -405,36 +418,36 @@ const removeElement = async (data: RemoveModalData) => {
   }
 }
 
-// const addElement = (day: string) => {
-//   axios
-//     .post(
-//       `http://localhost:3001/api/timetable-elements/${selectedYearId.value}/${selectedTerm.value?.value}/${selectedStudentClassId.value}/${day}`,
-//       {
-//         period: 1,
-//         startTime: '1970-01-01T00:00:00.000Z',
-//         endTime: '1970-01-01T00:01:00.000Z',
-//         alternating: false,
-//         split: false,
-//         yearId: 1,
-//         subjectTeacherId: 1,
-//         roomId: 1,
-//       }
-//     )
-//     .then((response) => {
-//       // timetableElements.value[day.toLowerCase()].push({
-//       timetableElements.value.monday.push({
-//         id: response.data.id,
-//         period: 1,
-//         startTime: new Date('1970-01-01T00:00:00.000Z'),
-//         endTime: new Date('1970-01-01T00:01:00.000Z'),
-//         alternating: false,
-//         split: false,
-//         studentClassSubjectTeacher: {
-//           subject: { id: 1, name: 'temp1' },
-//           teacher: { id: 1, name: 'temp2', initials: 't2' },
-//         },
-//         room: { id: 1, name: 'temp3' },
-//       })
-//     })
-// }
+const save = () => {
+  // axios
+  //     .post(
+  //       `http://localhost:3001/api/timetable-elements/${selectedYearId.value}/${selectedTerm.value?.value}/${selectedStudentClassId.value}/${day}`,
+  //       {
+  //         period: 1,
+  //         startTime: '1970-01-01T00:00:00.000Z',
+  //         endTime: '1970-01-01T00:01:00.000Z',
+  //         alternating: false,
+  //         split: false,
+  //         yearId: 1,
+  //         subjectTeacherId: 1,
+  //         roomId: 1,
+  //       }
+  //     )
+  //     .then((response) => {
+  //       // timetableElements.value[day.toLowerCase()].push({
+  //       timetableElements.value.monday.push({
+  //         id: response.data.id,
+  //         period: 1,
+  //         startTime: new Date('1970-01-01T00:00:00.000Z'),
+  //         endTime: new Date('1970-01-01T00:01:00.000Z'),
+  //         alternating: false,
+  //         split: false,
+  //         studentClassSubjectTeacher: {
+  //           subject: { id: 1, name: 'temp1' },
+  //           teacher: { id: 1, name: 'temp2', initials: 't2' },
+  //         },
+  //         room: { id: 1, name: 'temp3' },
+  //       })
+  //     })
+}
 </script>
