@@ -31,9 +31,10 @@ declare global {
     initials: string
   }
 
-  // For a year, a term, a student class and a day
+  // For a year, a term, a student class (and a day)
   interface TimetableElement {
     id: number
+    day: 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday'
     period: number
     startTime: Date
     endTime: Date
@@ -81,18 +82,20 @@ declare global {
     id: number
     name: string
   }
+
+  interface Timetable {
+    monday: TimetableElement[]
+    tuesday: TimetableElement[]
+    wednesday: TimetableElement[]
+    thursday: TimetableElement[]
+    friday: TimetableElement[]
+    available: AvailableTimetableElement[]
+  }
+
   // enum UserType {
   //   student = 'student',
   //   teacher = 'teacher',
   //   admin = 'admin',
   //   super_admin = 'superAdmin',
-  // }
-
-  // enum Day {
-  //   Monday = 'Monday',
-  //   Tuesday = 'Tuesday',
-  //   Wednesday = 'Wednesday',
-  //   Thursday = 'Thursday',
-  //   Friday = 'Friday',
   // }
 }

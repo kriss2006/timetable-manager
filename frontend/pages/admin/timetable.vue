@@ -21,17 +21,29 @@
       :ui="{ base: 'w-36' }"
     />
     <div class="flex gap-2 my-4">
-      <UButton size="lg" color="blue" variant="soft" @click="save"
-        >Save changes</UButton
+      <UButton
+        size="lg"
+        color="blue"
+        variant="soft"
+        @click="save"
+        :disabled="!(selectedTerm && selectedStudentClassId)"
       >
-      <UButton size="lg" color="red" variant="soft" @click="fetchTimetable"
-        >Revert changes</UButton
+        Save changes
+      </UButton>
+      <UButton
+        size="lg"
+        color="red"
+        variant="soft"
+        @click="updateTimetable()"
+        :disabled="!(selectedTerm && selectedStudentClassId)"
       >
+        Revert changes
+      </UButton>
     </div>
     <div class="flex w-full justify-center gap-10">
       <aside class="w-1/4">
         <draggable
-          :list="timetableElements.available"
+          :list="timetable.available"
           item-key="id"
           :group="{ name: 'timetable', pull: 'clone', put: false }"
           :clone="cloneAvailableElement"
@@ -176,14 +188,7 @@ onMounted(async () => {
 
 const selectedStudentClassId = ref<number>()
 
-const timetableElements = ref<{
-  monday: TimetableElement[]
-  tuesday: TimetableElement[]
-  wednesday: TimetableElement[]
-  thursday: TimetableElement[]
-  friday: TimetableElement[]
-  available: AvailableTimetableElement[]
-}>({
+const timetable = ref<Timetable>({
   monday: [],
   tuesday: [],
   wednesday: [],
@@ -192,45 +197,60 @@ const timetableElements = ref<{
   available: [],
 })
 
-const fetchTimetable = async () => {
+const fetchTimetable = async (): Promise<Timetable> => {
+  let fetchedTimetable: Timetable = {
+    monday: [],
+    tuesday: [],
+    wednesday: [],
+    thursday: [],
+    friday: [],
+    available: [],
+  }
   if (selectedTerm.value && selectedStudentClassId.value) {
-    timetableElements.value.monday = await store.fetchTimetableElements(
+    fetchedTimetable.monday = await store.fetchTimetableElements(
       selectedTerm.value.value,
       selectedStudentClassId.value,
       'Monday'
     )
 
-    timetableElements.value.tuesday = await store.fetchTimetableElements(
+    fetchedTimetable.tuesday = await store.fetchTimetableElements(
       selectedTerm.value.value,
       selectedStudentClassId.value,
       'Tuesday'
     )
 
-    timetableElements.value.wednesday = await store.fetchTimetableElements(
+    fetchedTimetable.wednesday = await store.fetchTimetableElements(
       selectedTerm.value.value,
       selectedStudentClassId.value,
       'Wednesday'
     )
 
-    timetableElements.value.thursday = await store.fetchTimetableElements(
+    fetchedTimetable.thursday = await store.fetchTimetableElements(
       selectedTerm.value.value,
       selectedStudentClassId.value,
       'Thursday'
     )
 
-    timetableElements.value.friday = await store.fetchTimetableElements(
+    fetchedTimetable.friday = await store.fetchTimetableElements(
       selectedTerm.value.value,
       selectedStudentClassId.value,
       'Friday'
     )
 
-    timetableElements.value.available =
-      await store.fetchAvailableTimetableElements(selectedStudentClassId.value)
+    fetchedTimetable.available = await store.fetchAvailableTimetableElements(
+      selectedStudentClassId.value
+    )
   }
+
+  return fetchedTimetable
+}
+
+const updateTimetable = async () => {
+  timetable.value = await fetchTimetable()
 }
 
 watchEffect(() => {
-  fetchTimetable()
+  updateTimetable()
 })
 
 const columns = [
@@ -256,7 +276,7 @@ const columns = [
   },
 ]
 
-const rows = ref([timetableElements.value])
+const rows = computed(() => [timetable.value])
 
 function cloneAvailableElement(
   element: AvailableTimetableElement
@@ -265,7 +285,7 @@ function cloneAvailableElement(
     return
   }
 
-  const targetElement = timetableElements.value.available.find(
+  const targetElement = timetable.value.available.find(
     (e) => e.id === element.id
   )
 
@@ -277,17 +297,18 @@ function cloneAvailableElement(
 
   const allIds = [
     0,
-    ...timetableElements.value.monday.map((e) => e.id),
-    ...timetableElements.value.tuesday.map((e) => e.id),
-    ...timetableElements.value.wednesday.map((e) => e.id),
-    ...timetableElements.value.thursday.map((e) => e.id),
-    ...timetableElements.value.friday.map((e) => e.id),
+    ...timetable.value.monday.map((e) => e.id),
+    ...timetable.value.tuesday.map((e) => e.id),
+    ...timetable.value.wednesday.map((e) => e.id),
+    ...timetable.value.thursday.map((e) => e.id),
+    ...timetable.value.friday.map((e) => e.id),
   ]
 
   const maxId = Math.max(...allIds)
 
   return {
     id: maxId + 1,
+    day: 'Monday',
     period: NaN,
     startTime: timeStringToDate('00:00'),
     endTime: timeStringToDate('00:00'),
@@ -306,7 +327,11 @@ function onColumnUpdate() {
   const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'] as const
 
   days.forEach((day) => {
-    timetableElements.value[day].forEach((element, index) => {
+    const capitalisedDay = (day.charAt(0).toUpperCase() +
+      day.slice(1)) as TimetableElement['day']
+
+    timetable.value[day].forEach((element, index) => {
+      element.day = capitalisedDay
       element.period = index + 1
     })
   })
@@ -344,18 +369,18 @@ const editElement = async (data: ModalData) => {
     ] as const
 
     for (const day of days) {
-      const elementToEdit = timetableElements.value[day].find(
-        (e) => e.id === data.id
-      )
-      if (elementToEdit) {
-        if (data.input.startTime instanceof Date) {
-          elementToEdit.startTime = data.input.startTime
-        }
-
-        if (data.input.endTime instanceof Date) {
-          elementToEdit.endTime = data.input.endTime
-        }
-
+      const index = timetable.value[day].findIndex((e) => e.id === data.id)
+      if (
+        index !== -1 &&
+        data.input.startTime instanceof Date &&
+        data.input.endTime instanceof Date
+      ) {
+        timetable.value[day].splice(index, 1, {
+          ...timetable.value[day][index],
+          startTime: data.input.startTime,
+          endTime: data.input.endTime,
+          room: data.select.room,
+        })
         break
       }
     }
@@ -393,20 +418,18 @@ const removeElement = async (data: RemoveModalData) => {
     ] as const
 
     for (const day of days) {
-      const index = timetableElements.value[day].findIndex(
-        (e) => e.id === data.id
-      )
+      const index = timetable.value[day].findIndex((e) => e.id === data.id)
       if (index !== -1) {
         const availableElementId =
-          timetableElements.value[day][index].studentClassSubjectTeacher.id
-        const availableElement = timetableElements.value.available.find(
+          timetable.value[day][index].studentClassSubjectTeacher.id
+        const availableElement = timetable.value.available.find(
           (e) => e.id === availableElementId
         )
         if (availableElement) {
           availableElement.classesPerWeek++
         }
 
-        timetableElements.value[day].splice(index, 1)
+        timetable.value[day].splice(index, 1)
         break
       }
     }
@@ -418,36 +441,49 @@ const removeElement = async (data: RemoveModalData) => {
   }
 }
 
-const save = () => {
-  // axios
-  //     .post(
-  //       `http://localhost:3001/api/timetable-elements/${selectedYearId.value}/${selectedTerm.value?.value}/${selectedStudentClassId.value}/${day}`,
-  //       {
-  //         period: 1,
-  //         startTime: '1970-01-01T00:00:00.000Z',
-  //         endTime: '1970-01-01T00:01:00.000Z',
-  //         alternating: false,
-  //         split: false,
-  //         yearId: 1,
-  //         subjectTeacherId: 1,
-  //         roomId: 1,
-  //       }
-  //     )
-  //     .then((response) => {
-  //       // timetableElements.value[day.toLowerCase()].push({
-  //       timetableElements.value.monday.push({
-  //         id: response.data.id,
-  //         period: 1,
-  //         startTime: new Date('1970-01-01T00:00:00.000Z'),
-  //         endTime: new Date('1970-01-01T00:01:00.000Z'),
-  //         alternating: false,
-  //         split: false,
-  //         studentClassSubjectTeacher: {
-  //           subject: { id: 1, name: 'temp1' },
-  //           teacher: { id: 1, name: 'temp2', initials: 't2' },
-  //         },
-  //         room: { id: 1, name: 'temp3' },
-  //       })
-  //     })
+const save = async () => {
+  const initialTimetable = await fetchTimetable()
+
+  const diff = compareTimetables(initialTimetable, timetable.value)
+
+  diff.added.forEach((element) => {
+    axios
+      .post(
+        `http://localhost:3001/api/timetable-elements/${selectedYearId.value}/${selectedTerm.value?.value}/${selectedStudentClassId.value}`,
+        { element }
+      )
+      .then((response) => {
+        const lowercaseDay =
+          element.day.toLowerCase() as keyof typeof timetable.value
+
+        const index = timetable.value[lowercaseDay].findIndex(
+          (e) => e.id === element.id
+        )
+        if (index !== -1 && response.data.id !== null) {
+          timetable.value[lowercaseDay][index].id = response.data.id
+        }
+      })
+  })
+
+  diff.modified.forEach((element) => {
+    axios.patch(`http://localhost:3001/api/timetable-elements/${element.id}`, {
+      element,
+    })
+  })
+
+  diff.deleted.forEach((element) => {
+    axios.delete(`http://localhost:3001/api/timetable-elements/${element.id}`)
+  })
+
+  diff.availableModified.forEach((element) => {
+    axios.patch(
+      `http://localhost:3001/api/available-timetable-elements/${element.id}`,
+      {
+        element,
+      }
+    )
+  })
+
+  console.log(diff)
 }
 </script>

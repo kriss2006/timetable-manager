@@ -296,6 +296,7 @@ app.get(
         },
         select: {
           id: true,
+          day: true,
           period: true,
           startTime: true,
           endTime: true,
@@ -336,57 +337,6 @@ app.get(
   }
 )
 
-app.post(
-  '/api/timetable-elements/:yearId/:term/:studentClassId/:day',
-  async (req, res) => {
-    const {
-      period,
-      startTime,
-      endTime,
-      alternating,
-      split,
-      studentClassSubjectTeacherId,
-      roomId,
-      evenWeekStudentClassSubjectTeacherId,
-      evenWeekRoomId,
-      group2StudentClassSubjectTeacherId,
-      group2RoomId,
-    } = req.body
-
-    prisma.timetableElement
-      .create({
-        data: {
-          term: Number(req.params.term),
-          day: req.params.day as Day,
-          period,
-          startTime,
-          endTime,
-          alternating,
-          split,
-          yearId: Number(req.params.yearId),
-          studentClassId: Number(req.params.studentClassId),
-          studentClassSubjectTeacherId,
-          roomId,
-          evenWeekStudentClassSubjectTeacherId,
-          evenWeekRoomId,
-          group2StudentClassSubjectTeacherId,
-          group2RoomId,
-        },
-      })
-      .then((newTimetableElement) =>
-        res.json({
-          message: 'Timetable element added successfully',
-          id: newTimetableElement.id,
-        })
-      )
-      .catch((err) =>
-        res
-          .status(500)
-          .json({ error: err.message || 'Error adding timetable element' })
-      )
-  }
-)
-
 app.get(
   '/api/available-timetable-elements/:yearId/:studentClassId',
   (req, res) => {
@@ -409,6 +359,110 @@ app.get(
       )
   }
 )
+
+app.post(
+  '/api/timetable-elements/:yearId/:term/:studentClassId',
+  async (req, res) => {
+    const { element } = req.body
+
+    if (!element) {
+      res.status(400).json({ error: 'Element is required' })
+      return
+    }
+
+    prisma.timetableElement
+      .create({
+        data: {
+          term: Number(req.params.term),
+          day: element.day,
+          period: element.period,
+          startTime: element.startTime,
+          endTime: element.endTime,
+          alternating: element.alternating,
+          split: element.split,
+          yearId: Number(req.params.yearId),
+          studentClassId: Number(req.params.studentClassId),
+          studentClassSubjectTeacherId: element.studentClassSubjectTeacher.id,
+          roomId: element.room.id,
+        },
+      })
+      .then((newElement) =>
+        res.json({
+          message: 'Timetable element added successfully',
+          id: newElement.id,
+        })
+      )
+      .catch((err) =>
+        res
+          .status(500)
+          .json({ error: err.message || 'Error adding timetable element' })
+      )
+  }
+)
+
+app.patch('/api/timetable-elements/:id', (req, res) => {
+  const { element } = req.body
+
+  if (!element) {
+    res.status(400).json({ error: 'Element is required' })
+    return
+  }
+
+  prisma.timetableElement
+    .update({
+      where: { id: Number(req.params.id) },
+      data: {
+        day: element.day,
+        period: element.period,
+        startTime: element.startTime,
+        endTime: element.endTime,
+        alternating: element.alternating,
+        split: element.split,
+        studentClassSubjectTeacherId: element.studentClassSubjectTeacher.id,
+        roomId: element.room.id,
+      },
+    })
+    .then(() => res.json({ message: 'Timetable element edited successfully' }))
+    .catch((err) =>
+      res.status(500).json({
+        error: err.message || 'Error editing timetable element',
+      })
+    )
+})
+
+app.delete('/api/timetable-elements/:id', (req, res) => {
+  prisma.timetableElement
+    .delete({ where: { id: Number(req.params.id) } })
+    .then(() => res.json({ message: 'Timetable element deleted successfully' }))
+    .catch((err) =>
+      res
+        .status(500)
+        .json({ error: err.message || 'Error deleting timetable element' })
+    )
+})
+
+app.patch('/api/available-timetable-elements/:id', (req, res) => {
+  const { element } = req.body
+
+  if (!element) {
+    res.status(400).json({ error: 'Element is required' })
+    return
+  }
+
+  prisma.studentClassSubjectTeacher
+    .update({
+      where: { id: Number(req.params.id) },
+      data: { classesPerWeek: element.classesPerWeek },
+    })
+    .then(() =>
+      res.json({ message: 'Available timetable element edited successfully' })
+    )
+    .catch((err) =>
+      res.status(500).json({
+        error: err.message || 'Error editing available timetable element',
+      })
+    )
+})
 
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`))
