@@ -125,6 +125,66 @@ app.get('/api/years', (_req, res) => {
     )
 })
 
+app.post('/api/years', (req, res) => {
+  const { name } = req.body
+
+  if (!name) {
+    res.status(400).json({ error: 'Name is required' })
+    return
+  }
+
+  if (name.length !== 9) {
+    res.status(400).json({ error: 'Name must be 9 characters' })
+    return
+  }
+
+  prisma.year
+    .create({
+      data: {
+        name,
+      },
+    })
+    .then((newYear) =>
+      res.json({ message: 'Year added successfully', id: newYear.id })
+    )
+    .catch((err) =>
+      res.status(500).json({ error: err.message || 'Error adding year' })
+    )
+})
+
+app.patch('/api/years/:id', (req, res) => {
+  const { name } = req.body
+
+  if (!name) {
+    res.status(400).json({ error: 'Name is required' })
+    return
+  }
+
+  if (name.length !== 9) {
+    res.status(400).json({ error: 'Name must be 9 characters' })
+    return
+  }
+
+  prisma.year
+    .update({
+      where: { id: Number(req.params.id) },
+      data: { name },
+    })
+    .then(() => res.json({ message: 'Year edited successfully' }))
+    .catch((err) =>
+      res.status(500).json({ error: err.message || 'Error editing year' })
+    )
+})
+
+app.delete('/api/years/:id', (req, res) => {
+  prisma.year
+    .delete({ where: { id: Number(req.params.id) } })
+    .then(() => res.json({ message: 'Year deleted successfully' }))
+    .catch((err) =>
+      res.status(500).json({ error: err.message || 'Error deleting year' })
+    )
+})
+
 app.get('/api/rooms/:yearId', (req, res) => {
   prisma.room
     .findMany({
@@ -282,15 +342,87 @@ app.delete('/api/student-classes/:id', (req, res) => {
     )
 })
 
-app.get('/api/rooms/:yearId', (req, res) => {
-  prisma.room
+app.get('/api/subjects/:yearId', (req, res) => {
+  prisma.subject
     .findMany({
       where: { yearId: Number(req.params.yearId) },
-      select: { id: true, name: true },
+      select: { id: true, name: true, abbreviation: true },
     })
-    .then((rooms) => res.json(rooms))
+    .then((subjects) => res.json(subjects))
     .catch((err) =>
-      res.status(500).json({ error: err.message || 'Error fetching rooms' })
+      res.status(500).json({ error: err.message || 'Error fetching subjects' })
+    )
+})
+
+app.post('/api/subjects/:yearId', (req, res) => {
+  const { name, abbreviation } = req.body
+
+  if (!name) {
+    res.status(400).json({ error: 'Name is required' })
+    return
+  }
+
+  if (name.length > 255) {
+    res.status(400).json({ error: 'Name must be up to 255 characters' })
+    return
+  }
+
+  if (abbreviation && abbreviation.length > 32) {
+    res.status(400).json({ error: 'Abbreviation must be up to 32 characters' })
+    return
+  }
+
+  prisma.subject
+    .create({
+      data: {
+        name,
+        abbreviation,
+        yearId: Number(req.params.yearId),
+      },
+    })
+    .then((newSubject) =>
+      res.json({ message: 'Subject added successfully', id: newSubject.id })
+    )
+    .catch((err) =>
+      res.status(500).json({ error: err.message || 'Error adding subject' })
+    )
+})
+
+app.patch('/api/subjects/:id', (req, res) => {
+  const { name, abbreviation } = req.body
+
+  if (!name) {
+    res.status(400).json({ error: 'Name is required' })
+    return
+  }
+
+  if (name.length > 255) {
+    res.status(400).json({ error: 'Name must be up to 255 characters' })
+    return
+  }
+
+  if (abbreviation && abbreviation.length > 32) {
+    res.status(400).json({ error: 'Abbreviation must be up to 32 characters' })
+    return
+  }
+
+  prisma.subject
+    .update({
+      where: { id: Number(req.params.id) },
+      data: { name, abbreviation },
+    })
+    .then(() => res.json({ message: 'Subject edited successfully' }))
+    .catch((err) =>
+      res.status(500).json({ error: err.message || 'Error editing subject' })
+    )
+})
+
+app.delete('/api/subjects/:id', (req, res) => {
+  prisma.subject
+    .delete({ where: { id: Number(req.params.id) } })
+    .then(() => res.json({ message: 'Subject deleted successfully' }))
+    .catch((err) =>
+      res.status(500).json({ error: err.message || 'Error deleting subject' })
     )
 })
 
@@ -300,6 +432,87 @@ app.get('/api/teachers', (_req, res) => {
     .then((teachers) => res.json(teachers))
     .catch((err) =>
       res.status(500).json({ error: err.message || 'Error fetching teachers' })
+    )
+})
+
+app.post('/api/teachers', (req, res) => {
+  const { name, initials } = req.body
+
+  if (!name) {
+    res.status(400).json({ error: 'Name is required' })
+    return
+  }
+
+  if (name.length > 255) {
+    res.status(400).json({ error: 'Name must be up to 255 characters' })
+    return
+  }
+
+  if (!initials) {
+    res.status(400).json({ error: 'Initials are required' })
+    return
+  }
+
+  if (initials.length > 4) {
+    res.status(400).json({ error: 'Initials must be up to 4 characters' })
+    return
+  }
+
+  prisma.teacher
+    .create({
+      data: {
+        name,
+        initials,
+      },
+    })
+    .then((newTeacher) =>
+      res.json({ message: 'Teacher added successfully', id: newTeacher.id })
+    )
+    .catch((err) =>
+      res.status(500).json({ error: err.message || 'Error adding teacher' })
+    )
+})
+
+app.patch('/api/teachers/:id', (req, res) => {
+  const { name, initials } = req.body
+
+  if (!name) {
+    res.status(400).json({ error: 'Name is required' })
+    return
+  }
+
+  if (name.length > 255) {
+    res.status(400).json({ error: 'Name must be up to 255 characters' })
+    return
+  }
+
+  if (!initials) {
+    res.status(400).json({ error: 'Initials are required' })
+    return
+  }
+
+  if (initials.length > 4) {
+    res.status(400).json({ error: 'Initials must be up to 4 characters' })
+    return
+  }
+
+  prisma.teacher
+    .update({
+      where: { id: Number(req.params.id) },
+      data: { name, initials },
+    })
+    .then(() => res.json({ message: 'Teacher edited successfully' }))
+    .catch((err) =>
+      res.status(500).json({ error: err.message || 'Error editing teacher' })
+    )
+})
+
+app.delete('/api/teachers/:id', (req, res) => {
+  prisma.teacher
+    .delete({ where: { id: Number(req.params.id) } })
+    .then(() => res.json({ message: 'Teacher deleted successfully' }))
+    .catch((err) =>
+      res.status(500).json({ error: err.message || 'Error deleting teacher' })
     )
 })
 
