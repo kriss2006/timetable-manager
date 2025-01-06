@@ -116,7 +116,9 @@ app.post('/api/login', async (req, res) => {
 
 app.get('/api/years', (_req, res) => {
   prisma.year
-    .findMany()
+    .findMany({
+      select: { id: true, name: true },
+    })
     .then((years) => res.json(years))
     .catch((err) =>
       res.status(500).json({ error: err.message || 'Error fetching years' })
@@ -125,7 +127,10 @@ app.get('/api/years', (_req, res) => {
 
 app.get('/api/rooms/:yearId', (req, res) => {
   prisma.room
-    .findMany({ where: { yearId: Number(req.params.yearId) } })
+    .findMany({
+      where: { yearId: Number(req.params.yearId) },
+      select: { id: true, name: true },
+    })
     .then((rooms) => res.json(rooms))
     .catch((err) =>
       res.status(500).json({ error: err.message || 'Error fetching rooms' })
@@ -195,7 +200,10 @@ app.delete('/api/rooms/:id', (req, res) => {
 
 app.get('/api/student-classes/:yearId', (req, res) => {
   prisma.studentClass
-    .findMany({ where: { yearId: Number(req.params.yearId) } })
+    .findMany({
+      where: { yearId: Number(req.params.yearId) },
+      select: { id: true, name: true },
+    })
     .then((studentClasses) => res.json(studentClasses))
     .catch((err) =>
       res
@@ -274,9 +282,21 @@ app.delete('/api/student-classes/:id', (req, res) => {
     )
 })
 
-app.get('/api/teachers/:yearId', (_req, res) => {
+app.get('/api/rooms/:yearId', (req, res) => {
+  prisma.room
+    .findMany({
+      where: { yearId: Number(req.params.yearId) },
+      select: { id: true, name: true },
+    })
+    .then((rooms) => res.json(rooms))
+    .catch((err) =>
+      res.status(500).json({ error: err.message || 'Error fetching rooms' })
+    )
+})
+
+app.get('/api/teachers', (_req, res) => {
   prisma.teacher
-    .findMany()
+    .findMany({ select: { id: true, name: true, initials: true } })
     .then((teachers) => res.json(teachers))
     .catch((err) =>
       res.status(500).json({ error: err.message || 'Error fetching teachers' })

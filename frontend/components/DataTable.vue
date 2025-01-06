@@ -45,7 +45,6 @@ const props = defineProps<{
   title: string
   isLoading: boolean
   columns: { key: string; label?: string }[]
-  hiddenColumns: string[]
   rows: T[]
   itemsPerPage: number
   onAdd: () => void
@@ -59,10 +58,8 @@ const currentPage = ref(1)
 function matchesQuery(row: T) {
   const query = searchQuery.value.toLowerCase()
   const searchableRow = row as { [key: string]: any }
-  return Object.keys(searchableRow).some(
-    (key) =>
-      !props.hiddenColumns.includes(key) &&
-      String(searchableRow[key]).toLowerCase().includes(query)
+  return Object.keys(searchableRow).some((key) =>
+    String(searchableRow[key]).toLowerCase().includes(query)
   )
 }
 

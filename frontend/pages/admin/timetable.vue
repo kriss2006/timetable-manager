@@ -373,7 +373,8 @@ const editElement = async (data: ModalData) => {
       if (
         index !== -1 &&
         data.input.startTime instanceof Date &&
-        data.input.endTime instanceof Date
+        data.input.endTime instanceof Date &&
+        data.select?.room
       ) {
         timetable.value[day].splice(index, 1, {
           ...timetable.value[day][index],

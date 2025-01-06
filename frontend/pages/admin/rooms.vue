@@ -3,7 +3,6 @@
     title="Manage rooms"
     :isLoading="roomsLoading"
     :columns="columns"
-    :hiddenColumns="hiddenColumns"
     :rows="rooms"
     :itemsPerPage="8"
     :onAdd="openAddModal"
@@ -20,15 +19,14 @@
     @add:row="addRow($event)"
     @reset:error-message="errorMessage = ''"
   />
+
   <EditModal
-    :open="editModalOpen"
-    :hidden-columns="hiddenColumns"
-    :row="editFormData"
-    :errorMessage="errorMessage"
-    @update:open="editModalOpen = $event"
-    @edit:row="editRow($event)"
-    @reset:error-message="errorMessage = ''"
+    :data="editModalData"
+    @close="editModalData.open = false"
+    @reset:error-message="editModalData.errorMessage = ''"
+    @edit="editRow($event)"
   />
+  <!--
   <RemoveModal
     :open="removeModalOpen"
     :hidden-columns="hiddenColumns"
@@ -37,6 +35,12 @@
     @update:open="removeModalOpen = $event"
     @remove:row="removeRow($event)"
     @reset:error-message="errorMessage = ''"
+  /> -->
+  <RemoveModal
+    :data="removeModalData"
+    @close="removeModalData.open = false"
+    @reset:error-message="removeModalData.errorMessage = ''"
+    @remove="removeRow($event)"
   />
 </template>
 
@@ -59,7 +63,7 @@ onMounted(async () => {
 })
 
 const columns = [{ key: 'name', label: 'Name' }, { key: 'actions' }]
-const hiddenColumns = ['id', 'yearId', 'year_id']
+const hiddenColumns = []
 const errorMessage = ref('')
 
 const addModalOpen = ref(false)
@@ -90,62 +94,72 @@ const addRow = (row: Room) => {
     })
 }
 
-const editModalOpen = ref(false)
-const editFormData = ref({
-  id: -1,
-  name: '',
+const editModalData = ref<ModalData>({
+  open: false,
+  errorMessage: '',
+  id: NaN,
+  input: {
+    name: '',
+  },
 })
 
 const openEditModal = (row: Room) => {
-  editFormData.value = { id: row.id, name: row.name }
-  errorMessage.value = ''
-  editModalOpen.value = true
+  editModalData.value = {
+    open: true,
+    errorMessage: '',
+    id: row.id,
+    input: { name: row.name },
+  }
 }
 
-const editRow = async (row: Room) => {
+const editRow = async (data: ModalData) => {
   await axios
-    .patch(`http://localhost:3001/api/rooms/${row.id}`, {
-      name: row.name,
+    .patch(`http://localhost:3001/api/rooms/${data.id}`, {
+      name: data.input.name,
     })
     .then(() => {
-      const index = rooms.value.findIndex((item) => item.id === row.id)
-      if (index !== -1) {
-        Object.assign(rooms.value[index], row)
+      const index = rooms.value.findIndex((item) => item.id === data.id)
+      if (index !== -1 && typeof data.input.name === 'string') {
+        rooms.value[index] = { id: data.id, name: data.input.name }
       }
-      editModalOpen.value = false
+      editModalData.value.open = false
     })
     .catch((error) => {
       if (error.response) {
-        errorMessage.value = error.response.data.error
+        editModalData.value.errorMessage = error.response.data.error
       }
     })
 }
 
-const removeModalOpen = ref(false)
-const removeFormData = ref({
-  id: -1,
+const removeModalData = ref<RemoveModalData>({
+  open: false,
+  errorMessage: '',
+  id: NaN,
   name: '',
 })
 
 const openRemoveModal = (row: Room) => {
-  removeFormData.value = { id: row.id, name: row.name }
-  errorMessage.value = ''
-  removeModalOpen.value = true
+  removeModalData.value = {
+    open: true,
+    errorMessage: '',
+    id: row.id,
+    name: row.name,
+  }
 }
 
-const removeRow = async (id: number) => {
+const removeRow = async (data: RemoveModalData) => {
   await axios
-    .delete(`http://localhost:3001/api/rooms/${id}`)
+    .delete(`http://localhost:3001/api/rooms/${data.id}`)
     .then(() => {
-      const index = rooms.value.findIndex((item) => item.id === id)
+      const index = rooms.value.findIndex((item) => item.id === data.id)
       if (index !== -1) {
         rooms.value.splice(index, 1)
       }
-      removeModalOpen.value = false
+      removeModalData.value.open = false
     })
     .catch((error) => {
       if (error.response) {
-        errorMessage.value = error.response.data.error
+        removeModalData.value.errorMessage = error.response.data.error
       }
     })
 }

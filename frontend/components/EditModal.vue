@@ -9,7 +9,7 @@
           :placeholder="`Enter ${String(key)}`"
         />
       </template>
-      <div v-if="formData.select.room">
+      <div v-if="formData.select?.room">
         <USelectMenu
           :loading="roomsLoading"
           searchable
@@ -43,7 +43,7 @@ const { roomsLoading } = storeToRefs(store)
 const rooms = ref<Room[]>([])
 
 onMounted(async () => {
-  if ('room' in props.data.select) {
+  if (props.data.select && 'room' in props.data.select) {
     rooms.value = await store.fetchRooms()
   }
 })

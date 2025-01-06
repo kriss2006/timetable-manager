@@ -73,7 +73,7 @@ declare global {
     errorMessage: string
     id: number
     input: Record<string, number | string | boolean | Date>
-    select: Record<'room', Room>
+    select?: Record<'room', Room>
   }
 
   interface RemoveModalData {
