@@ -11,31 +11,17 @@
   />
 
   <AddModal
-    :open="addModalOpen"
-    :hidden-columns="hiddenColumns"
-    :row="addFormData"
-    :errorMessage="errorMessage"
-    @update:open="addModalOpen = $event"
-    @add:row="addRow($event)"
-    @reset:error-message="errorMessage = ''"
+    :data="addModalData"
+    @close="addModalData.open = false"
+    @reset:error-message="addModalData.errorMessage = ''"
+    @edit="addRow($event)"
   />
-
   <EditModal
     :data="editModalData"
     @close="editModalData.open = false"
     @reset:error-message="editModalData.errorMessage = ''"
     @edit="editRow($event)"
   />
-  <!--
-  <RemoveModal
-    :open="removeModalOpen"
-    :hidden-columns="hiddenColumns"
-    :row="removeFormData"
-    :errorMessage="errorMessage"
-    @update:open="removeModalOpen = $event"
-    @remove:row="removeRow($event)"
-    @reset:error-message="errorMessage = ''"
-  /> -->
   <RemoveModal
     :data="removeModalData"
     @close="removeModalData.open = false"
@@ -63,33 +49,39 @@ onMounted(async () => {
 })
 
 const columns = [{ key: 'name', label: 'Name' }, { key: 'actions' }]
-const hiddenColumns = []
-const errorMessage = ref('')
 
-const addModalOpen = ref(false)
-const addFormData = ref({
-  name: '',
-  yearId: -1,
+const addModalData = ref<ModalData>({
+  open: false,
+  errorMessage: '',
+  id: NaN,
+  input: {
+    name: '',
+  },
 })
 
 const openAddModal = () => {
-  addFormData.value = { name: '', yearId: selectedYearId.value }
-  errorMessage.value = ''
-  addModalOpen.value = true
+  addModalData.value = {
+    open: true,
+    errorMessage: '',
+    id: NaN,
+    input: { name: '' },
+  }
 }
 
-const addRow = (row: Room) => {
+const addRow = (data: ModalData) => {
   axios
     .post(`http://localhost:3001/api/rooms/${selectedYearId.value}`, {
-      name: row.name,
+      name: data.input.name,
     })
     .then((response) => {
-      rooms.value.push({ id: response.data.id, name: row.name })
-      addModalOpen.value = false
+      if (typeof data.input.name === 'string') {
+        rooms.value.push({ id: response.data.id, name: data.input.name })
+      }
+      addModalData.value.open = false
     })
     .catch((error) => {
       if (error.response) {
-        errorMessage.value = error.response.data.error
+        addModalData.value.errorMessage = error.response.data.error
       }
     })
 }
