@@ -484,7 +484,5 @@ const save = async () => {
       }
     )
   })
-
-  console.log(diff)
 }
 </script>
