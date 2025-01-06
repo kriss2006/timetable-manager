@@ -3,7 +3,6 @@
     title="Manage classes"
     :isLoading="studentClassesLoading"
     :columns="columns"
-    :hiddenColumns="hiddenColumns"
     :rows="studentClasses"
     :itemsPerPage="8"
     :onAdd="openAddModal"
@@ -12,31 +11,22 @@
   />
 
   <AddModal
-    :open="addModalOpen"
-    :hidden-columns="hiddenColumns"
-    :row="addFormData"
-    :errorMessage="errorMessage"
-    @update:open="addModalOpen = $event"
-    @add:row="addRow($event)"
-    @reset:error-message="errorMessage = ''"
+    :data="addModalData"
+    @close="addModalData.open = false"
+    @reset:error-message="addModalData.errorMessage = ''"
+    @add="addRow($event)"
   />
   <EditModal
-    :open="editModalOpen"
-    :hidden-columns="hiddenColumns"
-    :row="editFormData"
-    :errorMessage="errorMessage"
-    @update:open="editModalOpen = $event"
-    @edit:row="editRow($event)"
-    @reset:error-message="errorMessage = ''"
+    :data="editModalData"
+    @close="editModalData.open = false"
+    @reset:error-message="editModalData.errorMessage = ''"
+    @edit="editRow($event)"
   />
   <RemoveModal
-    :open="removeModalOpen"
-    :hidden-columns="hiddenColumns"
-    :row="removeFormData"
-    :errorMessage="errorMessage"
-    @update:open="removeModalOpen = $event"
-    @remove:row="removeRow($event)"
-    @reset:error-message="errorMessage = ''"
+    :data="removeModalData"
+    @close="removeModalData.open = false"
+    @reset:error-message="removeModalData.errorMessage = ''"
+    @remove="removeRow($event)"
   />
 </template>
 
@@ -59,93 +49,116 @@ onMounted(async () => {
 })
 
 const columns = [{ key: 'name' }, { key: 'actions' }]
-const hiddenColumns = ['id', 'yearId', 'year_id']
-const errorMessage = ref('')
 
-const addModalOpen = ref(false)
-const addFormData = ref({
-  name: '',
-  yearId: -1,
+const addModalData = ref<ModalData>({
+  open: false,
+  errorMessage: '',
+  id: NaN,
+  input: {
+    name: '',
+  },
 })
 
 const openAddModal = () => {
-  addFormData.value = { name: '', yearId: selectedYearId.value }
-  errorMessage.value = ''
-  addModalOpen.value = true
+  addModalData.value = {
+    open: true,
+    errorMessage: '',
+    id: NaN,
+    input: { name: '' },
+  }
 }
 
-const addRow = (row: StudentClass) => {
+const addRow = (data: ModalData) => {
   axios
     .post(`http://localhost:3001/api/student-classes/${selectedYearId.value}`, {
-      name: row.name,
+      name: data.input.name,
     })
     .then((response) => {
-      studentClasses.value.push({ id: response.data.id, name: row.name })
-      addModalOpen.value = false
+      if (typeof data.input.name === 'string') {
+        studentClasses.value.push({
+          id: response.data.id,
+          name: data.input.name,
+        })
+      }
+      addModalData.value.open = false
     })
     .catch((error) => {
       if (error.response) {
-        errorMessage.value = error.response.data.error
+        addModalData.value.errorMessage = error.response.data.error
       }
     })
 }
 
-const editModalOpen = ref(false)
-const editFormData = ref({
-  id: -1,
-  name: '',
+const editModalData = ref<ModalData>({
+  open: false,
+  errorMessage: '',
+  id: NaN,
+  input: {
+    name: '',
+  },
 })
 
-const openEditModal = (row: StudentClass) => {
-  editFormData.value = { id: row.id, name: row.name }
-  errorMessage.value = ''
-  editModalOpen.value = true
+const openEditModal = (row: Room) => {
+  editModalData.value = {
+    open: true,
+    errorMessage: '',
+    id: row.id,
+    input: { name: row.name },
+  }
 }
 
-const editRow = async (row: StudentClass) => {
+const editRow = async (data: ModalData) => {
   await axios
-    .patch(`http://localhost:3001/api/student-classes/${row.id}`, {
-      name: row.name,
+    .patch(`http://localhost:3001/api/student-classes/${data.id}`, {
+      name: data.input.name,
     })
     .then(() => {
-      const index = studentClasses.value.findIndex((item) => item.id === row.id)
-      if (index !== -1) {
-        Object.assign(studentClasses.value[index], row)
+      const index = studentClasses.value.findIndex(
+        (item) => item.id === data.id
+      )
+      if (index !== -1 && typeof data.input.name === 'string') {
+        studentClasses.value[index] = { id: data.id, name: data.input.name }
       }
-      editModalOpen.value = false
+      editModalData.value.open = false
     })
     .catch((error) => {
       if (error.response) {
-        errorMessage.value = error.response.data.error
+        editModalData.value.errorMessage = error.response.data.error
       }
     })
 }
 
-const removeModalOpen = ref(false)
-const removeFormData = ref({
-  id: -1,
+const removeModalData = ref<RemoveModalData>({
+  open: false,
+  errorMessage: '',
+  id: NaN,
   name: '',
 })
 
-const openRemoveModal = (row: StudentClass) => {
-  removeFormData.value = { id: row.id, name: row.name }
-  errorMessage.value = ''
-  removeModalOpen.value = true
+const openRemoveModal = (row: Room) => {
+  removeModalData.value = {
+    open: true,
+    errorMessage: '',
+    id: row.id,
+    name: row.name,
+  }
 }
 
-const removeRow = async (id: number) => {
+const removeRow = async (data: RemoveModalData) => {
   await axios
-    .delete(`http://localhost:3001/api/student-classes/${id}`)
+    .delete(`http://localhost:3001/api/student-classes/${data.id}`)
     .then(() => {
-      const index = studentClasses.value.findIndex((item) => item.id === id)
+      const index = studentClasses.value.findIndex(
+        (item) => item.id === data.id
+      )
       if (index !== -1) {
         studentClasses.value.splice(index, 1)
       }
-      removeModalOpen.value = false
+      removeModalData.value.open = false
     })
     .catch((error) => {
       if (error.response) {
-        errorMessage.value = error.response.data.error
+        removeModalData.value.errorMessage = error.response.data.error
       }
     })
 }

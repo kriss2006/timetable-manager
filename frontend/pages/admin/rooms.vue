@@ -14,7 +14,7 @@
     :data="addModalData"
     @close="addModalData.open = false"
     @reset:error-message="addModalData.errorMessage = ''"
-    @edit="addRow($event)"
+    @add="addRow($event)"
   />
   <EditModal
     :data="editModalData"

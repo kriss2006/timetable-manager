@@ -58,8 +58,9 @@ const currentPage = ref(1)
 function matchesQuery(row: T) {
   const query = searchQuery.value.toLowerCase()
   const searchableRow = row as { [key: string]: any }
-  return Object.keys(searchableRow).some((key) =>
-    String(searchableRow[key]).toLowerCase().includes(query)
+  return Object.keys(searchableRow).some(
+    (key) =>
+      key !== 'id' && String(searchableRow[key]).toLowerCase().includes(query)
   )
 }
 
