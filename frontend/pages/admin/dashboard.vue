@@ -12,11 +12,20 @@
   />
 
   <div v-if="selectedYearId">
+    <UButton color="blue" variant="soft" @click="navigateTo('years')"
+      >Manage years
+    </UButton>
     <UButton color="blue" variant="soft" @click="navigateTo('rooms')"
       >Manage rooms
     </UButton>
     <UButton color="blue" variant="soft" @click="navigateTo('classes')"
       >Manage classes
+    </UButton>
+    <UButton color="blue" variant="soft" @click="navigateTo('subjects')"
+      >Manage subjects
+    </UButton>
+    <UButton color="blue" variant="soft" @click="navigateTo('teachers')"
+      >Manage teachers
     </UButton>
     <UButton color="blue" variant="soft" @click="navigateTo('timetable')"
       >Manage timetable

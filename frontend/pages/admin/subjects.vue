@@ -1,9 +1,9 @@
 <template>
   <DataTable
-    title="Manage teachers"
-    :isLoading="teachersLoading"
+    title="Manage subjects"
+    :isLoading="subjectsLoading"
     :columns="columns"
-    :rows="teachers"
+    :rows="subjects"
     :itemsPerPage="8"
     :onAdd="openAddModal"
     :onEdit="openEditModal"
@@ -40,17 +40,17 @@ definePageMeta({
 
 const store = useAdminStore()
 
-const { teachersLoading } = storeToRefs(store)
+const { selectedYearId, subjectsLoading } = storeToRefs(store)
 
-const teachers = ref<Teacher[]>([])
+const subjects = ref<Subject[]>([])
 
 onMounted(async () => {
-  teachers.value = await store.fetchTeachers()
+  subjects.value = await store.fetchSubjects()
 })
 
 const columns = [
   { key: 'name', label: 'Name' },
-  { key: 'initials', label: 'Initials' },
+  { key: 'abbreviation', label: 'Abbreviation' },
   { key: 'actions' },
 ]
 
@@ -60,7 +60,7 @@ const addModalData = ref<ModalData>({
   id: NaN,
   input: {
     name: '',
-    initials: '',
+    abbreviation: '',
   },
 })
 
@@ -69,25 +69,25 @@ const openAddModal = () => {
     open: true,
     errorMessage: '',
     id: NaN,
-    input: { name: '', initials: '' },
+    input: { name: '', abbreviation: '' },
   }
 }
 
 const addRow = (data: ModalData) => {
   axios
-    .post(`http://localhost:3001/api/teachers`, {
+    .post(`http://localhost:3001/api/subjects/${selectedYearId.value}`, {
       name: data.input.name,
-      initials: data.input.initials,
+      abbreviation: data.input.abbreviation,
     })
     .then((response) => {
       if (
         typeof data.input.name === 'string' &&
-        typeof data.input.initials === 'string'
+        typeof data.input.abbreviation === 'string'
       ) {
-        teachers.value.push({
+        subjects.value.push({
           id: response.data.id,
           name: data.input.name,
-          initials: data.input.initials,
+          abbreviation: data.input.abbreviation,
         })
       }
 
@@ -106,36 +106,36 @@ const editModalData = ref<ModalData>({
   id: NaN,
   input: {
     name: '',
-    initials: '',
+    abbreviation: '',
   },
 })
 
-const openEditModal = (row: Teacher) => {
+const openEditModal = (row: Subject) => {
   editModalData.value = {
     open: true,
     errorMessage: '',
     id: row.id,
-    input: { name: row.name, initials: row.initials },
+    input: { name: row.name, abbreviation: row.abbreviation ?? '' },
   }
 }
 
 const editRow = async (data: ModalData) => {
   await axios
-    .patch(`http://localhost:3001/api/teachers/${data.id}`, {
+    .patch(`http://localhost:3001/api/subjects/${data.id}`, {
       name: data.input.name,
-      initials: data.input.initials,
+      abbreviation: data.input.abbreviation,
     })
     .then(() => {
-      const index = teachers.value.findIndex((item) => item.id === data.id)
+      const index = subjects.value.findIndex((item) => item.id === data.id)
       if (
         index !== -1 &&
         typeof data.input.name === 'string' &&
-        typeof data.input.initials === 'string'
+        typeof data.input.abbreviation === 'string'
       ) {
-        teachers.value[index] = {
+        subjects.value[index] = {
           id: data.id,
           name: data.input.name,
-          initials: data.input.initials,
+          abbreviation: data.input.abbreviation,
         }
       }
 
@@ -155,7 +155,7 @@ const removeModalData = ref<RemoveModalData>({
   name: '',
 })
 
-const openRemoveModal = (row: Teacher) => {
+const openRemoveModal = (row: Subject) => {
   removeModalData.value = {
     open: true,
     errorMessage: '',
@@ -166,11 +166,11 @@ const openRemoveModal = (row: Teacher) => {
 
 const removeRow = async (data: RemoveModalData) => {
   await axios
-    .delete(`http://localhost:3001/api/teachers/${data.id}`)
+    .delete(`http://localhost:3001/api/subjects/${data.id}`)
     .then(() => {
-      const index = teachers.value.findIndex((item) => item.id === data.id)
+      const index = subjects.value.findIndex((item) => item.id === data.id)
       if (index !== -1) {
-        teachers.value.splice(index, 1)
+        subjects.value.splice(index, 1)
       }
 
       removeModalData.value.open = false

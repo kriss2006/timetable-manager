@@ -80,6 +80,7 @@ const addRow = (data: ModalData) => {
           name: data.input.name,
         })
       }
+
       addModalData.value.open = false
     })
     .catch((error) => {
@@ -119,6 +120,7 @@ const editRow = async (data: ModalData) => {
       if (index !== -1 && typeof data.input.name === 'string') {
         studentClasses.value[index] = { id: data.id, name: data.input.name }
       }
+
       editModalData.value.open = false
     })
     .catch((error) => {
@@ -154,6 +156,7 @@ const removeRow = async (data: RemoveModalData) => {
       if (index !== -1) {
         studentClasses.value.splice(index, 1)
       }
+
       removeModalData.value.open = false
     })
     .catch((error) => {

@@ -77,6 +77,7 @@ const addRow = (data: ModalData) => {
       if (typeof data.input.name === 'string') {
         rooms.value.push({ id: response.data.id, name: data.input.name })
       }
+
       addModalData.value.open = false
     })
     .catch((error) => {
@@ -114,6 +115,7 @@ const editRow = async (data: ModalData) => {
       if (index !== -1 && typeof data.input.name === 'string') {
         rooms.value[index] = { id: data.id, name: data.input.name }
       }
+
       editModalData.value.open = false
     })
     .catch((error) => {
@@ -147,6 +149,7 @@ const removeRow = async (data: RemoveModalData) => {
       if (index !== -1) {
         rooms.value.splice(index, 1)
       }
+
       removeModalData.value.open = false
     })
     .catch((error) => {

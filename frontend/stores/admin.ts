@@ -14,8 +14,7 @@ export const useAdminStore = defineStore('admin', () => {
     return axios
       .get(`http://localhost:3001/api/years`)
       .then((response) => response.data)
-      .catch((err) => {
-        console.error(err)
+      .catch(() => {
         return []
       })
       .finally(() => {
@@ -29,8 +28,7 @@ export const useAdminStore = defineStore('admin', () => {
       return axios
         .get(`http://localhost:3001/api/rooms/${selectedYearId.value}`)
         .then((response) => response.data)
-        .catch((err) => {
-          console.error(err)
+        .catch(() => {
           return []
         })
         .finally(() => {
@@ -49,8 +47,7 @@ export const useAdminStore = defineStore('admin', () => {
           `http://localhost:3001/api/student-classes/${selectedYearId.value}`
         )
         .then((response) => response.data)
-        .catch((err) => {
-          console.error(err)
+        .catch(() => {
           return []
         })
         .finally(() => {
@@ -59,6 +56,36 @@ export const useAdminStore = defineStore('admin', () => {
     } else {
       return []
     }
+  }
+
+  const subjectsLoading = ref(true)
+  const fetchSubjects = async (): Promise<Subject[]> => {
+    if (selectedYearId.value > 0) {
+      return axios
+        .get(`http://localhost:3001/api/subjects/${selectedYearId.value}`)
+        .then((response) => response.data)
+        .catch(() => {
+          return []
+        })
+        .finally(() => {
+          subjectsLoading.value = false
+        })
+    } else {
+      return []
+    }
+  }
+
+  const teachersLoading = ref(true)
+  const fetchTeachers = async (): Promise<Teacher[]> => {
+    return axios
+      .get(`http://localhost:3001/api/teachers`)
+      .then((response) => response.data)
+      .catch(() => {
+        return []
+      })
+      .finally(() => {
+        teachersLoading.value = false
+      })
   }
 
   const timetableElementsLoading = ref(true)
@@ -79,8 +106,7 @@ export const useAdminStore = defineStore('admin', () => {
             endTime: new Date(endTime),
           }))
         )
-        .catch((err) => {
-          console.error(err)
+        .catch(() => {
           return []
         })
         .finally(() => {
@@ -101,8 +127,7 @@ export const useAdminStore = defineStore('admin', () => {
           `http://localhost:3001/api/available-timetable-elements/${selectedYearId.value}/${studentClassId}`
         )
         .then((response) => response.data)
-        .catch((err) => {
-          console.error(err)
+        .catch(() => {
           return []
         })
         .finally(() => {
@@ -112,21 +137,6 @@ export const useAdminStore = defineStore('admin', () => {
       return []
     }
   }
-  // const fetchTeachers = async (): Promise<Teacher[]> => {
-  //   if (selectedYearId.value > 0) {
-  //     try {
-  //       const response = await axios.get(
-  //         `http://localhost:3001/api/teachers/${selectedYearId.value}`
-  //       )
-  //       return response.data
-  //     } catch (err) {
-  //       console.error(err)
-  //       return []
-  //     }
-  //   } else {
-  //     return []
-  //   }
-  // }
 
   watch(selectedYearId, () => {
     if (selectedYearId.value > 0 && import.meta.client) {
@@ -143,6 +153,10 @@ export const useAdminStore = defineStore('admin', () => {
     fetchRooms,
     studentClassesLoading,
     fetchStudentClasses,
+    subjectsLoading,
+    fetchSubjects,
+    teachersLoading,
+    fetchTeachers,
     timetableElementsLoading,
     fetchTimetableElements,
     availableTimetableElementsLoading,

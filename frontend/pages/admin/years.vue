@@ -1,9 +1,9 @@
 <template>
   <DataTable
-    title="Manage teachers"
-    :isLoading="teachersLoading"
+    title="Manage years"
+    :isLoading="yearsLoading"
     :columns="columns"
-    :rows="teachers"
+    :rows="years"
     :itemsPerPage="8"
     :onAdd="openAddModal"
     :onEdit="openEditModal"
@@ -40,19 +40,15 @@ definePageMeta({
 
 const store = useAdminStore()
 
-const { teachersLoading } = storeToRefs(store)
+const { yearsLoading } = storeToRefs(store)
 
-const teachers = ref<Teacher[]>([])
+const years = ref<Year[]>([])
 
 onMounted(async () => {
-  teachers.value = await store.fetchTeachers()
+  years.value = await store.fetchYears()
 })
 
-const columns = [
-  { key: 'name', label: 'Name' },
-  { key: 'initials', label: 'Initials' },
-  { key: 'actions' },
-]
+const columns = [{ key: 'name', label: 'Name' }, { key: 'actions' }]
 
 const addModalData = ref<ModalData>({
   open: false,
@@ -60,7 +56,6 @@ const addModalData = ref<ModalData>({
   id: NaN,
   input: {
     name: '',
-    initials: '',
   },
 })
 
@@ -69,26 +64,18 @@ const openAddModal = () => {
     open: true,
     errorMessage: '',
     id: NaN,
-    input: { name: '', initials: '' },
+    input: { name: '' },
   }
 }
 
 const addRow = (data: ModalData) => {
   axios
-    .post(`http://localhost:3001/api/teachers`, {
+    .post(`http://localhost:3001/api/years`, {
       name: data.input.name,
-      initials: data.input.initials,
     })
     .then((response) => {
-      if (
-        typeof data.input.name === 'string' &&
-        typeof data.input.initials === 'string'
-      ) {
-        teachers.value.push({
-          id: response.data.id,
-          name: data.input.name,
-          initials: data.input.initials,
-        })
+      if (typeof data.input.name === 'string') {
+        years.value.push({ id: response.data.id, name: data.input.name })
       }
 
       addModalData.value.open = false
@@ -106,37 +93,27 @@ const editModalData = ref<ModalData>({
   id: NaN,
   input: {
     name: '',
-    initials: '',
   },
 })
 
-const openEditModal = (row: Teacher) => {
+const openEditModal = (row: Year) => {
   editModalData.value = {
     open: true,
     errorMessage: '',
     id: row.id,
-    input: { name: row.name, initials: row.initials },
+    input: { name: row.name },
   }
 }
 
 const editRow = async (data: ModalData) => {
   await axios
-    .patch(`http://localhost:3001/api/teachers/${data.id}`, {
+    .patch(`http://localhost:3001/api/years/${data.id}`, {
       name: data.input.name,
-      initials: data.input.initials,
     })
     .then(() => {
-      const index = teachers.value.findIndex((item) => item.id === data.id)
-      if (
-        index !== -1 &&
-        typeof data.input.name === 'string' &&
-        typeof data.input.initials === 'string'
-      ) {
-        teachers.value[index] = {
-          id: data.id,
-          name: data.input.name,
-          initials: data.input.initials,
-        }
+      const index = years.value.findIndex((item) => item.id === data.id)
+      if (index !== -1 && typeof data.input.name === 'string') {
+        years.value[index] = { id: data.id, name: data.input.name }
       }
 
       editModalData.value.open = false
@@ -155,7 +132,7 @@ const removeModalData = ref<RemoveModalData>({
   name: '',
 })
 
-const openRemoveModal = (row: Teacher) => {
+const openRemoveModal = (row: Year) => {
   removeModalData.value = {
     open: true,
     errorMessage: '',
@@ -166,11 +143,11 @@ const openRemoveModal = (row: Teacher) => {
 
 const removeRow = async (data: RemoveModalData) => {
   await axios
-    .delete(`http://localhost:3001/api/teachers/${data.id}`)
+    .delete(`http://localhost:3001/api/years/${data.id}`)
     .then(() => {
-      const index = teachers.value.findIndex((item) => item.id === data.id)
+      const index = years.value.findIndex((item) => item.id === data.id)
       if (index !== -1) {
-        teachers.value.splice(index, 1)
+        years.value.splice(index, 1)
       }
 
       removeModalData.value.open = false
