@@ -15,7 +15,8 @@
     "nuxt": "^3.13.0",
     "vue": "latest",
     "vue-router": "latest",
-    "vuedraggable": "^4.1.0"
+    "vuedraggable": "^4.1.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.20",

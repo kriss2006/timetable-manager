@@ -1,40 +1,215 @@
 <template>
-  <div class="wrapper">
-    <div v-for="item in classes" :key="item.id" class="box">
-      {{ item.name }}
+  <div class="grid gap-4 grid-cols-4 mx-auto my-3 w-1/2">
+    <div
+      v-for="studentClass in studentClasses"
+      :key="studentClass.id"
+      class="flex items-center justify-center border-none rounded-3xl w-36 h-36 bg-green-400 cursor-pointer"
+      @click="openModal(studentClass.id)"
+    >
+      {{ studentClass.name }}
     </div>
+
+    <UModal
+      v-model="modalData.open"
+      :ui="{
+        base: 'p-4 w-max mx-auto flex flex-col gap-4',
+        width: 'sm:max-w-full',
+      }"
+    >
+      <UTable
+        :loading="timetableElementsLoading"
+        :columns="columns"
+        :rows="rows"
+        :ui="{
+          th: { base: 'text-center w-1/5' },
+          tr: { base: 'flex flex-row' },
+          td: { base: 'flex flex-col w-1/5' },
+        }"
+      >
+        <template #monday-data="{ column, row }">
+          <span v-if="row[column.key].length">
+            <TimetableElement
+              v-for="element in row[column.key]"
+              :key="element.id"
+              :element="element"
+              :admin="false"
+              :onEdit="openEditModal"
+              :onRemove="openRemoveModal"
+            />
+          </span>
+          <span v-else />
+        </template>
+        <template #tuesday-data="{ column, row }">
+          <span v-if="row[column.key].length">
+            <TimetableElement
+              v-for="element in row[column.key]"
+              :key="element.id"
+              :element="element"
+              :admin="false"
+              :onEdit="openEditModal"
+              :onRemove="openRemoveModal"
+            />
+          </span>
+          <span v-else />
+        </template>
+        <template #wednesday-data="{ column, row }">
+          <span v-if="row[column.key].length">
+            <TimetableElement
+              v-for="element in row[column.key]"
+              :key="element.id"
+              :element="element"
+              :admin="false"
+              :onEdit="openEditModal"
+              :onRemove="openRemoveModal"
+            />
+          </span>
+          <span v-else />
+        </template>
+        <template #thursday-data="{ column, row }">
+          <span v-if="row[column.key].length">
+            <TimetableElement
+              v-for="element in row[column.key]"
+              :key="element.id"
+              :element="element"
+              :admin="false"
+              :onEdit="openEditModal"
+              :onRemove="openRemoveModal"
+            />
+          </span>
+          <span v-else />
+        </template>
+        <template #friday-data="{ column, row }">
+          <span v-if="row[column.key].length">
+            <TimetableElement
+              v-for="element in row[column.key]"
+              :key="element.id"
+              :element="element"
+              :admin="false"
+              :onEdit="openEditModal"
+              :onRemove="openRemoveModal"
+            />
+          </span>
+          <span v-else />
+        </template>
+      </UTable>
+      <div class="flex justify-end gap-2 mt-4">
+        <!-- <UButton color="blue" variant="soft" @click="save">Save</UButton> -->
+        <UButton color="red" variant="soft" @click="modalData.open = false"
+          >Close</UButton
+        >
+      </div>
+    </UModal>
   </div>
 </template>
 
 <script setup lang="ts">
 const store = useAdminStore()
 
-const classes = ref<StudentClass[]>([])
+const { timetableElementsLoading } = storeToRefs(store)
+
+store.selectedYearId = 1
+const selectedTerm = 1
+const studentClasses = ref<StudentClass[]>([])
 
 onMounted(async () => {
-  const resultClasses = await store.fetchStudentClasses()
-  if (resultClasses) {
-    classes.value = resultClasses
-  }
+  studentClasses.value = await store.fetchStudentClasses()
 })
-</script>
-<style scoped>
-.wrapper {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 5vh;
-  margin: 5vh auto;
-  width: 50vw;
+
+const modalData = ref({ open: false, studentClassId: 1 })
+
+const openModal = (studentClassId: number) => {
+  modalData.value = {
+    open: true,
+    studentClassId,
+  }
 }
 
-.box {
-  width: 10vmax;
-  height: 10vmax;
-  background-color: lightgray;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  border-radius: 12.5%;
+const timetable = ref<Timetable>({
+  monday: [],
+  tuesday: [],
+  wednesday: [],
+  thursday: [],
+  friday: [],
+  available: [],
+})
+
+const fetchTimetable = async (): Promise<Timetable> => {
+  let fetchedTimetable: Timetable = {
+    monday: [],
+    tuesday: [],
+    wednesday: [],
+    thursday: [],
+    friday: [],
+    available: [],
+  }
+  if (selectedTerm && modalData.value.studentClassId) {
+    fetchedTimetable.monday = await store.fetchTimetableElements(
+      selectedTerm,
+      modalData.value.studentClassId,
+      'Monday'
+    )
+
+    fetchedTimetable.tuesday = await store.fetchTimetableElements(
+      selectedTerm,
+      modalData.value.studentClassId,
+      'Tuesday'
+    )
+
+    fetchedTimetable.wednesday = await store.fetchTimetableElements(
+      selectedTerm,
+      modalData.value.studentClassId,
+      'Wednesday'
+    )
+
+    fetchedTimetable.thursday = await store.fetchTimetableElements(
+      selectedTerm,
+      modalData.value.studentClassId,
+      'Thursday'
+    )
+
+    fetchedTimetable.friday = await store.fetchTimetableElements(
+      selectedTerm,
+      modalData.value.studentClassId,
+      'Friday'
+    )
+  }
+
+  return fetchedTimetable
 }
-</style>
+
+const updateTimetable = async () => {
+  timetable.value = await fetchTimetable()
+}
+
+watchEffect(() => {
+  updateTimetable()
+})
+
+const columns = [
+  {
+    key: 'monday',
+    label: 'Monday',
+  },
+  {
+    key: 'tuesday',
+    label: 'Tuesday',
+  },
+  {
+    key: 'wednesday',
+    label: 'Wednesday',
+  },
+  {
+    key: 'thursday',
+    label: 'Thursday',
+  },
+  {
+    key: 'friday',
+    label: 'Friday',
+  },
+]
+
+const rows = computed(() => [timetable.value])
+
+const openEditModal = () => {}
+const openRemoveModal = () => {}
+</script>

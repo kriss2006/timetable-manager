@@ -31,6 +31,11 @@ declare global {
     initials: string
   }
 
+  interface TableTeacher {
+    Name: string
+    Initials: string
+  }
+
   // For a year, a term, a student class (and a day)
   interface TimetableElement {
     id: number

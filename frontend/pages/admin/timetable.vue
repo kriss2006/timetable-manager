@@ -75,6 +75,7 @@
               <TimetableElement
                 :key="element.id"
                 :element="element"
+                :admin="true"
                 :onEdit="openEditModal"
                 :onRemove="openRemoveModal"
               />
@@ -92,6 +93,7 @@
               <TimetableElement
                 :key="element.id"
                 :element="element"
+                :admin="true"
                 :onEdit="openEditModal"
                 :onRemove="openRemoveModal"
               />
@@ -109,6 +111,7 @@
               <TimetableElement
                 :key="element.id"
                 :element="element"
+                :admin="true"
                 :onEdit="openEditModal"
                 :onRemove="openRemoveModal"
               />
@@ -126,6 +129,7 @@
               <TimetableElement
                 :key="element.id"
                 :element="element"
+                :admin="true"
                 :onEdit="openEditModal"
                 :onRemove="openRemoveModal"
               />
@@ -143,6 +147,7 @@
               <TimetableElement
                 :key="element.id"
                 :element="element"
+                :admin="true"
                 :onEdit="openEditModal"
                 :onRemove="openRemoveModal"
               />
