@@ -14,9 +14,7 @@ export const useAdminStore = defineStore('admin', () => {
     return axios
       .get(`http://localhost:3001/api/years`)
       .then((response) => response.data)
-      .catch(() => {
-        return []
-      })
+      .catch(() => [])
       .finally(() => {
         yearsLoading.value = false
       })
@@ -28,9 +26,7 @@ export const useAdminStore = defineStore('admin', () => {
       return axios
         .get(`http://localhost:3001/api/rooms/${selectedYearId.value}`)
         .then((response) => response.data)
-        .catch(() => {
-          return []
-        })
+        .catch(() => [])
         .finally(() => {
           roomsLoading.value = false
         })
@@ -40,16 +36,22 @@ export const useAdminStore = defineStore('admin', () => {
   }
 
   const studentClassesLoading = ref(true)
-  const fetchStudentClasses = async (): Promise<StudentClass[]> => {
-    if (selectedYearId.value > 0) {
+  const fetchStudentClasses = async (
+    currentYear?: string
+  ): Promise<StudentClass[]> => {
+    let yearId = selectedYearId.value
+    if (currentYear) {
+      yearId = await axios
+        .get(`http://localhost:3001/api/years/${currentYear}`)
+        .then((response) => response.data.id)
+        .catch(() => selectedYearId.value)
+    }
+
+    if (yearId > 0) {
       return axios
-        .get(
-          `http://localhost:3001/api/student-classes/${selectedYearId.value}`
-        )
+        .get(`http://localhost:3001/api/student-classes/${yearId}`)
         .then((response) => response.data)
-        .catch(() => {
-          return []
-        })
+        .catch(() => [])
         .finally(() => {
           studentClassesLoading.value = false
         })
@@ -64,9 +66,7 @@ export const useAdminStore = defineStore('admin', () => {
       return axios
         .get(`http://localhost:3001/api/subjects/${selectedYearId.value}`)
         .then((response) => response.data)
-        .catch(() => {
-          return []
-        })
+        .catch(() => [])
         .finally(() => {
           subjectsLoading.value = false
         })
@@ -80,9 +80,7 @@ export const useAdminStore = defineStore('admin', () => {
     return axios
       .get(`http://localhost:3001/api/teachers`)
       .then((response) => response.data)
-      .catch(() => {
-        return []
-      })
+      .catch(() => [])
       .finally(() => {
         teachersLoading.value = false
       })
@@ -92,12 +90,21 @@ export const useAdminStore = defineStore('admin', () => {
   const fetchTimetableElements = async (
     term: number | undefined,
     studentClassId: number | undefined,
-    day: string
+    day: string,
+    currentYear?: string
   ): Promise<TimetableElement[]> => {
-    if (selectedYearId.value > 0 && term && studentClassId) {
+    let yearId = selectedYearId.value
+    if (currentYear) {
+      yearId = await axios
+        .get(`http://localhost:3001/api/years/${currentYear}`)
+        .then((response) => response.data.id)
+        .catch(() => selectedYearId.value)
+    }
+
+    if (yearId > 0 && term && studentClassId) {
       return axios
         .get<TimetableElement[]>(
-          `http://localhost:3001/api/timetable-elements/${selectedYearId.value}/${term}/${studentClassId}/${day}`
+          `http://localhost:3001/api/timetable-elements/${yearId}/${term}/${studentClassId}/${day}`
         )
         .then((response) =>
           response.data.map(({ startTime, endTime, ...rest }) => ({
@@ -106,9 +113,7 @@ export const useAdminStore = defineStore('admin', () => {
             endTime: new Date(endTime),
           }))
         )
-        .catch(() => {
-          return []
-        })
+        .catch(() => [])
         .finally(() => {
           timetableElementsLoading.value = false
         })
@@ -127,9 +132,7 @@ export const useAdminStore = defineStore('admin', () => {
           `http://localhost:3001/api/available-timetable-elements/${selectedYearId.value}/${studentClassId}`
         )
         .then((response) => response.data)
-        .catch(() => {
-          return []
-        })
+        .catch(() => [])
         .finally(() => {
           availableTimetableElementsLoading.value = false
         })

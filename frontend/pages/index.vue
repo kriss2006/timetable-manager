@@ -107,12 +107,32 @@ const store = useAdminStore()
 
 const { timetableElementsLoading } = storeToRefs(store)
 
-store.selectedYearId = 1
-const selectedTerm = 1
+const getCurrentYear = () => {
+  const currentDate = new Date()
+  const currentYear = currentDate.getFullYear()
+  const currentMonth = currentDate.getMonth() + 1
+
+  if (currentMonth < 9) {
+    return encodeURIComponent(`${currentYear - 1}/${currentYear}`)
+  } else {
+    return encodeURIComponent(`${currentYear}/${currentYear + 1}`)
+  }
+}
+
+const getCurrentTerm = () => {
+  const currentMonth = new Date().getMonth() + 1
+
+  if (currentMonth >= 9 || currentMonth <= 1) {
+    return 1
+  } else {
+    return 2
+  }
+}
+
 const studentClasses = ref<StudentClass[]>([])
 
 onMounted(async () => {
-  studentClasses.value = await store.fetchStudentClasses()
+  studentClasses.value = await store.fetchStudentClasses(getCurrentYear())
 })
 
 const modalData = ref({ open: false, studentClassId: 1 })
@@ -142,35 +162,41 @@ const fetchTimetable = async (): Promise<Timetable> => {
     friday: [],
     available: [],
   }
-  if (selectedTerm && modalData.value.studentClassId) {
+
+  if (getCurrentTerm() && modalData.value.studentClassId) {
     fetchedTimetable.monday = await store.fetchTimetableElements(
-      selectedTerm,
+      getCurrentTerm(),
       modalData.value.studentClassId,
-      'Monday'
+      'Monday',
+      getCurrentYear()
     )
 
     fetchedTimetable.tuesday = await store.fetchTimetableElements(
-      selectedTerm,
+      getCurrentTerm(),
       modalData.value.studentClassId,
-      'Tuesday'
+      'Tuesday',
+      getCurrentYear()
     )
 
     fetchedTimetable.wednesday = await store.fetchTimetableElements(
-      selectedTerm,
+      getCurrentTerm(),
       modalData.value.studentClassId,
-      'Wednesday'
+      'Wednesday',
+      getCurrentYear()
     )
 
     fetchedTimetable.thursday = await store.fetchTimetableElements(
-      selectedTerm,
+      getCurrentTerm(),
       modalData.value.studentClassId,
-      'Thursday'
+      'Thursday',
+      getCurrentYear()
     )
 
     fetchedTimetable.friday = await store.fetchTimetableElements(
-      selectedTerm,
+      getCurrentTerm(),
       modalData.value.studentClassId,
-      'Friday'
+      'Friday',
+      getCurrentYear()
     )
   }
 

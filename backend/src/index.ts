@@ -114,6 +114,25 @@ app.post('/api/login', async (req, res) => {
   })
 })
 
+app.get('/api/years/:yearName', (req, res) => {
+  const yearName = req.params.yearName
+
+  prisma.year
+    .findUnique({
+      where: { name: yearName },
+    })
+    .then((year) => {
+      if (year) {
+        res.json({ id: year.id })
+      } else {
+        res.status(404).json({ error: 'Year not found' })
+      }
+    })
+    .catch((err) =>
+      res.status(500).json({ error: err.message || 'Error fetching year' })
+    )
+})
+
 app.get('/api/years', (_req, res) => {
   prisma.year
     .findMany({
