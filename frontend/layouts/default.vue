@@ -7,12 +7,11 @@
         >🏠</i
       >
       <h1 class="text-xl font-semibold text-center">Timetable Manager</h1>
-      <!-- <i
-        @click="navigateTo('/account')"
+      <i
+        @click="navigateTo('/login')"
         class="text-2xl not-italic cursor-pointer"
         >👤</i
-      > -->
-      <i class="text-2xl not-italic cursor-pointer" />
+      >
     </header>
     <main class="flex-grow p-4">
       <NuxtPage />
