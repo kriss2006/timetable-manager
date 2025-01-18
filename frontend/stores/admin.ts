@@ -1,12 +1,25 @@
 import axios from 'axios'
+import { jwtDecode } from 'jwt-decode'
 
 export const useAdminStore = defineStore('admin', () => {
   const selectedYearId = ref(0)
+  const user = ref<User | null>(null)
 
-  const getFromLocalStorage = () => {
-    selectedYearId.value = import.meta.client
-      ? Number(localStorage.getItem('selectedYearId') ?? 0)
-      : 0
+  const loadFromLocalStorage = () => {
+    if (import.meta.client) {
+      selectedYearId.value = Number(localStorage.getItem('selectedYearId'))
+
+      const token = localStorage.getItem('token')
+      if (token) {
+        const decodedToken = jwtDecode<{ user: User }>(token)
+        user.value = {
+          id: decodedToken.user.id,
+          name: decodedToken.user.name,
+          username: decodedToken.user.username,
+          type: decodedToken.user.type,
+        }
+      }
+    }
   }
 
   const yearsLoading = ref(true)
@@ -148,7 +161,8 @@ export const useAdminStore = defineStore('admin', () => {
   })
 
   return {
-    getFromLocalStorage,
+    loadFromLocalStorage,
+    user,
     selectedYearId,
     yearsLoading,
     fetchYears,

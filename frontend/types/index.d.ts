@@ -1,6 +1,13 @@
 export {}
 
 declare global {
+  interface User {
+    id: number
+    name: string
+    username: string
+    type: 'student' | 'teacher' | 'admin' | 'superAdmin'
+  }
+
   interface Year {
     id: number
     name: string

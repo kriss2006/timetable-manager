@@ -9,26 +9,24 @@
       <h1 class="text-xl font-semibold text-center">
         Timetable Manager Administration
       </h1>
-      <!-- <i
-          @click="navigateTo('/account')"
-          class="text-2xl not-italic cursor-pointer"
-          >👤</i
-        > -->
-      <i class="text-2xl not-italic cursor-pointer" />
+      <i
+        @click="navigateTo('/login')"
+        class="text-2xl not-italic cursor-pointer"
+        >👤 {{ user ? user.name : '' }}</i
+      >
     </header>
     <main class="flex-grow p-4">
       <NuxtPage />
     </main>
     <footer class="p-4 text-sm border-t">
-      <p>&copy; {{ today.getFullYear() }} Timetable Manager</p>
+      <p>&copy; {{ new Date().getFullYear() }} Timetable Manager</p>
     </footer>
   </div>
 </template>
 
 <script setup lang="ts">
 const store = useAdminStore()
+const { user } = storeToRefs(store)
 
-store.getFromLocalStorage()
-
-const today = new Date()
+store.loadFromLocalStorage()
 </script>

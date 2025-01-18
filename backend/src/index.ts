@@ -89,29 +89,97 @@ app.post('/api/signup', async (req, res) => {
 app.post('/api/login', async (req, res) => {
   const { username, password } = req.body
 
-  prisma.user.findUnique({ where: { username } }).then((user) => {
-    if (!user) {
-      return res.status(400).json({ message: 'Invalid credentials' })
-    }
+  if (!username) {
+    res.status(400).json({ message: 'Username is required' })
+    return
+  }
 
-    bcrypt
-      .compare(password, user.passwordHash)
-      .then((isMatch) => {
+  if (!password) {
+    res.status(400).json({ message: 'Password is required' })
+    return
+  }
+
+  prisma.user
+    .findUnique({
+      where: { username },
+    })
+    .then((user) => {
+      if (!user) {
+        res.status(400).json({ message: 'Invalid credentials' })
+        return
+      }
+      bcrypt.compare(password, user.passwordHash).then((isMatch) => {
         if (!isMatch) {
-          return res.status(400).json({ message: 'Invalid credentials' })
+          res.status(400).json({ message: 'Invalid credentials' })
+          return
         }
-
         const payload = {
-          user: { id: user.id, username: user.username },
+          user: {
+            id: user.id,
+            name: user.name,
+            username: user.username,
+            type: user.type,
+          },
         }
-
         const token = jwt.sign(payload, jwtSecret, { expiresIn: '1h' })
         res.json({ token })
       })
-      .catch((err) =>
-        res.status(500).json({ message: err.message || 'Server error' })
-      )
-  })
+    })
+    .catch((err) =>
+      res.status(500).json({ message: err.message || 'Server error' })
+    )
+})
+
+app.post('/api/google-login', async (req, res) => {
+  const { token } = req.body
+
+  const decoded = jwt.decode(token)
+  if (!decoded || typeof decoded !== 'object') {
+    res.status(400).json({ message: 'No token' })
+  } else {
+    const existingUser = await prisma.user.findUnique({
+      where: { username: decoded.email },
+    })
+
+    if (existingUser) {
+      const payload = {
+        user: {
+          id: existingUser.id,
+          name: existingUser.name,
+          username: existingUser.username,
+          type: existingUser.type,
+        },
+      }
+      const newToken = jwt.sign(payload, jwtSecret, { expiresIn: '1h' })
+      res.json({ token: newToken })
+    } else {
+      const newUser = await prisma.user.create({
+        data: {
+          name: decoded.name,
+          // name: `${decoded.given_name} ${decoded.family_name}`,
+          username: decoded.email,
+          passwordHash: 'google',
+          type: 'student',
+        },
+      })
+
+      const payload = {
+        user: {
+          id: newUser.id,
+          name: newUser.name,
+          username: newUser.username,
+          type: newUser.type,
+        },
+      }
+
+      const newToken = jwt.sign(payload, jwtSecret, { expiresIn: '1h' })
+
+      res.status(201).json({
+        message: 'User created successfully',
+        token: newToken,
+      })
+    }
+  }
 })
 
 app.get('/api/years/:yearName', (req, res) => {

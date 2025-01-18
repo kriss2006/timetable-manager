@@ -10,7 +10,7 @@
       <i
         @click="navigateTo('/login')"
         class="text-2xl not-italic cursor-pointer"
-        >👤</i
+        >👤 {{ user ? user.name : '' }}</i
       >
     </header>
     <main class="flex-grow p-4">
@@ -23,5 +23,10 @@
 </template>
 
 <script setup lang="ts">
+const store = useAdminStore()
+const { user } = storeToRefs(store)
+
+store.loadFromLocalStorage()
+
 const today = new Date()
 </script>
