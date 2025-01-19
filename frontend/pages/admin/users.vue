@@ -1,12 +1,11 @@
 <template>
   <div class="flex flex-col items-center my-2 gap-4">
-    <DataTable
+    <UsersTable
       title="Manage users"
       :isLoading="usersLoading"
       :columns="columns"
       :rows="users"
       :itemsPerPage="8"
-      :onAdd="openAddModal"
       :onEdit="openEditModal"
       :onRemove="openRemoveModal"
     />
@@ -45,7 +44,6 @@ definePageMeta({
 })
 
 const store = useAdminStore()
-
 const { usersLoading } = storeToRefs(store)
 
 const users = ref<User[]>([])
@@ -60,8 +58,6 @@ const columns = [
   { key: 'type', label: 'Type' },
   { key: 'actions' },
 ]
-
-const openAddModal = () => {}
 
 const editModalData = ref<ModalData>({
   open: false,

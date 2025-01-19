@@ -10,7 +10,7 @@
         Timetable Manager Administration
       </h1>
       <i
-        @click="navigateTo('/login')"
+        @click="navigateTo('/account')"
         class="text-2xl not-italic cursor-pointer"
         >👤 {{ user ? user.name : '' }}</i
       >

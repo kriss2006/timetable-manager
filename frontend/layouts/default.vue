@@ -8,7 +8,7 @@
       >
       <h1 class="text-xl font-semibold text-center">Timetable Manager</h1>
       <i
-        @click="navigateTo('/login')"
+        @click="navigateTo('/account')"
         class="text-2xl not-italic cursor-pointer"
         >👤 {{ user ? user.name : '' }}</i
       >
