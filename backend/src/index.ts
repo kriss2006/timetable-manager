@@ -50,6 +50,15 @@ app.post('/api/signup', async (req, res) => {
     return
   }
 
+  const existingUser = await prisma.user.findUnique({
+    where: { username },
+  })
+
+  if (existingUser) {
+    res.status(400).json({ message: 'User already exists' })
+    return
+  }
+
   const salt = await bcrypt.genSalt(10)
   const passwordHash = await bcrypt.hash(password, salt)
 
@@ -66,6 +75,7 @@ app.post('/api/signup', async (req, res) => {
       const payload = {
         user: {
           id: newUser.id,
+          name: newUser.name,
           username: newUser.username,
           type: newUser.type,
         },
@@ -82,7 +92,7 @@ app.post('/api/signup', async (req, res) => {
       })
     })
     .catch((err) =>
-      res.status(500).json({ error: err.message || 'Error adding room' })
+      res.status(500).json({ message: err.message || 'Server error' })
     )
 })
 
