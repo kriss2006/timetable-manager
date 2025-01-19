@@ -5,7 +5,7 @@ declare global {
     id: number
     name: string
     username: string
-    type: 'student' | 'teacher' | 'admin' | 'superAdmin'
+    type: 'student' | 'teacher' | 'admin' | 'super_admin'
   }
 
   interface Year {

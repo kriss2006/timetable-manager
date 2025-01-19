@@ -4,7 +4,7 @@ import cors from 'cors'
 import dotenv from 'dotenv'
 import jwt from 'jsonwebtoken'
 
-import { UserType, Day, PrismaClient } from '@prisma/client'
+import { Day, PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
@@ -190,6 +190,58 @@ app.post('/api/google-login', async (req, res) => {
       })
     }
   }
+})
+
+app.get('/api/users', (_req, res) => {
+  prisma.user
+    .findMany({ select: { id: true, name: true, username: true, type: true } })
+    .then((users) => res.json(users))
+    .catch((err) =>
+      res.status(500).json({ message: err.message || 'Error fetching users' })
+    )
+})
+
+app.patch('/api/users/:id', (req, res) => {
+  const { name, username, type } = req.body
+
+  if (!name) {
+    res.status(400).json({ error: 'Name is required' })
+    return
+  }
+
+  if (name.length > 255) {
+    res.status(400).json({ error: 'Name must be up to 255 characters' })
+    return
+  }
+
+  if (!username) {
+    res.status(400).json({ error: 'Username is required' })
+    return
+  }
+
+  if (username.length > 32) {
+    res.status(400).json({ error: 'Username must be up to 32 characters' })
+    return
+  }
+
+  prisma.user
+    .update({
+      where: { id: Number(req.params.id) },
+      data: { name, username, type },
+    })
+    .then(() => res.json({ message: 'User edited successfully' }))
+    .catch((err) =>
+      res.status(500).json({ message: err.message || 'Error editing user' })
+    )
+})
+
+app.delete('/api/users/:id', (req, res) => {
+  prisma.user
+    .delete({ where: { id: Number(req.params.id) } })
+    .then(() => res.json({ message: 'User deleted successfully' }))
+    .catch((err) =>
+      res.status(500).json({ message: err.message || 'Error deleting user' })
+    )
 })
 
 app.get('/api/years/:yearName', (req, res) => {

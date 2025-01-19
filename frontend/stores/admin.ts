@@ -15,6 +15,17 @@ export const useAdminStore = defineStore('admin', () => {
     }
   }
 
+  const usersLoading = ref(true)
+  const fetchUsers = async (): Promise<User[]> => {
+    return axios
+      .get(`http://localhost:3001/api/users`)
+      .then((response) => response.data)
+      .catch(() => [])
+      .finally(() => {
+        usersLoading.value = false
+      })
+  }
+
   const yearsLoading = ref(true)
   const fetchYears = async (): Promise<Year[]> => {
     return axios
@@ -157,6 +168,8 @@ export const useAdminStore = defineStore('admin', () => {
     loadFromLocalStorage,
     user,
     selectedYearId,
+    usersLoading,
+    fetchUsers,
     yearsLoading,
     fetchYears,
     roomsLoading,

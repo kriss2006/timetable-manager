@@ -14,6 +14,14 @@
 
     <div v-if="selectedYearId" class="flex flex-col items-center my-2 gap-4">
       <UButton
+        v-if="user?.type === 'super_admin'"
+        color="red"
+        variant="soft"
+        @click="navigateTo('users')"
+        :ui="{ base: 'w-36 flex justify-center' }"
+        >Manage users
+      </UButton>
+      <UButton
         color="blue"
         variant="soft"
         @click="navigateTo('years')"
@@ -67,7 +75,7 @@ definePageMeta({
 
 const store = useAdminStore()
 
-const { selectedYearId, yearsLoading } = storeToRefs(store)
+const { user, selectedYearId, yearsLoading } = storeToRefs(store)
 
 const years = ref<Year[]>([])
 
