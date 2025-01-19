@@ -1,3 +1,9 @@
+import { jwtDecode } from 'jwt-decode'
+
+export const tokenToUser = (token: string) => {
+  const decoded = jwtDecode<{ user: User }>(token)
+  return decoded.user
+}
 export const dateToTimeString = (date: Date) => date.toISOString().slice(11, 16)
 
 export const timeStringToDate = (timeString: string) =>

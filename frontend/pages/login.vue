@@ -32,7 +32,6 @@
 
 <script setup>
 import axios from 'axios'
-import { jwtDecode } from 'jwt-decode'
 
 const store = useAdminStore()
 const { user } = storeToRefs(store)
@@ -88,14 +87,7 @@ const googleLoginError = () => {
 const setToken = (token) => {
   if (import.meta.client) {
     localStorage.setItem('token', token)
-    const decodedToken = jwtDecode(token)
-
-    user.value = {
-      id: decodedToken.user.id,
-      name: decodedToken.user.name,
-      username: decodedToken.user.username,
-      type: decodedToken.user.type,
-    }
+    user.value = tokenToUser(token)
   }
 }
 
@@ -106,4 +98,9 @@ const logout = () => {
     navigateTo('/')
   }
 }
+
+//todo
+// da vidq dali middleware raboti
+//signup
+//superadmin da manegave roli
 </script>

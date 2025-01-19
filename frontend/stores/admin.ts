@@ -1,5 +1,4 @@
 import axios from 'axios'
-import { jwtDecode } from 'jwt-decode'
 
 export const useAdminStore = defineStore('admin', () => {
   const selectedYearId = ref(0)
@@ -11,13 +10,7 @@ export const useAdminStore = defineStore('admin', () => {
 
       const token = localStorage.getItem('token')
       if (token) {
-        const decodedToken = jwtDecode<{ user: User }>(token)
-        user.value = {
-          id: decodedToken.user.id,
-          name: decodedToken.user.name,
-          username: decodedToken.user.username,
-          type: decodedToken.user.type,
-        }
+        user.value = tokenToUser(token)
       }
     }
   }
