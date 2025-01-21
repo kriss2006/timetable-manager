@@ -26,7 +26,7 @@
         color="blue"
         variant="soft"
         @click="save"
-        :disabled="!(selectedTerm && selectedStudentClassId)"
+        :disabled="!okToSave"
       >
         Save changes
       </UButton>
@@ -281,6 +281,8 @@ const columns = [
   },
 ]
 
+const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'] as const
+
 const rows = computed(() => [timetable.value])
 
 function cloneAvailableElement(
@@ -329,8 +331,6 @@ function cloneAvailableElement(
 }
 
 function onColumnUpdate() {
-  const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'] as const
-
   days.forEach((day) => {
     const capitalisedDay = (day.charAt(0).toUpperCase() +
       day.slice(1)) as TimetableElement['day']
@@ -365,14 +365,6 @@ const openEditModal = (element: TimetableElement) => {
 
 const editElement = async (data: ModalData) => {
   try {
-    const days = [
-      'monday',
-      'tuesday',
-      'wednesday',
-      'thursday',
-      'friday',
-    ] as const
-
     for (const day of days) {
       const index = timetable.value[day].findIndex((e) => e.id === data.id)
       if (
@@ -415,14 +407,6 @@ const openRemoveModal = (element: TimetableElement) => {
 
 const removeElement = async (data: RemoveModalData) => {
   try {
-    const days = [
-      'monday',
-      'tuesday',
-      'wednesday',
-      'thursday',
-      'friday',
-    ] as const
-
     for (const day of days) {
       const index = timetable.value[day].findIndex((e) => e.id === data.id)
       if (index !== -1) {
@@ -447,7 +431,60 @@ const removeElement = async (data: RemoveModalData) => {
   }
 }
 
+const areTeacherandRoomFree = (teacher: Teacher, room: Room) => {
+  return true
+  // axios
+  //   .get(
+  //     `http://localhost:3001/api/teacher-and-room-free/${teacher.id}/${room.id}`
+  //   )
+  //   .then((response) => {
+  //     return response.data.teacherFree
+  //   })
+  //   .catch(() => {
+  //     return false
+  //   })
+
+  // return false
+}
+
+const warningIds = computed(() => {
+  const ids: number[] = []
+
+  for (const day of days) {
+    for (const element of timetable.value[day]) {
+      if (
+        element.startTime >= element.endTime ||
+        isNaN(element.room.id) ||
+        !areTeacherandRoomFree(
+          element.studentClassSubjectTeacher.teacher,
+          element.room
+        )
+      ) {
+        ids.push(element.id)
+      }
+    }
+  }
+
+  return ids
+})
+
+const okToSave = computed(() => {
+  if (!(selectedTerm.value?.value && selectedStudentClassId.value)) {
+    return false
+  }
+
+  if (warningIds.value.length) {
+    return false
+  }
+
+  return true
+})
+
 const save = async () => {
+  if (!okToSave.value) {
+    return
+  }
+
   const initialTimetable = await fetchTimetable()
 
   const diff = compareTimetables(initialTimetable, timetable.value)
