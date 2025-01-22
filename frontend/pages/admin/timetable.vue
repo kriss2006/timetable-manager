@@ -257,6 +257,7 @@ const fetchTimetable = async (): Promise<Timetable> => {
 
 const updateTimetable = async () => {
   timetable.value = await fetchTimetable()
+  warnings.value = []
 }
 
 watchEffect(() => {
