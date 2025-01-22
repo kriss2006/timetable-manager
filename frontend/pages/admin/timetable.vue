@@ -76,6 +76,7 @@
                 :key="element.id"
                 :element="element"
                 :admin="true"
+                :warnings="warnings"
                 :onEdit="openEditModal"
                 :onRemove="openRemoveModal"
               />
@@ -94,6 +95,7 @@
                 :key="element.id"
                 :element="element"
                 :admin="true"
+                :warnings="warnings"
                 :onEdit="openEditModal"
                 :onRemove="openRemoveModal"
               />
@@ -112,6 +114,7 @@
                 :key="element.id"
                 :element="element"
                 :admin="true"
+                :warnings="warnings"
                 :onEdit="openEditModal"
                 :onRemove="openRemoveModal"
               />
@@ -130,6 +133,7 @@
                 :key="element.id"
                 :element="element"
                 :admin="true"
+                :warnings="warnings"
                 :onEdit="openEditModal"
                 :onRemove="openRemoveModal"
               />
@@ -148,6 +152,7 @@
                 :key="element.id"
                 :element="element"
                 :admin="true"
+                :warnings="warnings"
                 :onEdit="openEditModal"
                 :onRemove="openRemoveModal"
               />
@@ -431,57 +436,90 @@ const removeElement = async (data: RemoveModalData) => {
   }
 }
 
-const areTeacherandRoomFree = (teacher: Teacher, room: Room) => {
-  return true
-  // axios
-  //   .get(
-  //     `http://localhost:3001/api/teacher-and-room-free/${teacher.id}/${room.id}`
-  //   )
-  //   .then((response) => {
-  //     return response.data.teacherFree
-  //   })
-  //   .catch(() => {
-  //     return false
-  //   })
+const isTeacherFree = async (element: TimetableElement) => {
+  let result = false
+  await axios
+    .get(
+      `http://localhost:3001/api/teacher-free/${element.studentClassSubjectTeacher.teacher.id}/${element.day}/${element.startTime.toISOString()}/${element.endTime.toISOString()}/${selectedStudentClassId.value}`
+    )
+    .then(() => {
+      result = true
+    })
+    .catch(() => {
+      result = false
+    })
 
-  // return false
+  return result
 }
 
-const warningIds = computed(() => {
-  const ids: number[] = []
+const isRoomFree = async (element: TimetableElement) => {
+  await axios
+    .get(
+      `http://localhost:3001/api/room-free/${element.room.id}/${element.day}/${element.startTime.toISOString()}/${element.endTime.toISOString()}/${selectedStudentClassId.value}`
+    )
+    .then((response) => {
+      return true
+    })
+    .catch(() => {
+      return false
+    })
 
-  for (const day of days) {
-    for (const element of timetable.value[day]) {
-      if (
-        element.startTime >= element.endTime ||
-        isNaN(element.room.id) ||
-        !areTeacherandRoomFree(
-          element.studentClassSubjectTeacher.teacher,
-          element.room
-        )
-      ) {
-        ids.push(element.id)
-      }
-    }
-  }
+  return false
+}
+const warnings = ref<{ id: number; message: string }[]>([])
 
-  return ids
-})
-
-const okToSave = computed(() => {
+const okToSave = async () => {
   if (!(selectedTerm.value?.value && selectedStudentClassId.value)) {
     return false
   }
 
-  if (warningIds.value.length) {
+  warnings.value = []
+
+  for (const day of days) {
+    for (const element of timetable.value[day]) {
+      if (element.startTime >= element.endTime) {
+        warnings.value.push({
+          id: element.id,
+          message: 'Start time must be before end time.',
+        })
+        continue
+      }
+
+      if (isNaN(element.room.id)) {
+        warnings.value.push({
+          id: element.id,
+          message: 'A room must be selected',
+        })
+        continue
+      }
+
+      if (!(await isTeacherFree(element))) {
+        warnings.value.push({
+          id: element.id,
+          message: 'Teacher is with another class at this time.',
+        })
+        continue
+      }
+
+      if (!isRoomFree(element)) {
+        warnings.value.push({
+          id: element.id,
+          message: 'Another class is in this room at this time.',
+        })
+        continue
+      }
+    }
+  }
+
+  if (warnings.value.length) {
     return false
   }
 
   return true
-})
+}
 
 const save = async () => {
-  if (!okToSave.value) {
+  if (!(await okToSave())) {
     return
   }
 
@@ -489,8 +527,8 @@ const save = async () => {
 
   const diff = compareTimetables(initialTimetable, timetable.value)
 
-  diff.added.forEach((element) => {
-    axios
+  diff.added.forEach(async (element) => {
+    await axios
       .post(
         `http://localhost:3001/api/timetable-elements/${selectedYearId.value}/${selectedTerm.value?.value}/${selectedStudentClassId.value}`,
         { element }
@@ -508,18 +546,23 @@ const save = async () => {
       })
   })
 
-  diff.modified.forEach((element) => {
-    axios.patch(`http://localhost:3001/api/timetable-elements/${element.id}`, {
-      element,
-    })
+  diff.modified.forEach(async (element) => {
+    await axios.patch(
+      `http://localhost:3001/api/timetable-elements/${element.id}`,
+      {
+        element,
+      }
+    )
   })
 
-  diff.deleted.forEach((element) => {
-    axios.delete(`http://localhost:3001/api/timetable-elements/${element.id}`)
+  diff.deleted.forEach(async (element) => {
+    await axios.delete(
+      `http://localhost:3001/api/timetable-elements/${element.id}`
+    )
   })
 
-  diff.availableModified.forEach((element) => {
-    axios.patch(
+  diff.availableModified.forEach(async (element) => {
+    await axios.patch(
       `http://localhost:3001/api/available-timetable-elements/${element.id}`,
       {
         element,

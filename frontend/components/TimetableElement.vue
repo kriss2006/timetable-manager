@@ -1,7 +1,7 @@
 <template>
   <div
     class="border-2 p-2 my-1 rounded-lg text-center"
-    :class="{ 'border-yellow-500': isWarning(), 'cursor-move': admin }"
+    :class="{ 'border-yellow-500': warningMessage, 'cursor-move': admin }"
   >
     <h1 class="text-lg">{{ element.period }}.</h1>
     <p>
@@ -39,6 +39,12 @@
     >
       Remove
     </UButton>
+    <p
+      v-if="warningMessage"
+      class="text-yellow-500 mt-2 break-words whitespace-normal"
+    >
+      {{ warningMessage }}
+    </p>
   </div>
 </template>
 
@@ -46,14 +52,15 @@
 const props = defineProps<{
   element: TimetableElement
   admin: boolean
+  warnings?: { id: number; message: string }[]
   onEdit?: (element: TimetableElement) => void
   onRemove?: (element: TimetableElement) => void
 }>()
 
-const isWarning = () => {
-  return (
-    props.element.startTime === props.element.endTime ||
-    isNaN(props.element.room.id)
+const warningMessage = computed(() => {
+  const warning = props.warnings?.find(
+    (warning) => warning.id === props.element.id
   )
-}
+  return warning ? warning.message : null
+})
 </script>

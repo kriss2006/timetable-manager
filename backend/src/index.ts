@@ -742,6 +742,102 @@ app.get(
   }
 )
 
+app.get(
+  '/api/teacher-free/:teacherId/:day/:startTime/:endTime/:studentClassId',
+  (req, res) => {
+    prisma.timetableElement
+      .findMany({
+        where: {
+          AND: [
+            {
+              studentClassSubjectTeacher: {
+                teacherId: Number(req.params.teacherId),
+              },
+            },
+            { day: req.params.day as Day },
+            { studentClassId: { not: Number(req.params.studentClassId) } },
+            {
+              OR: [
+                {
+                  AND: [
+                    { startTime: { lte: req.params.startTime } },
+                    { endTime: { gte: req.params.startTime } },
+                  ],
+                },
+                {
+                  AND: [
+                    { startTime: { lte: req.params.endTime } },
+                    { endTime: { gte: req.params.endTime } },
+                  ],
+                },
+                {
+                  AND: [
+                    { startTime: { gte: req.params.startTime } },
+                    { endTime: { lte: req.params.endTime } },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      })
+      .then((elements) => {
+        res.status(elements.length > 0 ? 409 : 200).send()
+      })
+      .catch((err) =>
+        res.status(500).json({
+          error: err.message || 'Error checking if the teacher is free',
+        })
+      )
+  }
+)
+
+app.get(
+  '/api/room-free/:roomId/:day/:startTime/:endTime/:studentClassId',
+  (req, res) => {
+    prisma.timetableElement
+      .findMany({
+        where: {
+          AND: [
+            { roomId: Number(req.params.roomId) },
+            { day: req.params.day as Day },
+            { studentClassId: { not: Number(req.params.studentClassId) } },
+            {
+              OR: [
+                {
+                  AND: [
+                    { startTime: { lte: req.params.startTime } },
+                    { endTime: { gte: req.params.startTime } },
+                  ],
+                },
+                {
+                  AND: [
+                    { startTime: { lte: req.params.endTime } },
+                    { endTime: { gte: req.params.endTime } },
+                  ],
+                },
+                {
+                  AND: [
+                    { startTime: { gte: req.params.startTime } },
+                    { endTime: { lte: req.params.endTime } },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      })
+      .then((elements) => {
+        res.status(elements.length > 0 ? 409 : 200).send()
+      })
+      .catch((err) =>
+        res.status(500).json({
+          error: err.message || 'Error checking if the teacher is free',
+        })
+      )
+  }
+)
+
 app.post(
   '/api/timetable-elements/:yearId/:term/:studentClassId',
   async (req, res) => {
