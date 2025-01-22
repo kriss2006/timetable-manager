@@ -17,51 +17,51 @@
         v-if="user?.type === 'super_admin'"
         color="red"
         variant="soft"
-        @click="navigateTo('users')"
+        to="/admin/users"
         :ui="{ base: 'w-36 flex justify-center' }"
         >Manage users
       </UButton>
       <UButton
         color="blue"
         variant="soft"
-        @click="navigateTo('years')"
+        to="/admin/timetable"
+        :ui="{ base: 'w-36 flex justify-center' }"
+        >Manage timetable
+      </UButton>
+      <UButton
+        color="blue"
+        variant="soft"
+        to="/admin/years"
         :ui="{ base: 'w-36 flex justify-center' }"
         >Manage years
       </UButton>
       <UButton
         color="blue"
         variant="soft"
-        @click="navigateTo('rooms')"
+        to="/admin/rooms"
         :ui="{ base: 'w-36 flex justify-center' }"
         >Manage rooms
       </UButton>
       <UButton
         color="blue"
         variant="soft"
-        @click="navigateTo('classes')"
+        to="/admin/classes"
         :ui="{ base: 'w-36 flex justify-center' }"
         >Manage classes
       </UButton>
       <UButton
         color="blue"
         variant="soft"
-        @click="navigateTo('subjects')"
+        to="/admin/subjects"
         :ui="{ base: 'w-36 flex justify-center' }"
         >Manage subjects
       </UButton>
       <UButton
         color="blue"
         variant="soft"
-        @click="navigateTo('teachers')"
+        to="/admin/teachers"
         :ui="{ base: 'w-36 flex justify-center' }"
         >Manage teachers
-      </UButton>
-      <UButton
-        color="blue"
-        variant="soft"
-        @click="navigateTo('timetable')"
-        :ui="{ base: 'w-36 flex justify-center' }"
-        >Manage timetable
       </UButton>
     </div>
   </div>
