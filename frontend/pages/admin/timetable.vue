@@ -476,11 +476,22 @@ const okToSave = async () => {
   warnings.value = []
 
   for (const day of days) {
-    for (const element of timetable.value[day]) {
+    for (let i = 0; i < timetable.value[day].length; i++) {
+      const element = timetable.value[day][i]
+      const prevElement = i > 0 ? timetable.value[day][i - 1] : null
+
       if (element.startTime >= element.endTime) {
         warnings.value.push({
           id: element.id,
           message: 'Start time must be before end time.',
+        })
+        continue
+      }
+
+      if (prevElement && element.startTime < prevElement.endTime) {
+        warnings.value.push({
+          id: element.id,
+          message: 'Start time must be after previous element end time.',
         })
         continue
       }
