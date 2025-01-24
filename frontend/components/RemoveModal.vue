@@ -22,7 +22,7 @@ const props = defineProps<{
   data: RemoveModalData
 }>()
 
-const emit = defineEmits(['close', 'reset:error-message', 'remove'])
+const emit = defineEmits(['close', 'remove'])
 
 const confirm = async () => {
   emit('remove', props.data)

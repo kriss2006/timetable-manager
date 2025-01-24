@@ -63,6 +63,13 @@
         :ui="{ base: 'w-36 flex justify-center' }"
         >Manage teachers
       </UButton>
+      <UButton
+        color="blue"
+        variant="soft"
+        to="/admin/curricula"
+        :ui="{ base: 'w-36 flex justify-center' }"
+        >Manage curricula
+      </UButton>
     </div>
   </div>
 </template>

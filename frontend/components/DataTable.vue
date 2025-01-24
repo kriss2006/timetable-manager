@@ -10,6 +10,7 @@
           <UButton
             color="blue"
             variant="soft"
+            :disabled="isLoading"
             @click="
               () => {
                 onAdd()
@@ -40,7 +41,11 @@
   </div>
 </template>
 
-<script setup lang="ts" generic="T extends Record<string, number | string>">
+<script
+  setup
+  lang="ts"
+  generic="T extends Record<string, number | string | Object>"
+>
 const props = defineProps<{
   title: string
   isLoading: boolean

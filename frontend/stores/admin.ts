@@ -103,6 +103,25 @@ export const useAdminStore = defineStore('admin', () => {
       })
   }
 
+  const curriculaLoading = ref(true)
+  const fetchCurricula = async (
+    studentClassId: number
+  ): Promise<Curriculum[]> => {
+    if (selectedYearId.value > 0) {
+      return axios
+        .get(
+          `http://localhost:3001/api/curricula/${selectedYearId.value}/${studentClassId}`
+        )
+        .then((response) => response.data)
+        .catch(() => [])
+        .finally(() => {
+          curriculaLoading.value = false
+        })
+    } else {
+      return []
+    }
+  }
+
   const timetableElementsLoading = ref(true)
   const fetchTimetableElements = async (
     term: number | undefined,
@@ -180,6 +199,8 @@ export const useAdminStore = defineStore('admin', () => {
     fetchSubjects,
     teachersLoading,
     fetchTeachers,
+    curriculaLoading,
+    fetchCurricula,
     timetableElementsLoading,
     fetchTimetableElements,
     availableTimetableElementsLoading,

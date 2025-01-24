@@ -165,13 +165,11 @@
   <EditModal
     :data="editModalData"
     @close="editModalData.open = false"
-    @reset:error-message="editModalData.errorMessage = ''"
     @edit="editElement($event)"
   />
   <RemoveModal
     :data="removeModalData"
     @close="removeModalData.open = false"
-    @reset:error-message="removeModalData.errorMessage = ''"
     @remove="removeElement($event)"
   />
 </template>

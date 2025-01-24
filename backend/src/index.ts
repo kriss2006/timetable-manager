@@ -665,6 +665,104 @@ app.delete('/api/teachers/:id', (req, res) => {
     )
 })
 
+app.get('/api/curricula/:yearId/:studentClassId', (req, res) => {
+  prisma.studentClassSubjectTeacher
+    .findMany({
+      where: {
+        yearId: Number(req.params.yearId),
+        studentClassId: Number(req.params.studentClassId),
+      },
+      select: { id: true, classesPerWeek: true, subject: true, teacher: true },
+    })
+    .then((curricula) => res.json(curricula))
+    .catch((err) =>
+      res.status(500).json({ error: err.message || 'Error fetching curricula' })
+    )
+})
+
+app.post('/api/curricula/:yearId/:studentClassId', (req, res) => {
+  const { classesPerWeek, subjectId, teacherId } = req.body
+
+  if (!classesPerWeek) {
+    res.status(400).json({ error: 'Classes per week is required' })
+    return
+  }
+
+  if (!subjectId) {
+    res.status(400).json({ error: 'Subject is required' })
+    return
+  }
+
+  if (!teacherId) {
+    res.status(400).json({ error: 'Teacher is required' })
+    return
+  }
+
+  prisma.studentClassSubjectTeacher
+    .create({
+      data: {
+        studentClassId: Number(req.params.studentClassId),
+        classesPerWeek: Number(classesPerWeek),
+        subjectId: Number(subjectId),
+        teacherId: Number(teacherId),
+        yearId: Number(req.params.yearId),
+      },
+    })
+    .then((newCurriculum) =>
+      res.json({
+        message: 'Curriculum added successfully',
+        id: newCurriculum.id,
+      })
+    )
+    .catch((err) =>
+      res.status(500).json({ error: err.message || 'Error adding curriculum' })
+    )
+})
+
+app.patch('/api/curricula/:id', (req, res) => {
+  const { classesPerWeek, subjectId, teacherId } = req.body
+
+  if (!classesPerWeek) {
+    res.status(400).json({ error: 'Classes per week is required' })
+    return
+  }
+
+  if (!subjectId) {
+    res.status(400).json({ error: 'Subject is required' })
+    return
+  }
+
+  if (!teacherId) {
+    res.status(400).json({ error: 'Teacher is required' })
+    return
+  }
+
+  prisma.studentClassSubjectTeacher
+    .update({
+      where: { id: Number(req.params.id) },
+      data: {
+        classesPerWeek,
+        subjectId: Number(subjectId),
+        teacherId: Number(teacherId),
+      },
+    })
+    .then(() => res.json({ message: 'Curriculum edited successfully' }))
+    .catch((err) =>
+      res.status(500).json({ error: err.message || 'Error editing curriculum' })
+    )
+})
+
+app.delete('/api/curricula/:id', (req, res) => {
+  prisma.studentClassSubjectTeacher
+    .delete({ where: { id: Number(req.params.id) } })
+    .then(() => res.json({ message: 'Curriculum deleted successfully' }))
+    .catch((err) =>
+      res
+        .status(500)
+        .json({ error: err.message || 'Error deleting curriculum' })
+    )
+})
+
 app.get(
   '/api/timetable-elements/:yearId/:term/:studentClassId/:day',
   (req, res) => {

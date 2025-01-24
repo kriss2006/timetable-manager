@@ -131,13 +131,13 @@ const googleLoginSuccess = (response) => {
         navigateTo('/admin/dashboard')
       }
     })
-    .catch((error) => {
-      console.error(error)
+    .catch((err) => {
+      googleErrorMessage.value = err
     })
 }
 
 const googleLoginError = () => {
-  errorMessage.value = 'Login failed'
+  googleErrorMessage.value = 'Login failed'
 }
 
 const setToken = (token) => {

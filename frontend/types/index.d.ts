@@ -43,6 +43,14 @@ declare global {
     Initials: string
   }
 
+  // For a year and a student class
+  interface Curriculum {
+    id: number
+    classesPerWeek: number
+    subject: Subject
+    teacher: Teacher
+  }
+
   // For a year, a term, a student class (and a day)
   interface TimetableElement {
     id: number
@@ -84,8 +92,12 @@ declare global {
     open: boolean
     errorMessage: string
     id: number
-    input: Record<string, number | string | boolean | Date>
-    select?: Record<'room', Room>
+    input: Record<string, number | string | Date>
+    select?: {
+      room?: Room
+      subject?: Subject
+      teacher?: Teacher
+    }
   }
 
   interface RemoveModalData {
