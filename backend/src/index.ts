@@ -677,7 +677,24 @@ app.get('/api/curricula/:yearId/:studentClassId', (req, res) => {
         yearId: Number(req.params.yearId),
         studentClassId: Number(req.params.studentClassId),
       },
-      select: { id: true, classesPerWeek: true, subject: true, teacher: true },
+      select: {
+        id: true,
+        classesPerWeek: true,
+        subject: {
+          select: {
+            id: true,
+            name: true,
+            abbreviation: true,
+          },
+        },
+        teacher: {
+          select: {
+            id: true,
+            name: true,
+            initials: true,
+          },
+        },
+      },
     })
     .then((curricula) => res.json(curricula))
     .catch((err) =>

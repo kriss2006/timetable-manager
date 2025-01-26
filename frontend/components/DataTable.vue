@@ -60,13 +60,24 @@ const props = defineProps<{
 const searchQuery = ref('')
 const currentPage = ref(1)
 
-function matchesQuery(row: T) {
-  const query = searchQuery.value.toLowerCase()
-  const searchableRow = row as { [key: string]: any }
-  return Object.keys(searchableRow).some(
-    (key) =>
-      key !== 'id' && String(searchableRow[key]).toLowerCase().includes(query)
-  )
+const matchesQuery = (row: T) => {
+  if (!searchQuery.value) return true
+
+  return Object.entries(row).some(([key, value]) => {
+    if (key === 'id') return false
+
+    if (typeof value === 'object' && value !== null) {
+      return Object.entries(value).some(
+        ([nestedKey, nestedValue]) =>
+          nestedKey !== 'id' &&
+          String(nestedValue)
+            .toLowerCase()
+            .includes(searchQuery.value.toLowerCase())
+      )
+    }
+
+    return String(value).toLowerCase().includes(searchQuery.value.toLowerCase())
+  })
 }
 
 const filteredRowsCount = computed(() => {
@@ -74,7 +85,25 @@ const filteredRowsCount = computed(() => {
 })
 
 const computedRows = computed(() => {
-  const filteredRows = props.rows.filter((row) => matchesQuery(row))
+  const filteredRows = props.rows
+    .filter((row) => matchesQuery(row))
+    .map((row) => {
+      const formattedRow = { ...row } as {
+        [key: string]: string | number | Subject | Teacher
+      }
+      Object.keys(formattedRow).forEach((key) => {
+        if (
+          typeof formattedRow[key] === 'object' &&
+          formattedRow[key] !== null &&
+          'name' in formattedRow[key]
+        ) {
+          formattedRow[key] = formattedRow[key].name
+        }
+      })
+
+      return formattedRow
+    })
+
   const start = (currentPage.value - 1) * props.itemsPerPage
   return filteredRows.slice(start, start + props.itemsPerPage)
 })
