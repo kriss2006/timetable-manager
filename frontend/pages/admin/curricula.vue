@@ -117,7 +117,7 @@ const openAddModal = () => {
 
 const addRow = (data: typeof addModalData.value) => {
   if ((data.input.classesPerWeek as number) < 1) {
-    addModalData.value.errorMessage = 'Please select both subject and teacher'
+    addModalData.value.errorMessage = 'Classes per week must be at least 1'
     return
   }
 
@@ -188,7 +188,7 @@ const openEditModal = (row: Curriculum) => {
 
 const editRow = async (data: ModalData) => {
   if ((data.input.classesPerWeek as number) < 1) {
-    editModalData.value.errorMessage = 'Please select both subject and teacher'
+    editModalData.value.errorMessage = 'Classes per week must be at least 1'
     return
   }
 

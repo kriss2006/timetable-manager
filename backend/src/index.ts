@@ -688,6 +688,11 @@ app.post('/api/curricula/:yearId/:studentClassId', (req, res) => {
     return
   }
 
+  if (classesPerWeek < 1) {
+    res.status(400).json({ error: 'Classes per week must be at least 1' })
+    return
+  }
+
   if (!subjectId) {
     res.status(400).json({ error: 'Subject is required' })
     return
@@ -724,6 +729,11 @@ app.patch('/api/curricula/:id', (req, res) => {
 
   if (!classesPerWeek) {
     res.status(400).json({ error: 'Classes per week is required' })
+    return
+  }
+
+  if (classesPerWeek < 1) {
+    res.status(400).json({ error: 'Classes per week must be at least 1' })
     return
   }
 
