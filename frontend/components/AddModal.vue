@@ -2,17 +2,18 @@
   <UModal :modelValue="data.open" @update:modelValue="emit('close')">
     <div class="p-4 w-full max-w-md mx-auto flex flex-col gap-4">
       <h2 class="text-xl font-semibold">Add</h2>
-      <template v-for="(_value, key) in parsedInput" :key="key">
-        <UInput
-          v-model="parsedInput[key]"
-          :type="typeOfInput(key)"
-          :min="typeOfInput(key) === 'number' ? 1 : undefined"
-          :placeholder="`Enter ${key}`"
-        />
-      </template>
+      <UInput
+        v-for="(_value, key) in parsedInput"
+        :key="key"
+        v-model="parsedInput[key]"
+        :type="typeOfInput(key)"
+        :min="typeOfInput(key) === 'number' ? 1 : undefined"
+        :placeholder="`Enter ${key}`"
+        :ui="{ base: 'w-full' }"
+      />
       <div
         v-if="formData.select"
-        class="p-4 w-full max-w-md mx-auto flex flex-col gap-4"
+        class="p-0 w-full max-w-md mx-auto flex flex-col gap-4"
       >
         <USelectMenu
           v-if="'room' in formData.select"
