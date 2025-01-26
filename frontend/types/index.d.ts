@@ -97,6 +97,7 @@ declare global {
       room?: Room
       subject?: Subject
       teacher?: Teacher
+      type?: 'student' | 'teacher' | 'admin' | 'super_admin'
     }
   }
 

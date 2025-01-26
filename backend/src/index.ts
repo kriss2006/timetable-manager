@@ -224,6 +224,11 @@ app.patch('/api/users/:id', (req, res) => {
     return
   }
 
+  if (!type) {
+    res.status(400).json({ error: 'Type is required' })
+    return
+  }
+
   prisma.user
     .update({
       where: { id: Number(req.params.id) },

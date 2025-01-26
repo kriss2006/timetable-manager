@@ -39,19 +39,16 @@
   <AddModal
     :data="addModalData"
     @close="addModalData.open = false"
-    @reset:error-message="addModalData.errorMessage = ''"
     @add="addRow($event)"
   />
   <EditModal
     :data="editModalData"
     @close="editModalData.open = false"
-    @reset:error-message="editModalData.errorMessage = ''"
     @edit="editRow($event)"
   />
   <RemoveModal
     :data="removeModalData"
     @close="removeModalData.open = false"
-    @reset:error-message="removeModalData.errorMessage = ''"
     @remove="removeRow($event)"
   />
 </template>
@@ -101,22 +98,37 @@ const openAddModal = () => {
 }
 
 const addRow = (data: ModalData) => {
+  if (!data.input.name) {
+    addModalData.value.errorMessage = 'Name is required'
+    return
+  }
+
+  if ((data.input.name as string).length > 255) {
+    addModalData.value.errorMessage = 'Name must be up to 255 characters'
+    return
+  }
+
+  if (!data.input.initials) {
+    addModalData.value.errorMessage = 'Initials are required'
+    return
+  }
+
+  if ((data.input.initials as string).length > 4) {
+    addModalData.value.errorMessage = 'Initials must be up to 4 characters'
+    return
+  }
+
   axios
     .post(`http://localhost:3001/api/teachers`, {
       name: data.input.name,
       initials: data.input.initials,
     })
     .then((response) => {
-      if (
-        typeof data.input.name === 'string' &&
-        typeof data.input.initials === 'string'
-      ) {
-        teachers.value.push({
-          id: response.data.id,
-          name: data.input.name,
-          initials: data.input.initials,
-        })
-      }
+      teachers.value.push({
+        id: response.data.id,
+        name: data.input.name as string,
+        initials: data.input.initials as string,
+      })
 
       addModalData.value.open = false
     })
@@ -147,6 +159,26 @@ const openEditModal = (row: Teacher) => {
 }
 
 const editRow = async (data: ModalData) => {
+  if (!data.input.name) {
+    editModalData.value.errorMessage = 'Name is required'
+    return
+  }
+
+  if ((data.input.name as string).length > 255) {
+    editModalData.value.errorMessage = 'Name must be up to 255 characters'
+    return
+  }
+
+  if (!data.input.initials) {
+    editModalData.value.errorMessage = 'Initials are required'
+    return
+  }
+
+  if ((data.input.initials as string).length > 4) {
+    editModalData.value.errorMessage = 'Initials must be up to 4 characters'
+    return
+  }
+
   await axios
     .patch(`http://localhost:3001/api/teachers/${data.id}`, {
       name: data.input.name,
@@ -154,15 +186,12 @@ const editRow = async (data: ModalData) => {
     })
     .then(() => {
       const index = teachers.value.findIndex((item) => item.id === data.id)
-      if (
-        index !== -1 &&
-        typeof data.input.name === 'string' &&
-        typeof data.input.initials === 'string'
-      ) {
+
+      if (index !== -1) {
         teachers.value[index] = {
           id: data.id,
-          name: data.input.name,
-          initials: data.input.initials,
+          name: data.input.name as string,
+          initials: data.input.initials as string,
         }
       }
 

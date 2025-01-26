@@ -115,14 +115,15 @@ const openAddModal = () => {
   }
 }
 
-const addRow = (data: typeof addModalData.value) => {
+const addRow = (data: ModalData) => {
   if ((data.input.classesPerWeek as number) < 1) {
     addModalData.value.errorMessage = 'Classes per week must be at least 1'
     return
   }
 
   if (!data.select?.subject?.id || !data.select?.teacher?.id) {
-    addModalData.value.errorMessage = 'Please select both subject and teacher'
+    addModalData.value.errorMessage =
+      'Please select both a subject and a teacher'
     return
   }
 
@@ -137,8 +138,8 @@ const addRow = (data: typeof addModalData.value) => {
       `http://localhost:3001/api/curricula/${selectedYearId.value}/${selectedStudentClassId.value}`,
       {
         classesPerWeek: data.input.classesPerWeek,
-        subjectId: data.select?.subject?.id,
-        teacherId: data.select?.teacher?.id,
+        subjectId: data.select.subject.id,
+        teacherId: data.select.teacher.id,
       }
     )
     .then((response) => {
@@ -193,7 +194,8 @@ const editRow = async (data: ModalData) => {
   }
 
   if (!data.select?.subject?.id || !data.select?.teacher?.id) {
-    editModalData.value.errorMessage = 'Please select both subject and teacher'
+    editModalData.value.errorMessage =
+      'Please select both a subject and a teacher'
     return
   }
 
@@ -212,11 +214,12 @@ const editRow = async (data: ModalData) => {
   await axios
     .patch(`http://localhost:3001/api/curricula/${data.id}`, {
       classesPerWeek: data.input.classesPerWeek,
-      subjectId: data.select?.subject?.id,
-      teacherId: data.select?.teacher?.id,
+      subjectId: data.select.subject.id,
+      teacherId: data.select.teacher.id,
     })
     .then(() => {
       const index = curricula.value.findIndex((item) => item.id === data.id)
+
       if (index !== -1 && data.select?.subject && data.select?.teacher) {
         curricula.value[index] = {
           id: data.id,
@@ -256,6 +259,7 @@ const removeRow = async (data: RemoveModalData) => {
     .delete(`http://localhost:3001/api/curricula/${data.id}`)
     .then(() => {
       const index = curricula.value.findIndex((item) => item.id === data.id)
+
       if (index !== -1) {
         curricula.value.splice(index, 1)
       }

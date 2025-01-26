@@ -23,13 +23,11 @@
   <EditModal
     :data="editModalData"
     @close="editModalData.open = false"
-    @reset:error-message="editModalData.errorMessage = ''"
     @edit="editRow($event)"
   />
   <RemoveModal
     :data="removeModalData"
     @close="removeModalData.open = false"
-    @reset:error-message="removeModalData.errorMessage = ''"
     @remove="removeRow($event)"
   />
 </template>
@@ -66,7 +64,9 @@ const editModalData = ref<ModalData>({
   input: {
     name: '',
     username: '',
-    type: '',
+  },
+  select: {
+    type: 'student',
   },
 })
 
@@ -75,30 +75,52 @@ const openEditModal = (row: User) => {
     open: true,
     errorMessage: '',
     id: row.id,
-    input: { name: row.name, username: row.username, type: row.type },
+    input: { name: row.name, username: row.username },
+    select: { type: row.type },
   }
 }
 
 const editRow = async (data: ModalData) => {
+  if (!data.input.name) {
+    editModalData.value.errorMessage = 'Name is required'
+    return
+  }
+
+  if ((data.input.name as string).length > 255) {
+    editModalData.value.errorMessage = 'Name must be up to 255 characters'
+    return
+  }
+
+  if (!data.input.username) {
+    editModalData.value.errorMessage = 'Username is required'
+    return
+  }
+
+  if ((data.input.username as string).length > 32) {
+    editModalData.value.errorMessage = 'Username must be up to 32 characters'
+    return
+  }
+
+  if (!data.select?.type) {
+    editModalData.value.errorMessage = 'Please select a type'
+    return
+  }
+
   await axios
     .patch(`http://localhost:3001/api/users/${data.id}`, {
       name: data.input.name,
       username: data.input.username,
-      type: data.input.type,
+      type: data.select.type,
     })
     .then(() => {
       const index = users.value.findIndex((item) => item.id === data.id)
-      if (
-        index !== -1 &&
-        typeof data.input.name === 'string' &&
-        typeof data.input.username === 'string' &&
-        typeof data.input.type === 'string'
-      ) {
+
+      if (index !== -1 && data.select?.type) {
         users.value[index] = {
           id: data.id,
-          name: data.input.name,
-          username: data.input.username,
-          type: data.input.type,
+          name: data.input.name as string,
+          username: data.input.username as string,
+          type: data.select?.type,
         }
       }
 

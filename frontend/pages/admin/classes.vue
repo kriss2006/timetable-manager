@@ -13,19 +13,16 @@
   <AddModal
     :data="addModalData"
     @close="addModalData.open = false"
-    @reset:error-message="addModalData.errorMessage = ''"
     @add="addRow($event)"
   />
   <EditModal
     :data="editModalData"
     @close="editModalData.open = false"
-    @reset:error-message="editModalData.errorMessage = ''"
     @edit="editRow($event)"
   />
   <RemoveModal
     :data="removeModalData"
     @close="removeModalData.open = false"
-    @reset:error-message="removeModalData.errorMessage = ''"
     @remove="removeRow($event)"
   />
 </template>
@@ -69,17 +66,25 @@ const openAddModal = () => {
 }
 
 const addRow = (data: ModalData) => {
+  if (!data.input.name) {
+    addModalData.value.errorMessage = 'Name is required'
+    return
+  }
+
+  if ((data.input.name as string).length > 5) {
+    addModalData.value.errorMessage = 'Name must be up to 5 characters'
+    return
+  }
+
   axios
     .post(`http://localhost:3001/api/student-classes/${selectedYearId.value}`, {
       name: data.input.name,
     })
     .then((response) => {
-      if (typeof data.input.name === 'string') {
-        studentClasses.value.push({
-          id: response.data.id,
-          name: data.input.name,
-        })
-      }
+      studentClasses.value.push({
+        id: response.data.id,
+        name: data.input.name as string,
+      })
 
       addModalData.value.open = false
     })
@@ -109,6 +114,16 @@ const openEditModal = (row: Room) => {
 }
 
 const editRow = async (data: ModalData) => {
+  if (!data.input.name) {
+    editModalData.value.errorMessage = 'Name is required'
+    return
+  }
+
+  if ((data.input.name as string).length > 5) {
+    editModalData.value.errorMessage = 'Name must be up to 5 characters'
+    return
+  }
+
   await axios
     .patch(`http://localhost:3001/api/student-classes/${data.id}`, {
       name: data.input.name,
@@ -117,8 +132,12 @@ const editRow = async (data: ModalData) => {
       const index = studentClasses.value.findIndex(
         (item) => item.id === data.id
       )
-      if (index !== -1 && typeof data.input.name === 'string') {
-        studentClasses.value[index] = { id: data.id, name: data.input.name }
+
+      if (index !== -1) {
+        studentClasses.value[index] = {
+          id: data.id,
+          name: data.input.name as string,
+        }
       }
 
       editModalData.value.open = false
@@ -153,6 +172,7 @@ const removeRow = async (data: RemoveModalData) => {
       const index = studentClasses.value.findIndex(
         (item) => item.id === data.id
       )
+
       if (index !== -1) {
         studentClasses.value.splice(index, 1)
       }

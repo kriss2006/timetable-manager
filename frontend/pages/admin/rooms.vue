@@ -13,19 +13,16 @@
   <AddModal
     :data="addModalData"
     @close="addModalData.open = false"
-    @reset:error-message="addModalData.errorMessage = ''"
     @add="addRow($event)"
   />
   <EditModal
     :data="editModalData"
     @close="editModalData.open = false"
-    @reset:error-message="editModalData.errorMessage = ''"
     @edit="editRow($event)"
   />
   <RemoveModal
     :data="removeModalData"
     @close="removeModalData.open = false"
-    @reset:error-message="removeModalData.errorMessage = ''"
     @remove="removeRow($event)"
   />
 </template>
@@ -69,14 +66,25 @@ const openAddModal = () => {
 }
 
 const addRow = (data: ModalData) => {
+  if (!data.input.name) {
+    addModalData.value.errorMessage = 'Name is required'
+    return
+  }
+
+  if ((data.input.name as string).length > 255) {
+    addModalData.value.errorMessage = 'Name must be up to 255 characters'
+    return
+  }
+
   axios
     .post(`http://localhost:3001/api/rooms/${selectedYearId.value}`, {
       name: data.input.name,
     })
     .then((response) => {
-      if (typeof data.input.name === 'string') {
-        rooms.value.push({ id: response.data.id, name: data.input.name })
-      }
+      rooms.value.push({
+        id: response.data.id,
+        name: data.input.name as string,
+      })
 
       addModalData.value.open = false
     })
@@ -106,14 +114,25 @@ const openEditModal = (row: Room) => {
 }
 
 const editRow = async (data: ModalData) => {
+  if (!data.input.name) {
+    editModalData.value.errorMessage = 'Name is required'
+    return
+  }
+
+  if ((data.input.name as string).length > 255) {
+    editModalData.value.errorMessage = 'Name must be up to 255 characters'
+    return
+  }
+
   await axios
     .patch(`http://localhost:3001/api/rooms/${data.id}`, {
       name: data.input.name,
     })
     .then(() => {
       const index = rooms.value.findIndex((item) => item.id === data.id)
-      if (index !== -1 && typeof data.input.name === 'string') {
-        rooms.value[index] = { id: data.id, name: data.input.name }
+
+      if (index !== -1) {
+        rooms.value[index] = { id: data.id, name: data.input.name as string }
       }
 
       editModalData.value.open = false

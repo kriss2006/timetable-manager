@@ -13,19 +13,16 @@
   <AddModal
     :data="addModalData"
     @close="addModalData.open = false"
-    @reset:error-message="addModalData.errorMessage = ''"
     @add="addRow($event)"
   />
   <EditModal
     :data="editModalData"
     @close="editModalData.open = false"
-    @reset:error-message="editModalData.errorMessage = ''"
     @edit="editRow($event)"
   />
   <RemoveModal
     :data="removeModalData"
     @close="removeModalData.open = false"
-    @reset:error-message="removeModalData.errorMessage = ''"
     @remove="removeRow($event)"
   />
 </template>
@@ -74,22 +71,32 @@ const openAddModal = () => {
 }
 
 const addRow = (data: ModalData) => {
+  if (!data.input.name) {
+    addModalData.value.errorMessage = 'Name is required'
+    return
+  }
+
+  if ((data.input.name as string).length > 255) {
+    addModalData.value.errorMessage = 'Name must be up to 255 characters'
+    return
+  }
+
+  if ((data.input.abbreviation as string).length > 32) {
+    addModalData.value.errorMessage = 'Abbreviation must be up to 32 characters'
+    return
+  }
+
   axios
     .post(`http://localhost:3001/api/subjects/${selectedYearId.value}`, {
       name: data.input.name,
       abbreviation: data.input.abbreviation,
     })
     .then((response) => {
-      if (
-        typeof data.input.name === 'string' &&
-        typeof data.input.abbreviation === 'string'
-      ) {
-        subjects.value.push({
-          id: response.data.id,
-          name: data.input.name,
-          abbreviation: data.input.abbreviation,
-        })
-      }
+      subjects.value.push({
+        id: response.data.id,
+        name: data.input.name as string,
+        abbreviation: data.input.abbreviation as string,
+      })
 
       addModalData.value.open = false
     })
@@ -120,6 +127,22 @@ const openEditModal = (row: Subject) => {
 }
 
 const editRow = async (data: ModalData) => {
+  if (!data.input.name) {
+    editModalData.value.errorMessage = 'Name is required'
+    return
+  }
+
+  if ((data.input.name as string).length > 255) {
+    editModalData.value.errorMessage = 'Name must be up to 255 characters'
+    return
+  }
+
+  if ((data.input.abbreviation as string).length > 32) {
+    editModalData.value.errorMessage =
+      'Abbreviation must be up to 32 characters'
+    return
+  }
+
   await axios
     .patch(`http://localhost:3001/api/subjects/${data.id}`, {
       name: data.input.name,
@@ -127,15 +150,12 @@ const editRow = async (data: ModalData) => {
     })
     .then(() => {
       const index = subjects.value.findIndex((item) => item.id === data.id)
-      if (
-        index !== -1 &&
-        typeof data.input.name === 'string' &&
-        typeof data.input.abbreviation === 'string'
-      ) {
+
+      if (index !== -1) {
         subjects.value[index] = {
           id: data.id,
-          name: data.input.name,
-          abbreviation: data.input.abbreviation,
+          name: data.input.name as string,
+          abbreviation: data.input.abbreviation as string,
         }
       }
 

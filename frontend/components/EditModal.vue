@@ -15,6 +15,13 @@
         class="p-4 w-full max-w-md mx-auto flex flex-col gap-4"
       >
         <USelectMenu
+          v-if="'type' in formData.select"
+          v-model="formData.select.type"
+          :options="['student', 'teacher', 'admin', 'super_admin']"
+          placeholder="Select a type"
+        />
+
+        <USelectMenu
           v-if="'room' in formData.select"
           :loading="roomsLoading"
           searchable
