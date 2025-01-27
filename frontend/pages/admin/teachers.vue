@@ -246,16 +246,16 @@ const triggerFileUpload = () => {
 
 const handleFileUpload = async (event: Event) => {
   const input = event.target as HTMLInputElement
-  if (!input.files?.length) return
+  const file = input.files?.[0]
+  if (!file) return
 
-  const file = input.files[0]
   const reader = new FileReader()
 
   reader.onload = async (e) => {
     const data = new Uint8Array(e.target?.result as ArrayBuffer)
     const workbook = XLSX.read(data, { type: 'array' })
-    const sheetName = workbook.SheetNames[0]
-    const sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName])
+    const sheet = workbook.Sheets[workbook.SheetNames[0]]
+    const sheetData = XLSX.utils.sheet_to_json<TableTeacher>(sheet)
 
     const newTeachers = (sheetData as Array<TableTeacher>).filter((row) => {
       const existingTeacher = teachers.value.find(
@@ -294,9 +294,9 @@ const exportTeachers = () => {
     Initials: teacher.initials,
   }))
 
-  const worksheet = XLSX.utils.json_to_sheet(exportData)
+  const sheet = XLSX.utils.json_to_sheet(exportData)
   const workbook = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(workbook, worksheet, 'Teachers')
+  XLSX.utils.book_append_sheet(workbook, sheet, 'Teachers')
 
   XLSX.writeFile(workbook, 'teachers.xlsx')
 }

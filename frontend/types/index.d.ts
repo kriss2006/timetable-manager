@@ -8,9 +8,19 @@ declare global {
     type: 'student' | 'teacher' | 'admin' | 'super_admin'
   }
 
+  interface TableUser {
+    Name: string
+    Username: string
+    Type: string
+  }
+
   interface Year {
     id: number
     name: string
+  }
+
+  interface TableYear {
+    Name: string
   }
 
   // For a year
@@ -19,10 +29,18 @@ declare global {
     name: string
   }
 
+  interface TableRoom {
+    Name: string
+  }
+
   // For a year
   interface StudentClass {
     id: number
     name: string
+  }
+
+  interface TableStudentClass {
+    Name: string
   }
 
   // For a year
@@ -30,6 +48,11 @@ declare global {
     id: number
     name: string
     abbreviation?: string
+  }
+
+  interface TableSubject {
+    Name: string
+    Abbreviation?: string
   }
 
   interface Teacher {
@@ -49,6 +72,12 @@ declare global {
     classesPerWeek: number
     subject: Subject
     teacher: Teacher
+  }
+
+  interface TableCurriculum {
+    ClassesPerWeek: number
+    Subject: string
+    Teacher: string
   }
 
   // For a year, a term, a student class (and a day)
