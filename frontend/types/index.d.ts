@@ -8,17 +8,12 @@ declare global {
     type: 'student' | 'teacher' | 'admin' | 'super_admin'
   }
 
-  interface TableUser {
-    Name: string
-    Username: string
-    Type: string
-  }
-
   interface Year {
     id: number
     name: string
   }
 
+  // All of the table types are for the import format
   interface TableYear {
     Name: string
   }
@@ -72,12 +67,6 @@ declare global {
     classesPerWeek: number
     subject: Subject
     teacher: Teacher
-  }
-
-  interface TableCurriculum {
-    ClassesPerWeek: number
-    Subject: string
-    Teacher: string
   }
 
   // For a year, a term, a student class (and a day)

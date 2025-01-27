@@ -11,17 +11,24 @@
       option-attribute="name"
       :ui="{ base: 'w-36' }"
     />
+    <DataTable
+      title=""
+      :isLoading="curriculaLoading"
+      :columns="columns"
+      :rows="curricula"
+      :itemsPerPage="8"
+      :onAdd="openAddModal"
+      :onEdit="openEditModal"
+      :onRemove="openRemoveModal"
+    />
+    <UButton
+      v-if="!curriculaLoading"
+      color="blue"
+      variant="soft"
+      @click="exportCurricula"
+      >Export</UButton
+    >
   </div>
-  <DataTable
-    title=""
-    :isLoading="curriculaLoading"
-    :columns="columns"
-    :rows="curricula"
-    :itemsPerPage="8"
-    :onAdd="openAddModal"
-    :onEdit="openEditModal"
-    :onRemove="openRemoveModal"
-  />
 
   <AddModal
     :data="addModalData"
@@ -42,6 +49,7 @@
 
 <script setup lang="ts">
 import axios from 'axios'
+import * as XLSX from 'xlsx'
 
 definePageMeta({
   layout: 'admin',
@@ -271,5 +279,24 @@ const removeRow = async (data: RemoveModalData) => {
         removeModalData.value.errorMessage = error.response.data.error
       }
     })
+}
+
+const exportCurricula = () => {
+  if (curricula.value.length === 0) {
+    alert('No curricula available to export.')
+    return
+  }
+
+  const exportData = curricula.value.map((curriculum) => ({
+    ClassesPerWeek: curriculum.classesPerWeek,
+    Subject: curriculum.subject.name,
+    Teacher: curriculum.teacher.name,
+  }))
+
+  const sheet = XLSX.utils.json_to_sheet(exportData)
+  const workbook = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(workbook, sheet, 'Curricula')
+
+  XLSX.writeFile(workbook, 'curricula.xlsx')
 }
 </script>

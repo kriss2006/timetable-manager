@@ -1,14 +1,40 @@
 <template>
-  <DataTable
-    title="Manage classes"
-    :isLoading="studentClassesLoading"
-    :columns="columns"
-    :rows="studentClasses"
-    :itemsPerPage="8"
-    :onAdd="openAddModal"
-    :onEdit="openEditModal"
-    :onRemove="openRemoveModal"
-  />
+  <div class="flex flex-col items-center my-2 gap-4">
+    <DataTable
+      title="Manage classes"
+      :isLoading="studentClassesLoading"
+      :columns="columns"
+      :rows="studentClasses"
+      :itemsPerPage="8"
+      :onAdd="openAddModal"
+      :onEdit="openEditModal"
+      :onRemove="openRemoveModal"
+    />
+    <div class="flex gap-2 my-4">
+      <UButton
+        v-if="!studentClassesLoading"
+        color="blue"
+        variant="soft"
+        @click="triggerFileUpload"
+        >Import</UButton
+      >
+      <input
+        type="file"
+        ref="fileInput"
+        @change="handleFileUpload"
+        accept=".xlsx, .xls"
+        class="hidden"
+      />
+
+      <UButton
+        v-if="!studentClassesLoading"
+        color="blue"
+        variant="soft"
+        @click="exportClasses"
+        >Export</UButton
+      >
+    </div>
+  </div>
 
   <AddModal
     :data="addModalData"
@@ -28,6 +54,7 @@
 </template>
 
 <script setup lang="ts">
+import * as XLSX from 'xlsx'
 import axios from 'axios'
 
 definePageMeta({
@@ -184,5 +211,67 @@ const removeRow = async (data: RemoveModalData) => {
         removeModalData.value.errorMessage = error.response.data.error
       }
     })
+}
+
+const fileInput = ref<HTMLInputElement>()
+
+const triggerFileUpload = () => {
+  fileInput.value?.click()
+}
+
+const handleFileUpload = async (event: Event) => {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+
+  const reader = new FileReader()
+  reader.onload = async (e) => {
+    const data = new Uint8Array(e.target?.result as ArrayBuffer)
+    const workbook = XLSX.read(data, { type: 'array' })
+    const sheet = workbook.Sheets[workbook.SheetNames[0]]
+    const sheetData = XLSX.utils.sheet_to_json<TableStudentClass>(sheet)
+
+    const newClasses = (sheetData as Array<TableStudentClass>).filter((row) => {
+      const existingClass = studentClasses.value.find(
+        (studentClass) => studentClass.name === row.Name
+      )
+      return !existingClass
+    })
+
+    for (const studentClass of newClasses) {
+      await addClass(studentClass)
+    }
+
+    studentClasses.value = await store.fetchStudentClasses()
+  }
+
+  reader.readAsArrayBuffer(file)
+  input.value = ''
+}
+
+const addClass = async (row: TableStudentClass) => {
+  await axios.post(
+    `http://localhost:3001/api/student-classes/${selectedYearId.value}`,
+    {
+      name: row.Name,
+    }
+  )
+}
+
+const exportClasses = () => {
+  if (studentClasses.value.length === 0) {
+    alert('No classes available to export.')
+    return
+  }
+
+  const exportData = studentClasses.value.map((studentClass) => ({
+    Name: studentClass.name,
+  }))
+
+  const sheet = XLSX.utils.json_to_sheet(exportData)
+  const workbook = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(workbook, sheet, 'Classes')
+
+  XLSX.writeFile(workbook, 'classes.xlsx')
 }
 </script>

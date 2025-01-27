@@ -9,15 +9,13 @@
       :onEdit="openEditModal"
       :onRemove="openRemoveModal"
     />
-    <div class="flex gap-2 my-4">
-      <UButton
-        v-if="!usersLoading"
-        color="blue"
-        variant="soft"
-        @click="exportUsers"
-        >Export</UButton
-      >
-    </div>
+    <UButton
+      v-if="!usersLoading"
+      color="blue"
+      variant="soft"
+      @click="exportUsers"
+      >Export</UButton
+    >
   </div>
 
   <EditModal
@@ -179,9 +177,9 @@ const exportUsers = () => {
     Type: user.type,
   }))
 
-  const worksheet = XLSX.utils.json_to_sheet(exportData)
+  const sheet = XLSX.utils.json_to_sheet(exportData)
   const workbook = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(workbook, worksheet, 'Users')
+  XLSX.utils.book_append_sheet(workbook, sheet, 'Users')
 
   XLSX.writeFile(workbook, 'users.xlsx')
 }

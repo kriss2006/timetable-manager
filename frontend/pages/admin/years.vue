@@ -1,14 +1,40 @@
 <template>
-  <DataTable
-    title="Manage years"
-    :isLoading="yearsLoading"
-    :columns="columns"
-    :rows="years"
-    :itemsPerPage="8"
-    :onAdd="openAddModal"
-    :onEdit="openEditModal"
-    :onRemove="openRemoveModal"
-  />
+  <div class="flex flex-col items-center my-2 gap-4">
+    <DataTable
+      title="Manage years"
+      :isLoading="yearsLoading"
+      :columns="columns"
+      :rows="years"
+      :itemsPerPage="8"
+      :onAdd="openAddModal"
+      :onEdit="openEditModal"
+      :onRemove="openRemoveModal"
+    />
+
+    <div class="flex gap-2 my-4">
+      <UButton
+        v-if="!yearsLoading"
+        color="blue"
+        variant="soft"
+        @click="triggerFileUpload"
+        >Import</UButton
+      >
+      <input
+        type="file"
+        ref="fileInput"
+        @change="handleFileUpload"
+        accept=".xlsx, .xls"
+        class="hidden"
+      />
+      <UButton
+        v-if="!yearsLoading"
+        color="blue"
+        variant="soft"
+        @click="exportYears"
+        >Export</UButton
+      >
+    </div>
+  </div>
 
   <AddModal
     :data="addModalData"
@@ -29,6 +55,7 @@
 
 <script setup lang="ts">
 import axios from 'axios'
+import * as XLSX from 'xlsx'
 
 definePageMeta({
   layout: 'admin',
@@ -176,5 +203,62 @@ const removeRow = async (data: RemoveModalData) => {
         removeModalData.value.errorMessage = error.response.data.error
       }
     })
+}
+
+const fileInput = ref<HTMLInputElement>()
+
+const triggerFileUpload = () => {
+  fileInput.value?.click()
+}
+
+const handleFileUpload = async (event: Event) => {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (!file) return
+
+  const reader = new FileReader()
+  reader.onload = async (e) => {
+    const data = new Uint8Array(e.target?.result as ArrayBuffer)
+    const workbook = XLSX.read(data, { type: 'array' })
+    const sheet = workbook.Sheets[workbook.SheetNames[0]]
+    const sheetData = XLSX.utils.sheet_to_json<TableYear>(sheet)
+
+    const newYears = (sheetData as Array<TableYear>).filter((row) => {
+      const existingYear = years.value.find((year) => year.name === row.Name)
+      return !existingYear
+    })
+
+    for (const year of newYears) {
+      await addYear(year)
+    }
+
+    years.value = await store.fetchYears()
+  }
+
+  reader.readAsArrayBuffer(file)
+  input.value = ''
+}
+
+const addYear = async (row: TableYear) => {
+  await axios.post('http://localhost:3001/api/years', {
+    name: row.Name,
+  })
+}
+
+const exportYears = () => {
+  if (years.value.length === 0) {
+    alert('No years available to export.')
+    return
+  }
+
+  const exportData = years.value.map((year) => ({
+    Name: year.name,
+  }))
+
+  const sheet = XLSX.utils.json_to_sheet(exportData)
+  const workbook = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(workbook, sheet, 'Years')
+
+  XLSX.writeFile(workbook, 'years.xlsx')
 }
 </script>
