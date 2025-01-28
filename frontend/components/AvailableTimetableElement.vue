@@ -13,6 +13,6 @@
 
 <script setup lang="ts">
 defineProps<{
-  element: AvailableTimetableElement
+  element: Curriculum
 }>()
 </script>

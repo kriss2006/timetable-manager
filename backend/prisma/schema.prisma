@@ -21,11 +21,11 @@ model Year {
   id   Int    @id @default(autoincrement())
   name String @unique @db.Char(9)
 
-  rooms                       Room[]
-  studentClasses              StudentClass[]
-  subjects                    Subject[]
-  studentClassSubjectTeachers StudentClassSubjectTeacher[]
-  timetableElements           TimetableElement[]
+  rooms             Room[]
+  studentClasses    StudentClass[]
+  subjects          Subject[]
+  curricula         Curriculum[]
+  timetableElements TimetableElement[]
 
   @@map("year")
 }
@@ -37,9 +37,7 @@ model Room {
   yearId Int  @map("year_id")
   year   Year @relation(fields: [yearId], references: [id], onDelete: Cascade)
 
-  timetableElements         TimetableElement[] @relation("TimetableElements")
-  timetableElementsEvenWeek TimetableElement[] @relation("TimetableElementsEvenWeek")
-  timetableElementsGroup2   TimetableElement[] @relation("TimetableElementsGroup2")
+  timetableElements TimetableElement[]
 
   @@map("room")
 }
@@ -51,8 +49,8 @@ model StudentClass {
   yearId Int  @map("year_id")
   year   Year @relation(fields: [yearId], references: [id], onDelete: Cascade)
 
-  studentClassSubjectTeachers StudentClassSubjectTeacher[]
-  timetableElements           TimetableElement[]
+  curricula         Curriculum[]
+  timetableElements TimetableElement[]
 
   @@map("student_class")
 }
@@ -65,7 +63,7 @@ model Subject {
   yearId Int  @map("year_id")
   year   Year @relation(fields: [yearId], references: [id], onDelete: Cascade)
 
-  studentClassSubjectTeachers StudentClassSubjectTeacher[]
+  curricula Curriculum[]
 
   @@map("subject")
 }
@@ -75,12 +73,12 @@ model Teacher {
   name     String @db.VarChar(255)
   initials String @db.VarChar(4)
 
-  studentClassSubjectTeachers StudentClassSubjectTeacher[]
+  curricula Curriculum[]
 
   @@map("teacher")
 }
 
-model StudentClassSubjectTeacher {
+model Curriculum {
   id             Int @id @default(autoincrement())
   classesPerWeek Int @db.TinyInt
 
@@ -96,22 +94,18 @@ model StudentClassSubjectTeacher {
   yearId Int  @map("year_id")
   year   Year @relation(fields: [yearId], references: [id], onDelete: Cascade)
 
-  timetableElements         TimetableElement[] @relation("TimetableElements")
-  timetableElementsEvenWeek TimetableElement[] @relation("TimetableElementsEvenWeek")
-  timetableElementsGroup2   TimetableElement[] @relation("TimetableElementsGroup2")
+  timetableElements TimetableElement[]
 
-  @@map("student_class_subject_teacher")
+  @@map("curriculum")
 }
 
 model TimetableElement {
-  id          Int      @id @default(autoincrement())
-  term        Int      @db.TinyInt
-  day         Day
-  period      Int      @db.TinyInt
-  startTime   DateTime @map("start_time") @db.Time
-  endTime     DateTime @map("end_time") @db.Time
-  alternating Boolean
-  split       Boolean
+  id        Int      @id @default(autoincrement())
+  term      Int      @db.TinyInt
+  day       Day
+  period    Int      @db.TinyInt
+  startTime DateTime @map("start_time") @db.Time
+  endTime   DateTime @map("end_time") @db.Time
 
   yearId Int  @map("year_id")
   year   Year @relation(fields: [yearId], references: [id], onDelete: Cascade)
@@ -119,23 +113,11 @@ model TimetableElement {
   studentClassId Int          @map("student_class_id")
   studentClass   StudentClass @relation(fields: [studentClassId], references: [id], onDelete: Cascade)
 
-  studentClassSubjectTeacherId Int                        @map("subject_teacher_id")
-  studentClassSubjectTeacher   StudentClassSubjectTeacher @relation("TimetableElements", fields: [studentClassSubjectTeacherId], references: [id], onDelete: Cascade)
+  curriculumId Int        @map("curriculum_id")
+  curriculum   Curriculum @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
 
   roomId Int  @map("room_id")
-  room   Room @relation("TimetableElements", fields: [roomId], references: [id], onDelete: Cascade)
-
-  evenWeekStudentClassSubjectTeacherId Int?                        @map("even_week_student_class_subject_teacher_id")
-  evenWeekStudentClassSubjectTeacher   StudentClassSubjectTeacher? @relation("TimetableElementsEvenWeek", fields: [evenWeekStudentClassSubjectTeacherId], references: [id], onDelete: Cascade)
-
-  evenWeekRoomId Int?  @map("even_week_room_id")
-  evenWeekRoom   Room? @relation("TimetableElementsEvenWeek", fields: [evenWeekRoomId], references: [id], onDelete: Cascade)
-
-  group2StudentClassSubjectTeacherId Int?                        @map("group_2_student_class_subject_teacher_id")
-  group2StudentClassSubjectTeacher   StudentClassSubjectTeacher? @relation("TimetableElementsGroup2", fields: [group2StudentClassSubjectTeacherId], references: [id], onDelete: Cascade)
-
-  group2RoomId Int?  @map("group_2_room_id")
-  group2Room   Room? @relation("TimetableElementsGroup2", fields: [group2RoomId], references: [id], onDelete: Cascade)
+  room   Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
 
   @@map("timetable_element")
 }

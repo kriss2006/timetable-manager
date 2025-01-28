@@ -245,7 +245,7 @@ const fetchTimetable = async (): Promise<Timetable> => {
       'Friday'
     )
 
-    fetchedTimetable.available = await store.fetchAvailableTimetableElements(
+    fetchedTimetable.available = await store.fetchCurricula(
       selectedStudentClassId.value
     )
   }
@@ -289,9 +289,7 @@ const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'] as const
 
 const rows = computed(() => [timetable.value])
 
-function cloneAvailableElement(
-  element: AvailableTimetableElement
-): TimetableElement | void {
+function cloneAvailableElement(element: Curriculum): TimetableElement | void {
   if (element.classesPerWeek <= 0) {
     return
   }
@@ -323,9 +321,7 @@ function cloneAvailableElement(
     period: NaN,
     startTime: timeStringToDate('00:00'),
     endTime: timeStringToDate('00:00'),
-    alternating: false,
-    split: false,
-    studentClassSubjectTeacher: {
+    curriculum: {
       id: element.id,
       subject: element.subject,
       teacher: element.teacher,
@@ -405,7 +401,7 @@ const openRemoveModal = (element: TimetableElement) => {
     open: true,
     errorMessage: '',
     id: element.id,
-    name: element.studentClassSubjectTeacher.subject.name,
+    name: element.curriculum.subject.name,
   }
 }
 
@@ -414,8 +410,7 @@ const removeElement = async (data: RemoveModalData) => {
     for (const day of days) {
       const index = timetable.value[day].findIndex((e) => e.id === data.id)
       if (index !== -1) {
-        const availableElementId =
-          timetable.value[day][index].studentClassSubjectTeacher.id
+        const availableElementId = timetable.value[day][index].curriculum.id
         const availableElement = timetable.value.available.find(
           (e) => e.id === availableElementId
         )
@@ -439,7 +434,7 @@ const isTeacherFree = async (element: TimetableElement) => {
   let result = false
   await axios
     .get(
-      `http://localhost:3001/api/teacher-free/${element.studentClassSubjectTeacher.teacher.id}/${element.day}/${element.startTime.toISOString()}/${element.endTime.toISOString()}/${selectedStudentClassId.value}`
+      `http://localhost:3001/api/teacher-free/${element.curriculum.teacher.id}/${element.day}/${element.startTime.toISOString()}/${element.endTime.toISOString()}/${selectedStudentClassId.value}`
     )
     .then(() => {
       result = true
@@ -572,12 +567,11 @@ const save = async () => {
   })
 
   diff.availableModified.forEach(async (element) => {
-    await axios.patch(
-      `http://localhost:3001/api/available-timetable-elements/${element.id}`,
-      {
-        element,
-      }
-    )
+    await axios.patch(`http://localhost:3001/api/curricula/${element.id}`, {
+      classesPerWeek: element.classesPerWeek,
+      subjectId: element.subject.id,
+      teacherId: element.teacher.id,
+    })
   })
 }
 </script>

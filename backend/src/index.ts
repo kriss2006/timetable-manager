@@ -671,7 +671,7 @@ app.delete('/api/teachers/:id', (req, res) => {
 })
 
 app.get('/api/curricula/:yearId/:studentClassId', (req, res) => {
-  prisma.studentClassSubjectTeacher
+  prisma.curriculum
     .findMany({
       where: {
         yearId: Number(req.params.yearId),
@@ -725,7 +725,7 @@ app.post('/api/curricula/:yearId/:studentClassId', (req, res) => {
     return
   }
 
-  prisma.studentClassSubjectTeacher
+  prisma.curriculum
     .create({
       data: {
         studentClassId: Number(req.params.studentClassId),
@@ -769,7 +769,7 @@ app.patch('/api/curricula/:id', (req, res) => {
     return
   }
 
-  prisma.studentClassSubjectTeacher
+  prisma.curriculum
     .update({
       where: { id: Number(req.params.id) },
       data: {
@@ -785,7 +785,7 @@ app.patch('/api/curricula/:id', (req, res) => {
 })
 
 app.delete('/api/curricula/:id', (req, res) => {
-  prisma.studentClassSubjectTeacher
+  prisma.curriculum
     .delete({ where: { id: Number(req.params.id) } })
     .then(() => res.json({ message: 'Curriculum deleted successfully' }))
     .catch((err) =>
@@ -812,9 +812,7 @@ app.get(
           period: true,
           startTime: true,
           endTime: true,
-          alternating: true,
-          split: true,
-          studentClassSubjectTeacher: {
+          curriculum: {
             select: {
               id: true,
               subject: { select: { id: true, name: true, abbreviation: true } },
@@ -822,22 +820,6 @@ app.get(
             },
           },
           room: { select: { id: true, name: true } },
-          evenWeekStudentClassSubjectTeacher: {
-            select: {
-              id: true,
-              subject: { select: { id: true, name: true, abbreviation: true } },
-              teacher: { select: { id: true, name: true, initials: true } },
-            },
-          },
-          evenWeekRoom: { select: { id: true, name: true } },
-          group2StudentClassSubjectTeacher: {
-            select: {
-              id: true,
-              subject: { select: { id: true, name: true, abbreviation: true } },
-              teacher: { select: { id: true, name: true, initials: true } },
-            },
-          },
-          group2Room: { select: { id: true, name: true } },
         },
       })
       .then((timetableElements) => res.json(timetableElements))
@@ -850,29 +832,6 @@ app.get(
 )
 
 app.get(
-  '/api/available-timetable-elements/:yearId/:studentClassId',
-  (req, res) => {
-    prisma.studentClassSubjectTeacher
-      .findMany({
-        where: {
-          yearId: Number(req.params.yearId),
-          studentClassId: Number(req.params.studentClassId),
-        },
-        include: {
-          subject: true,
-          teacher: true,
-        },
-      })
-      .then((timetableElements) => res.json(timetableElements))
-      .catch((err) =>
-        res.status(500).json({
-          error: err.message || 'Error fetching available timetable elements',
-        })
-      )
-  }
-)
-
-app.get(
   '/api/teacher-free/:teacherId/:day/:startTime/:endTime/:studentClassId',
   (req, res) => {
     prisma.timetableElement
@@ -880,7 +839,7 @@ app.get(
         where: {
           AND: [
             {
-              studentClassSubjectTeacher: {
+              curriculum: {
                 teacherId: Number(req.params.teacherId),
               },
             },
@@ -986,11 +945,9 @@ app.post(
           period: element.period,
           startTime: element.startTime,
           endTime: element.endTime,
-          alternating: element.alternating,
-          split: element.split,
           yearId: Number(req.params.yearId),
           studentClassId: Number(req.params.studentClassId),
-          studentClassSubjectTeacherId: element.studentClassSubjectTeacher.id,
+          curriculumId: element.curriculum.id,
           roomId: element.room.id,
         },
       })
@@ -1024,9 +981,7 @@ app.patch('/api/timetable-elements/:id', (req, res) => {
         period: element.period,
         startTime: element.startTime,
         endTime: element.endTime,
-        alternating: element.alternating,
-        split: element.split,
-        studentClassSubjectTeacherId: element.studentClassSubjectTeacher.id,
+        curriculumId: element.curriculum.id,
         roomId: element.room.id,
       },
     })
@@ -1046,29 +1001,6 @@ app.delete('/api/timetable-elements/:id', (req, res) => {
       res
         .status(500)
         .json({ error: err.message || 'Error deleting timetable element' })
-    )
-})
-
-app.patch('/api/available-timetable-elements/:id', (req, res) => {
-  const { element } = req.body
-
-  if (!element) {
-    res.status(400).json({ error: 'Element is required' })
-    return
-  }
-
-  prisma.studentClassSubjectTeacher
-    .update({
-      where: { id: Number(req.params.id) },
-      data: { classesPerWeek: element.classesPerWeek },
-    })
-    .then(() =>
-      res.json({ message: 'Available timetable element edited successfully' })
-    )
-    .catch((err) =>
-      res.status(500).json({
-        error: err.message || 'Error editing available timetable element',
-      })
     )
 })
 

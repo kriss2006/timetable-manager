@@ -10,14 +10,13 @@
     </p>
     <p>
       {{
-        element.studentClassSubjectTeacher.subject.abbreviation ??
-        element.studentClassSubjectTeacher.subject.name
+        element.curriculum.subject.abbreviation ??
+        element.curriculum.subject.name
       }}
     </p>
     <p>
       {{
-        element.studentClassSubjectTeacher.teacher.initials ??
-        element.studentClassSubjectTeacher.teacher.name
+        element.curriculum.teacher.initials ?? element.curriculum.teacher.name
       }}
     </p>
     <p>{{ element.room.name }}</p>

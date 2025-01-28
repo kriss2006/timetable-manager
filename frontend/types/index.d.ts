@@ -76,34 +76,12 @@ declare global {
     period: number
     startTime: Date
     endTime: Date
-    alternating: boolean
-    split: boolean
-    studentClassSubjectTeacher: {
+    curriculum: {
       id: number
       subject: Subject
       teacher: Teacher
     }
     room: Room
-    evenWeekStudentClassSubjectTeacher?: {
-      id: number
-      subject: Subject
-      teacher: Teacher
-    }
-    evenWeekRoom?: Room
-    group2StudentClassSubjectTeacher?: {
-      id: number
-      subject: Subject
-      teacher: Teacher
-    }
-    group2Room?: Room
-  }
-
-  // For a year and a class
-  interface AvailableTimetableElement {
-    id: number
-    classesPerWeek: number
-    subject: Subject
-    teacher: Teacher
   }
 
   interface ModalData {
@@ -132,13 +110,6 @@ declare global {
     wednesday: TimetableElement[]
     thursday: TimetableElement[]
     friday: TimetableElement[]
-    available: AvailableTimetableElement[]
+    available: Curriculum[]
   }
-
-  // enum UserType {
-  //   student = 'student',
-  //   teacher = 'teacher',
-  //   admin = 'admin',
-  //   super_admin = 'superAdmin',
-  // }
 }
