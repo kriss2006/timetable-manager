@@ -93,7 +93,6 @@
         </template>
       </UTable>
       <div class="flex justify-end gap-2 mt-4">
-        <!-- <UButton color="blue" variant="soft" @click="save">Save</UButton> -->
         <UButton color="red" variant="soft" @click="modalData.open = false"
           >Close</UButton
         >

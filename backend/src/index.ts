@@ -193,12 +193,20 @@ app.post('/api/google-login', async (req, res) => {
 })
 
 app.get('/api/users', (_req, res) => {
+  const order = ['super_admin', 'admin', 'teacher', 'student']
+
   prisma.user
-    .findMany({ select: { id: true, name: true, username: true, type: true } })
-    .then((users) => res.json(users))
-    .catch((err) =>
+    .findMany({
+      select: { id: true, name: true, username: true, type: true },
+      orderBy: [{ username: 'asc' }, { name: 'asc' }],
+    })
+    .then((users) => {
+      users.sort((a, b) => order.indexOf(a.type) - order.indexOf(b.type))
+      res.json(users)
+    })
+    .catch((err) => {
       res.status(500).json({ message: err.message || 'Error fetching users' })
-    )
+    })
 })
 
 app.patch('/api/users/:id', (req, res) => {
@@ -272,6 +280,7 @@ app.get('/api/years', (_req, res) => {
   prisma.year
     .findMany({
       select: { id: true, name: true },
+      orderBy: { name: 'desc' },
     })
     .then((years) => res.json(years))
     .catch((err) =>
@@ -344,6 +353,7 @@ app.get('/api/rooms/:yearId', (req, res) => {
     .findMany({
       where: { yearId: Number(req.params.yearId) },
       select: { id: true, name: true },
+      orderBy: { name: 'asc' },
     })
     .then((rooms) => res.json(rooms))
     .catch((err) =>
@@ -417,6 +427,9 @@ app.get('/api/student-classes/:yearId', (req, res) => {
     .findMany({
       where: { yearId: Number(req.params.yearId) },
       select: { id: true, name: true },
+      orderBy: {
+        name: 'asc',
+      },
     })
     .then((studentClasses) => res.json(studentClasses))
     .catch((err) =>
@@ -501,6 +514,9 @@ app.get('/api/subjects/:yearId', (req, res) => {
     .findMany({
       where: { yearId: Number(req.params.yearId) },
       select: { id: true, name: true, abbreviation: true },
+      orderBy: {
+        name: 'asc',
+      },
     })
     .then((subjects) => res.json(subjects))
     .catch((err) =>
@@ -582,7 +598,10 @@ app.delete('/api/subjects/:id', (req, res) => {
 
 app.get('/api/teachers', (_req, res) => {
   prisma.teacher
-    .findMany({ select: { id: true, name: true, initials: true } })
+    .findMany({
+      select: { id: true, name: true, initials: true },
+      orderBy: { name: 'asc' },
+    })
     .then((teachers) => res.json(teachers))
     .catch((err) =>
       res.status(500).json({ error: err.message || 'Error fetching teachers' })
@@ -694,6 +713,12 @@ app.get('/api/curricula/:yearId/:studentClassId', (req, res) => {
             initials: true,
           },
         },
+      },
+      orderBy: {
+        subject: {
+          name: 'asc',
+        },
+        teacher: { name: 'asc' },
       },
     })
     .then((curricula) => res.json(curricula))
