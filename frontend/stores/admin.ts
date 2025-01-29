@@ -58,10 +58,11 @@ export const useAdminStore = defineStore('admin', () => {
   ): Promise<StudentClass[]> => {
     let yearId = selectedYearId.value
     if (currentYear) {
-      yearId = await axios
+      await axios
         .get(`http://localhost:3001/api/years/${currentYear}`)
-        .then((response) => response.data.id)
-        .catch(() => selectedYearId.value)
+        .then((response) => {
+          yearId = response.data.id
+        })
     }
 
     if (yearId > 0) {
@@ -131,10 +132,11 @@ export const useAdminStore = defineStore('admin', () => {
   ): Promise<TimetableElement[]> => {
     let yearId = selectedYearId.value
     if (currentYear) {
-      yearId = await axios
+      await axios
         .get(`http://localhost:3001/api/years/${currentYear}`)
-        .then((response) => response.data.id)
-        .catch(() => selectedYearId.value)
+        .then((response) => {
+          yearId = response.data.id
+        })
     }
 
     if (yearId > 0 && term && studentClassId) {
