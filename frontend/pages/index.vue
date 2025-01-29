@@ -1,9 +1,11 @@
 <template>
-  <div class="grid gap-4 grid-cols-4 mx-auto my-3 w-1/2">
+  <div
+    class="grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mx-auto my-3 w-full px-4 md:w-3/4 lg:w-1/2"
+  >
     <div
       v-for="studentClass in studentClasses"
       :key="studentClass.id"
-      class="flex items-center justify-center border-none rounded-3xl w-36 h-36 bg-green-400 cursor-pointer"
+      class="flex items-center justify-center border-none rounded-3xl h-16 sm:h-24 md:h-28 bg-green-600 cursor-pointer hover:bg-green-500 transition-colors text-black"
       @click="openModal(studentClass.id)"
     >
       {{ studentClass.name }}
