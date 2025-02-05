@@ -714,12 +714,18 @@ app.get('/api/curricula/:yearId/:studentClassId', (req, res) => {
           },
         },
       },
-      orderBy: {
-        subject: {
-          name: 'asc',
+      orderBy: [
+        {
+          subject: {
+            name: 'asc',
+          },
         },
-        teacher: { name: 'asc' },
-      },
+        {
+          teacher: {
+            name: 'asc',
+          },
+        },
+      ],
     })
     .then((curricula) => res.json(curricula))
     .catch((err) =>
