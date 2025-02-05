@@ -1,6 +1,6 @@
 <template>
   <div
-    class="border-2 p-2 my-1 rounded-lg text-center"
+    class="border-2 p-2 my-1 rounded-lg text-center text-xs"
     :class="{ 'border-yellow-500': warningMessage, 'cursor-move': admin }"
   >
     <h1 class="text-lg">{{ element.period }}.</h1>
