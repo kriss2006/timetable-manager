@@ -166,7 +166,6 @@ app.post('/api/google-login', async (req, res) => {
       const newUser = await prisma.user.create({
         data: {
           name: decoded.name,
-          // name: `${decoded.given_name} ${decoded.family_name}`,
           username: decoded.email,
           passwordHash: 'google',
           type: 'student',
