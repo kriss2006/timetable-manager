@@ -49,7 +49,7 @@ export const compareTimetables = (
   const oldAvailable = oldTimetable.available
   const newAvailable = newTimetable.available
 
-  const availableModified: AvailableTimetableElement[] = []
+  const availableModified: Curriculum[] = []
 
   newAvailable.forEach((item) => {
     const oldItem = oldAvailable.find((oldElem) => oldElem.id === item.id)
