@@ -20,7 +20,7 @@ echo DATABASE_URL=mysql://user:password@localhost:3306/timetable_manager
 
 echo Generating .env file for frontend...
 (
-echo API_URL=http://localhost:3001/api
+echo API_BASE_URL=http://localhost:3001/api
 ) > frontend/.env
 
 echo Installing dependencies...

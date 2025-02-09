@@ -31,7 +31,7 @@ Follow these steps to set up the project:
      ```
    - Create a `.env` file in the `frontend` directory with the following contents:
      ```env
-     API_URL=http://localhost:3001/api
+     API_BASE_URL=http://localhost:3001/api
      ```
    - Install the project dependencies using `pnpm install`.
    - Generate the Prisma client.
