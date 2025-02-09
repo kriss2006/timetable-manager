@@ -8,13 +8,6 @@ IF ERRORLEVEL 1 (
     exit /b 1
 )
 
-echo Checking if MySQL is installed...
-mysql --version >nul 2>&1
-IF ERRORLEVEL 1 (
-    echo MySQL is not installed. Please install it from: https://dev.mysql.com/downloads/
-    exit /b 1
-)
-
 echo Generating a random JWT_SECRET
 FOR /F "usebackq tokens=*" %%i IN (`powershell -Command "[guid]::NewGuid().ToString()"`) DO SET JWT_SECRET=%%i
 
@@ -34,10 +27,10 @@ echo Installing dependencies...
 pnpm install
 
 echo Generating Prisma client...
-npx prisma generate
+pnpm prisma generate
 
 echo Running database migrations...
-npx prisma migrate dev --name init
+pnpm prisma migrate dev --name init
 
 echo Setup complete.
-echo Remember to provide your proper MySQL credentials in the backend/.env file
+echo Make sure that you have MySQL installed and remember to provide your proper MySQL credentials in the backend/.env file
