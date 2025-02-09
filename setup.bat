@@ -26,11 +26,5 @@ echo API_URL=http://localhost:3000/api
 echo Installing dependencies...
 pnpm install
 
-echo Generating Prisma client...
-pnpm prisma generate
-
-echo Running database migrations...
-pnpm prisma migrate dev --name init
-
-echo Setup complete.
 echo Make sure that you have MySQL installed and remember to provide your proper MySQL credentials in the backend/.env file
+echo After that, run prisma_setup.bat
